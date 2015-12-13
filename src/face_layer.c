@@ -36,7 +36,7 @@ void face_layer_redraw(Layer *layer, GContext *ctx)
 	graphics_fill_circle(ctx, center, 1);
 }
 
-FaceLayer *face_layer_create(void)
+FaceLayer *face_layer_create(GRect bounds)
 {
 	static const GPoint hour_hand_path_points[] = {{0, 0}, {0, -35}};
 	static const GPathInfo hour_hand_path = {
@@ -49,14 +49,13 @@ FaceLayer *face_layer_create(void)
 		.points = (GPoint*)minute_hand_path_points
 	};
 
-	FaceLayer *layer = layer_create_with_data(GRect(0, 0, 144, 168), sizeof(FaceLayerData));
+	FaceLayer *layer = layer_create_with_data(bounds, sizeof(FaceLayerData));
 	layer_set_update_proc(layer, face_layer_redraw);
 
 	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->animating = false;
 
-	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
 
 	face_layer_data->hour_path = gpath_create(&hour_hand_path);

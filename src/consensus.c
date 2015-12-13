@@ -28,11 +28,12 @@ static void fill_black(Layer *layer, GContext *ctx)
 
 static void init_layers(void)
 {
-	Layer *black_layer = layer_create(GRect(0, 0, 144, 168));
+	GRect size = layer_get_bounds(window_get_root_layer(window));
+	Layer *black_layer = layer_create(size);
 	layer_set_update_proc(black_layer, fill_black);
 	layer_add_child(window_get_root_layer(window), black_layer);
 
-	face_layer = face_layer_create();
+	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue);
 	layer_add_child(window_get_root_layer(window), face_layer);
 }
