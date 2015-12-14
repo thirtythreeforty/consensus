@@ -10,7 +10,7 @@ static Layer *black_layer;
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
-	face_layer_set_time(face_layer, tick_time);
+	face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
 }
 
 static void update_time()
@@ -37,6 +37,7 @@ static void init_layers(void)
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue);
 	layer_add_child(window_get_root_layer(window), face_layer);
+	face_layer_animate_in(face_layer, false, true);
 }
 
 static void deinit_layers(void)
@@ -72,6 +73,7 @@ static void init(void)
 
 static void deinit(void)
 {
+	animation_unschedule_all();
 	tick_timer_service_unsubscribe();
 	window_destroy(window);
 }
