@@ -6,6 +6,7 @@
 
 static Window *window;
 static FaceLayer *face_layer;
+static Layer *black_layer;
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
@@ -29,7 +30,7 @@ static void fill_black(Layer *layer, GContext *ctx)
 static void init_layers(void)
 {
 	GRect size = layer_get_bounds(window_get_root_layer(window));
-	Layer *black_layer = layer_create(size);
+	black_layer = layer_create(size);
 	layer_set_update_proc(black_layer, fill_black);
 	layer_add_child(window_get_root_layer(window), black_layer);
 
@@ -42,6 +43,7 @@ static void deinit_layers(void)
 {
 	layer_remove_from_parent(face_layer);
 	face_layer_destroy(face_layer);
+	layer_destroy(black_layer);
 }
 
 static void main_window_load(Window *window)
