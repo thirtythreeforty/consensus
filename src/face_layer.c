@@ -254,6 +254,12 @@ void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 
 	if(zoom) {
 		face_layer_animate(duration, delay, AnimationCurveEaseOut, &radius_anim_impl, roll ? NULL : &handlers, face_layer);
+
+		// Go ahead and set the initial scale so that there's no flicker of large hands
+		FaceLayerData *face_layer_data = layer_get_data(face_layer);
+		scalable_path_scale(face_layer_data->hour_path, 0);
+		scalable_path_scale(face_layer_data->minute_path, 0);
+		scalable_path_scale(face_layer_data->second_path, 0);
 	}
 	if(roll) {
 		face_layer_animate(duration, delay, AnimationCurveEaseInOut, &roll_anim_impl, &handlers, face_layer);
