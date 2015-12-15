@@ -125,9 +125,9 @@ void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8
 		gpath_rotate_to(face_layer_data->hour_path, face_layer_hour_angle(hour, min));
 		gpath_rotate_to(face_layer_data->minute_path, face_layer_minute_angle(min, sec));
 		gpath_rotate_to(face_layer_data->second_path, face_layer_minute_angle(sec, 0));
-	}
 
-	layer_mark_dirty(face_layer);
+		layer_mark_dirty(face_layer);
+	}
 }
 
 void face_layer_set_colors(FaceLayer *face_layer, GColor hour, GColor minute, GColor second)
