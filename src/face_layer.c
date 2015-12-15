@@ -2,12 +2,15 @@
 
 #include "common.h"
 
+typedef struct {
+	uint8_t hour;
+	uint8_t minute;
+	uint8_t second;
+} hms_t;
+
 struct st_face_layer_data {
-	struct {
-		uint8_t hour;
-		uint8_t minute;
-		uint8_t second;
-	} requested_time;
+	hms_t requested_time;
+	hms_t displayed_time;
 
 	bool animating;
 
@@ -174,17 +177,17 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 
 	gpath_rotate_to(face_layer_data->hour_path,
 	                face_layer_scale(dist_normalized,
-	                                 face_layer_hour_angle(face_layer_data->requested_time.hour,
-	                                                       face_layer_data->requested_time.minute)));
+	                                 face_layer_hour_angle(face_layer_data->displayed_time.hour,
+	                                                       face_layer_data->displayed_time.minute)));
 
 	gpath_rotate_to(face_layer_data->minute_path,
 	                face_layer_scale(dist_normalized,
-	                                 face_layer_minute_angle(face_layer_data->requested_time.minute,
-	                                                         face_layer_data->requested_time.second)));
+	                                 face_layer_minute_angle(face_layer_data->displayed_time.minute,
+	                                                         face_layer_data->displayed_time.second)));
 
 	gpath_rotate_to(face_layer_data->second_path,
 	                face_layer_scale(dist_normalized,
-	                                 face_layer_minute_angle(face_layer_data->requested_time.second, 0)));
+	                                 face_layer_minute_angle(face_layer_data->displayed_time.second, 0)));
 
 	layer_mark_dirty(face_layer);
 }
@@ -196,6 +199,9 @@ static void face_layer_animation_start_handler(Animation *animation, void *conte
 
 	face_layer_data->animating = true;
 
+	// Grab a copy of the requested time to use during animation
+	face_layer_data->displayed_time = face_layer_data->requested_time;
+
 	APP_DEBUG("Animation started");
 }
 
@@ -205,6 +211,12 @@ static void face_layer_animation_stop_handler(Animation *animation, bool finishe
 	FaceLayerData *face_layer_data = layer_get_data(face_layer);
 
 	face_layer_data->animating = false;
+
+	// This will set the hands to requested_time and update the display
+	face_layer_set_time(face_layer,
+	                    face_layer_data->requested_time.hour,
+	                    face_layer_data->requested_time.minute,
+	                    face_layer_data->requested_time.second);
 
 	APP_DEBUG("Animation stopped, finished = %i", finished);
 }
