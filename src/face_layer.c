@@ -13,9 +13,11 @@ struct st_face_layer_data {
 
 	GPath *hour_path;
 	GPath *minute_path;
+	GPath *second_path;
 
 	GColor hour_color;
 	GColor minute_color;
+	GColor second_color;
 };
 typedef struct st_face_layer_data FaceLayerData;
 
@@ -31,12 +33,16 @@ static void face_layer_redraw(Layer *layer, GContext *ctx)
 	graphics_context_set_stroke_color(ctx, face_layer_data->minute_color);
 	gpath_draw_outline(ctx, face_layer_data->minute_path);
 
+	graphics_context_set_stroke_width(ctx, 1);
+	graphics_context_set_stroke_color(ctx, face_layer_data->second_color);
+	gpath_draw_outline_open(ctx, face_layer_data->second_path);
+
 	// Middle dot
 	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
 
-	graphics_context_set_stroke_width(ctx, 1);
-	graphics_context_set_stroke_color(ctx, GColorBlack);
+	//graphics_context_set_stroke_width(ctx, 1);
+	graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_fill_circle(ctx, center, 1);
 }
 
@@ -51,6 +57,13 @@ FaceLayer *face_layer_create(GRect bounds)
 	static const GPathInfo minute_hand_path = {
 		.num_points = NELEM(minute_hand_path_points),
 		.points = (GPoint*)minute_hand_path_points
+	};
+	// The extra {0, 0} point keeps the second hand always going through the center,
+	// even if the rotation makes the hand imperceptibly bent due to imperfect rotation.
+	static const GPoint second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -57}};
+	static const GPathInfo second_hand_path = {
+		.num_points = NELEM(second_hand_path_points),
+		.points = (GPoint*)second_hand_path_points
 	};
 
 	FaceLayer *layer = layer_create_with_data(bounds, sizeof(FaceLayerData));
@@ -67,6 +80,9 @@ FaceLayer *face_layer_create(GRect bounds)
 
 	face_layer_data->minute_path = gpath_create(&minute_hand_path);
 	gpath_move_to(face_layer_data->minute_path, center);
+
+	face_layer_data->second_path = gpath_create(&second_hand_path);
+	gpath_move_to(face_layer_data->second_path, center);
 
 	return layer;
 }
@@ -105,17 +121,19 @@ void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8
 	if(!face_layer_data->animating) {
 		gpath_rotate_to(face_layer_data->hour_path, face_layer_hour_angle(hour, min));
 		gpath_rotate_to(face_layer_data->minute_path, face_layer_minute_angle(min, sec));
+		gpath_rotate_to(face_layer_data->second_path, face_layer_minute_angle(sec, 0));
 	}
 
 	layer_mark_dirty(face_layer);
 }
 
-void face_layer_set_colors(FaceLayer *face_layer, GColor hour, GColor minute)
+void face_layer_set_colors(FaceLayer *face_layer, GColor hour, GColor minute, GColor second)
 {
 	FaceLayerData *face_layer_data = layer_get_data(face_layer);
 
 	face_layer_data->hour_color = hour;
 	face_layer_data->minute_color = minute;
+	face_layer_data->second_color = second;
 }
 
 /** Helper function to automate tedious setup in face_layer_animate_in */
@@ -162,7 +180,11 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 	gpath_rotate_to(face_layer_data->minute_path,
 	                face_layer_scale(dist_normalized,
 	                                 face_layer_minute_angle(face_layer_data->requested_time.minute,
-	                                                       face_layer_data->requested_time.second)));
+	                                                         face_layer_data->requested_time.second)));
+
+	gpath_rotate_to(face_layer_data->second_path,
+	                face_layer_scale(dist_normalized,
+	                                 face_layer_minute_angle(face_layer_data->requested_time.second, 0)));
 
 	layer_mark_dirty(face_layer);
 }
