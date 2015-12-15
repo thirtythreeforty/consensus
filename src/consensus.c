@@ -1,16 +1,25 @@
 #include <pebble.h>
+#include "common.h"
 
 #include "face_layer.h"
-
-#define NELEM(x) (sizeof(x)/sizeof(x[0]))
 
 static Window *window;
 static FaceLayer *face_layer;
 static Layer *black_layer;
+static TextLayer *date_layer;
+
+static void set_date(struct tm *tick_time)
+{
+	static char date_layer_text[8] = "";
+	strftime(date_layer_text, NELEM(date_layer_text), "%a %d", tick_time);
+	text_layer_set_text(date_layer, date_layer_text);
+}
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
+
+	set_date(tick_time);
 }
 
 static void update_time()
@@ -30,9 +39,28 @@ static void fill_black(Layer *layer, GContext *ctx)
 static void init_layers(void)
 {
 	GRect size = layer_get_bounds(window_get_root_layer(window));
+	GPoint center = grect_center_point(&size);
+
 	black_layer = layer_create(size);
 	layer_set_update_proc(black_layer, fill_black);
 	layer_add_child(window_get_root_layer(window), black_layer);
+
+	// As far as I can tell this is just a magic number.  5px margins per side?
+	static const unsigned int date_margins = 10;
+	static const unsigned int date_font_height = 24;
+	static const unsigned int date_height = date_font_height + date_margins;
+#ifdef PBL_ROUND
+	date_layer = text_layer_create(GRect(center.x, center.y - date_height / 2,
+	                                     center.x - 8, date_height));
+#else
+	date_layer = text_layer_create(GRect(0, center.y + 24,
+	                                     size.size.w, date_height));
+#endif
+	text_layer_set_text_alignment(date_layer, PBL_IF_ROUND_ELSE(GTextAlignmentRight, GTextAlignmentCenter));
+	text_layer_set_background_color(date_layer, GColorBlack);
+	text_layer_set_text_color(date_layer, GColorLightGray);
+	text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue);
@@ -42,7 +70,7 @@ static void init_layers(void)
 
 static void deinit_layers(void)
 {
-	layer_remove_from_parent(face_layer);
+	text_layer_destroy(date_layer);
 	face_layer_destroy(face_layer);
 	layer_destroy(black_layer);
 }
