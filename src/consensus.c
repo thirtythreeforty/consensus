@@ -17,9 +17,13 @@ static void set_date(struct tm *tick_time)
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
-	face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
+	if(face_layer) {
+		face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
+	}
 
-	set_date(tick_time);
+	if(date_layer) {
+		set_date(tick_time);
+	}
 }
 
 static void update_time()
