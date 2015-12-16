@@ -57,7 +57,7 @@ static void init_layers(void)
 	                                     size.size.w, date_height));
 #endif
 	text_layer_set_text_alignment(date_layer, PBL_IF_ROUND_ELSE(GTextAlignmentRight, GTextAlignmentCenter));
-	text_layer_set_background_color(date_layer, GColorBlack);
+	text_layer_set_background_color(date_layer, GColorClear);
 	text_layer_set_text_color(date_layer, GColorLightGray);
 	text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
