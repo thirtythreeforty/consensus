@@ -13,6 +13,17 @@
     "dummy": 0
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "raw",
+        "name": "BATTERY",
+        "file": "battery.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "BATTERY_CHARGING",
+        "file": "battery-charging.pdc"
+      }
+    ]
   }
 }

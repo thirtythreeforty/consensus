@@ -2,11 +2,13 @@
 #include "common.h"
 
 #include "face_layer.h"
+#include "complications/complication.h"
 
 static Window *window;
 static FaceLayer *face_layer;
 static Layer *black_layer;
 static TextLayer *date_layer;
+static BatteryComplication *battery_complication;
 
 static void set_date(struct tm *tick_time)
 {
@@ -23,6 +25,13 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 
 	if(date_layer) {
 		set_date(tick_time);
+	}
+}
+
+void on_battery_state_change(BatteryChargeState charge)
+{
+	if(battery_complication) {
+		battery_complication_state_changed(battery_complication, &charge);
 	}
 }
 
@@ -48,6 +57,14 @@ static void init_layers(void)
 	black_layer = layer_create(size);
 	layer_set_update_proc(black_layer, fill_black);
 	layer_add_child(window_get_root_layer(window), black_layer);
+
+	BatteryChargeState charge_state = battery_state_service_peek();
+	const unsigned int complication_size = 51;
+	GRect complication_position = {{ .x = center.x - complication_size - 20, .y = center.y - complication_size / 2 },
+	                               { .h = complication_size, .w = complication_size }};
+	battery_complication = battery_complication_create(complication_position, &charge_state);
+	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
+	battery_complication_animate_in(battery_complication);
 
 	// As far as I can tell this is just a magic number.  5px margins per side?
 	static const unsigned int date_margins = 10;
@@ -76,6 +93,7 @@ static void deinit_layers(void)
 {
 	text_layer_destroy(date_layer);
 	face_layer_destroy(face_layer);
+	battery_complication_destroy(battery_complication);
 	layer_destroy(black_layer);
 }
 
@@ -100,6 +118,8 @@ static void init(void)
 
 	tick_timer_service_subscribe(SECOND_UNIT, on_tick);
 
+	battery_state_service_subscribe(on_battery_state_change);
+
 	update_time();
 }
 
@@ -107,6 +127,7 @@ static void deinit(void)
 {
 	animation_unschedule_all();
 	tick_timer_service_unsubscribe();
+	battery_state_service_unsubscribe();
 	window_destroy(window);
 }
 
