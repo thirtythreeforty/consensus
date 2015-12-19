@@ -21,6 +21,13 @@ void battery_complication_update(Layer *layer, GContext *ctx)
 	int32_t angle = data->animating ? data->animation_angle
 	                                : battery_complication_angle(data->charge_state.charge_percent);
 
+	// According to Pebble, apps should not display a percentage while
+	// charging, because they cannot accurately measure the battery.
+	// See https://www.reddit.com/r/pebble/comments/3bodnk/full_charge_at_70/
+	if(data->charge_state.is_charging) {
+		angle = 0;
+	}
+
 	base_complication_update(layer, ctx, GColorChromeYellow, angle);
 
 	// Draw the icon based on the charging state (icon is loaded/unloaded
