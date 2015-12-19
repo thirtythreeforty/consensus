@@ -4,3 +4,6 @@ build
 
 # Ignore waf lock file
 .lock-waf*
+
+# Ignore compiled Python
+*.pyc
