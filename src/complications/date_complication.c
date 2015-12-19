@@ -21,8 +21,6 @@ static void date_complication_update(Layer *layer, GContext *ctx)
 	DateComplicationData *data = layer_get_data(layer);
 
 	base_complication_update(layer, ctx, GColorClear, 0);
-
-	snprintf(data->date_layer_text, NELEM(data->date_layer_text), "%u", data->displayed_date.mday);
 }
 
 #include "common.h"
@@ -81,6 +79,7 @@ void date_complication_time_changed(DateComplication *complication, struct tm *t
 	else {
 		data->displayed_date.wday = time->tm_wday;
 		data->displayed_date.mday = time->tm_mday;
+		snprintf(data->date_layer_text, NELEM(data->date_layer_text), "%u", data->displayed_date.mday);
 	}
 
 	layer_mark_dirty(layer);
