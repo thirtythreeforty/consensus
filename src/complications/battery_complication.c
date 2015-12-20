@@ -51,7 +51,7 @@ BatteryComplication* battery_complication_create(GRect bounds, BatteryChargeStat
 
 void battery_complication_destroy(BatteryComplication *complication)
 {
-	Layer *layer = (Layer*)complication;
+	Layer *layer = battery_complication_get_layer(complication);
 
 	BatteryComplicationData *data = layer_get_data(layer);
 	free(data->icon);
@@ -59,7 +59,7 @@ void battery_complication_destroy(BatteryComplication *complication)
 	layer_destroy(layer);
 }
 
-Layer* battery_complication_get_layer(BatteryComplication *complication)
+inline Layer* battery_complication_get_layer(BatteryComplication *complication)
 {
 	return (Layer*)complication;
 }
@@ -67,7 +67,7 @@ Layer* battery_complication_get_layer(BatteryComplication *complication)
 void battery_complication_state_changed(BatteryComplication *complication,
                                         BatteryChargeState *charge)
 {
-	Layer *layer = (Layer*)complication;
+	Layer *layer = battery_complication_get_layer(complication);
 	BatteryComplicationData *data = layer_get_data(layer);
 
 	data->charge_state = *charge;
@@ -83,7 +83,7 @@ void battery_complication_state_changed(BatteryComplication *complication,
 
 void battery_complication_animate_in(BatteryComplication *complication)
 {
-	Layer *layer = (Layer*)complication;
+	Layer *layer = battery_complication_get_layer(complication);
 	BatteryComplicationData *data = layer_get_data(layer);
 
 	// TODO

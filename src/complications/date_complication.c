@@ -18,12 +18,8 @@ typedef struct {
 
 static void date_complication_update(Layer *layer, GContext *ctx)
 {
-	DateComplicationData *data = layer_get_data(layer);
-
 	base_complication_update(layer, ctx, GColorClear, 0);
 }
-
-#include "common.h"
 
 DateComplication* date_complication_create(GRect bounds)
 {
@@ -54,7 +50,7 @@ DateComplication* date_complication_create(GRect bounds)
 
 void date_complication_destroy(DateComplication *complication)
 {
-	Layer *layer = (Layer*)complication;
+	Layer *layer = date_complication_get_layer(complication);
 	DateComplicationData *data = layer_get_data(layer);
 
 	text_layer_destroy(data->date_layer);
@@ -62,14 +58,14 @@ void date_complication_destroy(DateComplication *complication)
 	layer_destroy(layer);
 }
 
-Layer* date_complication_get_layer(DateComplication *complication)
+inline Layer* date_complication_get_layer(DateComplication *complication)
 {
 	return (Layer*)complication;
 }
 
 void date_complication_time_changed(DateComplication *complication, struct tm *time)
 {
-	Layer *layer = (Layer*)complication;
+	Layer *layer = date_complication_get_layer(complication);
 	DateComplicationData *data = layer_get_data(layer);
 
 	if(data->animating) {
