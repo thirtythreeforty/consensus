@@ -29,13 +29,6 @@ void on_battery_state_change(BatteryChargeState charge)
 	}
 }
 
-static void update_time()
-{
-	time_t abs_time = time(0);
-	struct tm *tick_time = localtime(&abs_time);
-	on_tick(tick_time, MINUTE_UNIT);
-}
-
 static void fill_black(Layer *layer, GContext *ctx)
 {
 	GRect rect = layer_get_bounds(layer);
@@ -117,7 +110,9 @@ static void init(void)
 
 	battery_state_service_subscribe(on_battery_state_change);
 
-	update_time();
+	time_t abs_time = time(0);
+	struct tm *tick_time = localtime(&abs_time);
+	on_tick(tick_time, MINUTE_UNIT);
 }
 
 static void deinit(void)
