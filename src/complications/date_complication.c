@@ -3,14 +3,8 @@
 #include "common.h"
 
 typedef struct {
-	uint8_t mday;
-	uint8_t wday;
-} day_date;
-
-typedef struct {
 	bool animating;
-	day_date requested_date;
-	day_date displayed_date;
+	uint8_t requested_date;
 
 	TextLayer *date_layer;
 	char date_layer_text[3];
@@ -63,30 +57,62 @@ inline Layer* date_complication_get_layer(DateComplication *complication)
 	return (Layer*)complication;
 }
 
+static void date_complication_set_displayed(Layer *layer, DateComplicationData *data, uint8_t mday)
+{
+	snprintf(data->date_layer_text, NELEM(data->date_layer_text), "%02u", mday);
+	layer_mark_dirty(layer);
+}
+
 void date_complication_time_changed(DateComplication *complication, struct tm *time)
 {
 	Layer *layer = date_complication_get_layer(complication);
 	DateComplicationData *data = layer_get_data(layer);
 
 	if(data->animating) {
-		data->requested_date.wday = time->tm_wday;
-		data->requested_date.mday = time->tm_mday;
+		data->requested_date = time->tm_mday;
 	}
 	else {
-		data->displayed_date.wday = time->tm_wday;
-		data->displayed_date.mday = time->tm_mday;
-		snprintf(data->date_layer_text, NELEM(data->date_layer_text), "%u", data->displayed_date.mday);
+		date_complication_set_displayed(layer, data, time->tm_mday);
 	}
+}
 
-	layer_mark_dirty(layer);
+static void date_complication_spinup_animation_update(Animation* anim, AnimationProgress progress)
+{
+	DateComplication *complication = animation_get_context(anim);
+	Layer *layer = date_complication_get_layer(complication);
+	DateComplicationData *data = layer_get_data(layer);
+
+	uint8_t scaled_date = progress * data->requested_date / ANIMATION_NORMALIZED_MAX;
+	date_complication_set_displayed(layer, data, scaled_date);
+}
+
+static void date_complication_spinup_animation_stopped(Animation *animation, bool finished, void *context)
+{
+	DateComplication *complication = context;
+	Layer *layer = date_complication_get_layer(complication);
+	DateComplicationData *data = layer_get_data(layer);
+
+	data->animating = false;
 }
 
 void date_complication_animate_in(DateComplication *complication)
 {
-	Layer *layer = date_complication_get_layer(complication);
-	DateComplicationData *data = layer_get_data(layer);
+	static const unsigned int duration = 750;
+	static const unsigned int delay = 0;
+	static const AnimationImplementation date_spinup_anim_impl = {
+		.update = date_complication_spinup_animation_update
+	};
+	static const AnimationHandlers date_spinup_anim_handlers = {
+		.started = NULL,
+		.stopped = date_complication_spinup_animation_stopped
+	};
 
-	// TODO
-	data->animating = false;
+	Animation *anim = animation_create();
+	animation_set_duration(anim, duration);
+	animation_set_delay(anim, delay);
+	animation_set_curve(anim, AnimationCurveLinear);
+	animation_set_implementation(anim, &date_spinup_anim_impl);
+	animation_set_handlers(anim, date_spinup_anim_handlers, complication);
+	animation_schedule(anim);
 }
 
