@@ -121,8 +121,6 @@ void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8
 	face_layer_data->requested_time.minute = min;
 	face_layer_data->requested_time.second = sec;
 
-	APP_DEBUG("Requested time set to %i:%i:%i", hour, min, sec);
-
 	if(!face_layer_data->animating) {
 		gpath_rotate_to(scalable_path_get_path(face_layer_data->hour_path), face_layer_hour_angle(hour, min));
 		gpath_rotate_to(scalable_path_get_path(face_layer_data->minute_path), face_layer_minute_angle(min, sec));
@@ -172,8 +170,6 @@ static void face_layer_radius_anim_update(Animation *anim, AnimationProgress dis
 	FaceLayer *face_layer = animation_get_context(anim);
 	FaceLayerData *face_layer_data = layer_get_data(face_layer);
 
-	APP_DEBUG("Zoom animation progress: %04lx", dist_normalized);
-
 	scalable_path_scale(face_layer_data->hour_path, dist_normalized);
 	scalable_path_scale(face_layer_data->minute_path, dist_normalized);
 	scalable_path_scale(face_layer_data->second_path, dist_normalized);
@@ -185,8 +181,6 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 {
 	FaceLayer *face_layer = animation_get_context(anim);
 	FaceLayerData *face_layer_data = layer_get_data(face_layer);
-
-	APP_DEBUG("Roll animation progress: %04lx", dist_normalized);
 
 	gpath_rotate_to(scalable_path_get_path(face_layer_data->hour_path),
 	                face_layer_scale(dist_normalized,
@@ -214,8 +208,6 @@ static void face_layer_animation_start_handler(Animation *animation, void *conte
 
 	// Grab a copy of the requested time to use during animation
 	face_layer_data->animation_time = face_layer_data->requested_time;
-
-	APP_DEBUG("Animation started");
 }
 
 static void face_layer_animation_stop_handler(Animation *animation, bool finished, void *context)
@@ -230,8 +222,6 @@ static void face_layer_animation_stop_handler(Animation *animation, bool finishe
 	                    face_layer_data->requested_time.hour,
 	                    face_layer_data->requested_time.minute,
 	                    face_layer_data->requested_time.second);
-
-	APP_DEBUG("Animation stopped, finished = %i", finished);
 }
 
 void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
