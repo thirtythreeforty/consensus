@@ -20,6 +20,16 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 	if(date_complication) {
 		date_complication_time_changed(date_complication, tick_time);
 	}
+
+	// Vibrate once on the hour and twice at noon.
+	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
+		if(tick_time->tm_hour % 12 == 0) {
+			vibes_double_pulse();
+		}
+		else {
+			vibes_short_pulse();
+		}
+	}
 }
 
 void on_battery_state_change(BatteryChargeState charge)
