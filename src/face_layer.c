@@ -79,13 +79,13 @@ FaceLayer *face_layer_create(GRect bounds)
 
 	GPoint center = grect_center_point(&bounds);
 
-	face_layer_data->hour_path = create_scalable_path(&hour_hand_path);
+	face_layer_data->hour_path = scalable_path_create(&hour_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->hour_path), center);
 
-	face_layer_data->minute_path = create_scalable_path(&minute_hand_path);
+	face_layer_data->minute_path = scalable_path_create(&minute_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->minute_path), center);
 
-	face_layer_data->second_path = create_scalable_path(&second_hand_path);
+	face_layer_data->second_path = scalable_path_create(&second_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->second_path), center);
 
 	return layer;
@@ -94,9 +94,9 @@ FaceLayer *face_layer_create(GRect bounds)
 void face_layer_destroy(FaceLayer *face_layer)
 {
 	FaceLayerData *face_layer_data = layer_get_data(face_layer);
-	destroy_scalable_path(face_layer_data->hour_path);
-	destroy_scalable_path(face_layer_data->minute_path);
-	destroy_scalable_path(face_layer_data->second_path);
+	scalable_path_destroy(face_layer_data->hour_path);
+	scalable_path_destroy(face_layer_data->minute_path);
+	scalable_path_destroy(face_layer_data->second_path);
 
 	layer_destroy(face_layer);
 }

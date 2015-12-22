@@ -6,8 +6,8 @@
 struct ScalablePath;
 typedef struct ScalablePath ScalablePath;
 
-ScalablePath* create_scalable_path(const GPathInfo *path_info);
-void destroy_scalable_path(ScalablePath *spath);
+ScalablePath* scalable_path_create(const GPathInfo *path_info);
+void scalable_path_destroy(ScalablePath *spath);
 void scalable_path_scale(ScalablePath *spath, AnimationProgress dist_normalized);
 GPath* scalable_path_get_path(const ScalablePath *spath);
 

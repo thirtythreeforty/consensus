@@ -5,7 +5,7 @@ struct ScalablePath {
 	GPath *path;
 };
 
-ScalablePath* create_scalable_path(const GPathInfo *path_info)
+ScalablePath* scalable_path_create(const GPathInfo *path_info)
 {
 	GPathInfo our_info = *path_info;
 
@@ -19,7 +19,7 @@ ScalablePath* create_scalable_path(const GPathInfo *path_info)
 	return spath;
 }
 
-void destroy_scalable_path(ScalablePath *spath)
+void scalable_path_destroy(ScalablePath *spath)
 {
 	free(spath->path->points);
 	gpath_destroy(spath->path);
