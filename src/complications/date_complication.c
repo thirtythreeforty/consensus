@@ -97,8 +97,6 @@ static void date_complication_spinup_animation_stopped(Animation *animation, boo
 
 void date_complication_animate_in(DateComplication *complication)
 {
-	static const unsigned int duration = 750;
-	static const unsigned int delay = 0;
 	static const AnimationImplementation date_spinup_anim_impl = {
 		.update = date_complication_spinup_animation_update
 	};
@@ -107,12 +105,8 @@ void date_complication_animate_in(DateComplication *complication)
 		.stopped = date_complication_spinup_animation_stopped
 	};
 
-	Animation *anim = animation_create();
-	animation_set_duration(anim, duration);
-	animation_set_delay(anim, delay);
-	animation_set_curve(anim, AnimationCurveLinear);
-	animation_set_implementation(anim, &date_spinup_anim_impl);
-	animation_set_handlers(anim, date_spinup_anim_handlers, complication);
-	animation_schedule(anim);
+	base_complication_animate_in(&date_spinup_anim_impl,
+	                             &date_spinup_anim_handlers,
+	                             complication);
 }
 

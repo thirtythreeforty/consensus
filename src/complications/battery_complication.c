@@ -81,12 +81,40 @@ void battery_complication_state_changed(BatteryComplication *complication,
 	layer_mark_dirty(layer);
 }
 
-void battery_complication_animate_in(BatteryComplication *complication)
+static void battery_complication_spinup_animation_update(Animation *anim, AnimationProgress progress)
 {
+	BatteryComplication *complication = animation_get_context(anim);
 	Layer *layer = battery_complication_get_layer(complication);
 	BatteryComplicationData *data = layer_get_data(layer);
 
-	// TODO
+	data->animation_angle =
+		battery_complication_angle(data->charge_state.charge_percent * progress / ANIMATION_NORMALIZED_MAX);
+
+	layer_mark_dirty(layer);
+}
+
+static void battery_complication_spinup_animation_stopped(Animation *anim, bool finished, void *context)
+{
+	BatteryComplication *complication = context;
+	Layer *layer = battery_complication_get_layer(complication);
+	BatteryComplicationData *data = layer_get_data(layer);
+
 	data->animating = false;
+	layer_mark_dirty(layer);
+}
+
+void battery_complication_animate_in(BatteryComplication *complication)
+{
+	static const AnimationImplementation battery_spinup_anim_impl = {
+		.update = battery_complication_spinup_animation_update
+	};
+	static const AnimationHandlers battery_spinup_anim_handlers = {
+		.started = NULL,
+		.stopped = battery_complication_spinup_animation_stopped
+	};
+
+	base_complication_animate_in(&battery_spinup_anim_impl,
+	                             &battery_spinup_anim_handlers,
+	                             complication);
 }
 
