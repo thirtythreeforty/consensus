@@ -30,7 +30,7 @@ void base_complication_animate_in(const AnimationImplementation *impl,
 	Animation *anim = animation_create();
 	animation_set_duration(anim, duration);
 	animation_set_delay(anim, delay);
-	animation_set_curve(anim, AnimationCurveLinear);
+	animation_set_curve(anim, AnimationCurveEaseInOut);
 	animation_set_implementation(anim, impl);
 	animation_set_handlers(anim, *handlers, ctx);
 	animation_schedule(anim);
