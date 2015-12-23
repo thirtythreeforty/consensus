@@ -82,8 +82,8 @@ static void date_complication_spinup_animation_update(Animation* anim, Animation
 	Layer *layer = date_complication_get_layer(complication);
 	DateComplicationData *data = layer_get_data(layer);
 
-	uint8_t scaled_date = progress * data->requested_date / ANIMATION_NORMALIZED_MAX;
-	date_complication_set_displayed(layer, data, scaled_date);
+	uint8_t random_date = rand() % 30 + 1;
+	date_complication_set_displayed(layer, data, random_date);
 }
 
 static void date_complication_spinup_animation_stopped(Animation *animation, bool finished, void *context)
@@ -93,6 +93,7 @@ static void date_complication_spinup_animation_stopped(Animation *animation, boo
 	DateComplicationData *data = layer_get_data(layer);
 
 	data->animating = false;
+	date_complication_set_displayed(layer, data, data->requested_date);
 }
 
 void date_complication_animate_in(DateComplication *complication)
