@@ -24,8 +24,8 @@ void base_complication_update(Layer *layer, GContext *ctx,
 void base_complication_animate_in(const AnimationImplementation *impl,
                                   const AnimationHandlers *handlers, void *ctx)
 {
-	static const unsigned int duration = 500;
-	static const unsigned int delay = 0;
+	static const unsigned int duration = 700;
+	static const unsigned int delay = 200;
 
 	Animation *anim = animation_create();
 	animation_set_duration(anim, duration);

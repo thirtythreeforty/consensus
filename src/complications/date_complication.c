@@ -4,6 +4,8 @@
 
 typedef struct {
 	bool animating;
+	uint8_t anim_frames_skipped;
+
 	uint8_t requested_date;
 
 	TextLayer *date_layer;
@@ -82,8 +84,24 @@ static void date_complication_spinup_animation_update(Animation* anim, Animation
 	Layer *layer = date_complication_get_layer(complication);
 	DateComplicationData *data = layer_get_data(layer);
 
-	uint8_t random_date = rand() % 30 + 1;
-	date_complication_set_displayed(layer, data, random_date);
+	if(data->anim_frames_skipped == 1) {
+		uint8_t random_date = rand() % 100;
+		date_complication_set_displayed(layer, data, random_date);
+		data->anim_frames_skipped = 0;
+	}
+	else {
+		data->anim_frames_skipped++;
+	}
+}
+
+static void date_complication_spinup_animation_started(Animation *animation, void *context)
+{
+	DateComplication *complication = context;
+	Layer *layer = date_complication_get_layer(complication);
+	DateComplicationData *data = layer_get_data(layer);
+
+	data->animating = true;
+	data->anim_frames_skipped = 0;
 }
 
 static void date_complication_spinup_animation_stopped(Animation *animation, bool finished, void *context)
@@ -102,7 +120,7 @@ void date_complication_animate_in(DateComplication *complication)
 		.update = date_complication_spinup_animation_update
 	};
 	static const AnimationHandlers date_spinup_anim_handlers = {
-		.started = NULL,
+		.started = date_complication_spinup_animation_started,
 		.stopped = date_complication_spinup_animation_stopped
 	};
 
