@@ -23,12 +23,13 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 
 	// Vibrate once on the hour and twice at noon.
 	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
-		if(tick_time->tm_hour % 12 == 0) {
-			vibes_double_pulse();
-		}
-		else {
-			vibes_short_pulse();
-		}
+		static const uint32_t vibe_pattern[] = {100, 250, 100};
+		VibePattern vibe = {
+			.durations = vibe_pattern,
+			.num_segments = tick_time->tm_hour % 12 == 0 ? 3 : 1
+		};
+
+		vibes_enqueue_custom_pattern(vibe);
 	}
 }
 
