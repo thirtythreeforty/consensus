@@ -28,7 +28,7 @@ void battery_complication_update(Layer *layer, GContext *ctx)
 		angle = 0;
 	}
 
-	base_complication_update(layer, ctx, GColorChromeYellow, angle);
+	base_complication_update(layer, ctx, GColorYellow, angle);
 
 	// Draw the icon based on the charging state (icon is loaded/unloaded
 	// in battery_complication_state_changed)
