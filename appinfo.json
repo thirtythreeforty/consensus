@@ -1,8 +1,8 @@
 {
   "uuid": "7cd698f3-f62b-4dd5-81d0-b4888c52e2c5",
-  "shortName": "consensus",
-  "longName": "consensus",
-  "companyName": "thirtythreeforty",
+  "shortName": "Consensus",
+  "longName": "Consensus",
+  "companyName": "George Hilliard",
   "versionLabel": "1.0",
   "sdkVersion": "3",
   "targetPlatforms": ["basalt", "chalk"],
