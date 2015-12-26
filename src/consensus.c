@@ -74,8 +74,8 @@ static void init_layers(void)
 	battery_complication_animate_in(battery_complication);
 
 	const GRect date_complication_position =
-		{{ .x = center.x - complication_size / 2,
-		   .y = center.y + complication_offset_y },
+		{{ .x = center.x + complication_offset_x,
+		   .y = center.y - complication_size / 2 },
 		 { .h = complication_size,
 		   .w = complication_size }};
 	date_complication = date_complication_create(date_complication_position);
