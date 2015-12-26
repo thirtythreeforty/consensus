@@ -92,6 +92,7 @@ static void init_layers(void)
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
+	face_layer_set_show_second(face_layer, false);
 	layer_add_child(window_get_root_layer(window), face_layer);
 	face_layer_animate_in(face_layer, true, true);
 }
@@ -124,7 +125,7 @@ static void init(void)
 	});
 	window_stack_push(window, true);
 
-	tick_timer_service_subscribe(SECOND_UNIT, on_tick);
+	tick_timer_service_subscribe(MINUTE_UNIT, on_tick);
 
 	battery_state_service_subscribe(on_battery_state_change);
 

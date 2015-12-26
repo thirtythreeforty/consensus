@@ -19,6 +19,8 @@ struct st_face_layer_data {
 	ScalablePath *minute_path;
 	ScalablePath *second_path;
 
+	bool show_second;
+
 	GColor hour_color;
 	GColor minute_color;
 	GColor second_color;
@@ -37,15 +39,17 @@ static void face_layer_redraw(Layer *layer, GContext *ctx)
 	graphics_context_set_stroke_color(ctx, face_layer_data->minute_color);
 	gpath_draw_outline(ctx, scalable_path_get_path(face_layer_data->minute_path));
 
-	graphics_context_set_stroke_width(ctx, 1);
-	graphics_context_set_stroke_color(ctx, face_layer_data->second_color);
-	gpath_draw_outline_open(ctx, scalable_path_get_path(face_layer_data->second_path));
+	if(face_layer_data->show_second) {
+		graphics_context_set_stroke_width(ctx, 1);
+		graphics_context_set_stroke_color(ctx, face_layer_data->second_color);
+		gpath_draw_outline_open(ctx, scalable_path_get_path(face_layer_data->second_path));
+	}
 
 	// Middle dot
 	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
 
-	//graphics_context_set_stroke_width(ctx, 1);
+	graphics_context_set_stroke_width(ctx, 1);
 	graphics_context_set_fill_color(ctx, GColorBlack);
 	graphics_fill_circle(ctx, center, 1);
 }
@@ -99,6 +103,15 @@ void face_layer_destroy(FaceLayer *face_layer)
 	scalable_path_destroy(face_layer_data->second_path);
 
 	layer_destroy(face_layer);
+}
+
+void face_layer_set_show_second(FaceLayer *face_layer, bool show)
+{
+	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+
+	face_layer_data->show_second = show;
+
+	layer_mark_dirty(face_layer);
 }
 
 static unsigned int face_layer_hour_angle(unsigned int hour, unsigned int minute)
