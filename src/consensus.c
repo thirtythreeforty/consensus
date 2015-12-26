@@ -32,6 +32,14 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 	}
 }
 
+void on_tap(AccelAxisType axis, int32_t direction)
+{
+	APP_DEBUG("Handling acceleration on axis %i", axis);
+	if(axis == ACCEL_AXIS_Z) {
+		light_enable_interaction();
+	}
+}
+
 void on_battery_state_change(BatteryChargeState charge)
 {
 	if(battery_complication) {
@@ -120,6 +128,8 @@ static void init(void)
 
 	battery_state_service_subscribe(on_battery_state_change);
 
+	accel_tap_service_subscribe(on_tap);
+
 	time_t abs_time = time(0);
 	struct tm *tick_time = localtime(&abs_time);
 	on_tick(tick_time, MINUTE_UNIT);
@@ -128,8 +138,9 @@ static void init(void)
 static void deinit(void)
 {
 	animation_unschedule_all();
-	tick_timer_service_unsubscribe();
+	accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();
+	tick_timer_service_unsubscribe();
 	window_destroy(window);
 }
 
