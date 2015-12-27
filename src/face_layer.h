@@ -5,7 +5,7 @@
 
 typedef Layer FaceLayer;
 
-FaceLayer* face_layer_create(GRect bounds);
+FaceLayer* face_layer_create(GRect frame);
 void face_layer_destroy(FaceLayer *face_layer);
 void face_layer_set_show_second(FaceLayer *face_layer, bool show);
 void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8_t sec);

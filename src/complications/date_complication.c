@@ -17,9 +17,9 @@ static void date_complication_update(Layer *layer, GContext *ctx)
 	base_complication_update(layer, ctx, GColorClear, 0);
 }
 
-DateComplication* date_complication_create(GRect bounds)
+DateComplication* date_complication_create(GRect frame)
 {
-	Layer *layer = layer_create_with_data(bounds, sizeof(DateComplicationData));
+	Layer *layer = layer_create_with_data(frame, sizeof(DateComplicationData));
 	layer_set_update_proc(layer, date_complication_update);
 
 	DateComplicationData *data = layer_get_data(layer);

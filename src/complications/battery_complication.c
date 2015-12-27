@@ -35,9 +35,9 @@ void battery_complication_update(Layer *layer, GContext *ctx)
 	gdraw_command_image_draw(ctx, data->icon, GPointZero);
 }
 
-BatteryComplication* battery_complication_create(GRect bounds, BatteryChargeState *charge)
+BatteryComplication* battery_complication_create(GRect frame, BatteryChargeState *charge)
 {
-	Layer *layer = layer_create_with_data(bounds, sizeof(BatteryComplicationData));
+	Layer *layer = layer_create_with_data(frame, sizeof(BatteryComplicationData));
 	layer_set_update_proc(layer, battery_complication_update);
 
 	BatteryComplicationData *data = layer_get_data(layer);
