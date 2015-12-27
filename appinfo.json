@@ -20,6 +20,11 @@
         "file": "ticks.pdc"
       },
       {
+        "type": "png",
+        "name": "NO_BLUETOOTH",
+        "file": "no-bluetooth.png"
+      },
+      {
         "type": "raw",
         "name": "BATTERY",
         "file": "battery.pdc"
