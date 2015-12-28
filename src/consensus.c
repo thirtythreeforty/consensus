@@ -6,7 +6,7 @@
 
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
-static Layer *black_layer = NULL;
+static Layer *background_layer = NULL;
 static DateComplication *date_complication = NULL;
 static BitmapLayer *no_bluetooth_layer = NULL;
 static BatteryComplication *battery_complication = NULL;
@@ -60,7 +60,7 @@ void ignore_connection_change(bool connected)
 {
 }
 
-static void fill_black(Layer *layer, GContext *ctx)
+static void update_background(Layer *layer, GContext *ctx)
 {
 	GRect rect = layer_get_bounds(layer);
 	graphics_context_set_fill_color(ctx, GColorBlack);
@@ -77,9 +77,9 @@ static void init_layers(void)
 	ticks_image = gdraw_command_image_create_with_resource(RESOURCE_ID_TICKS);
 	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
 
-	black_layer = layer_create(size);
-	layer_set_update_proc(black_layer, fill_black);
-	layer_add_child(window_get_root_layer(window), black_layer);
+	background_layer = layer_create(size);
+	layer_set_update_proc(background_layer, update_background);
+	layer_add_child(window_get_root_layer(window), background_layer);
 
 	const unsigned int complication_size = 51;
 	const unsigned int complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
@@ -131,7 +131,7 @@ static void deinit_layers(void)
 	battery_complication_destroy(battery_complication);
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
-	layer_destroy(black_layer);
+	layer_destroy(background_layer);
 	free(ticks_image);
 }
 
