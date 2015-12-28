@@ -84,18 +84,25 @@ FaceLayer *face_layer_create(GRect frame)
 
 	FaceLayerData *face_layer_data = layer_get_data(layer);
 
-	face_layer_data->animating = true; // Must call face_layer_animate_in at some point
+	face_layer_data->animating = false;
 
 	GPoint center = grect_center_point(&frame);
 
+	// Create the hands.  Go ahead and set the initial scale so that there's no
+	// flicker of large hands.  Note that this means clients must call
+	// face_layer_animate_in at some point to get everything animated in.
+
 	face_layer_data->hour_path = scalable_path_create(&hour_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->hour_path), center);
+	scalable_path_scale(face_layer_data->hour_path, 0);
 
 	face_layer_data->minute_path = scalable_path_create(&minute_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->minute_path), center);
+	scalable_path_scale(face_layer_data->minute_path, 0);
 
 	face_layer_data->second_path = scalable_path_create(&second_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->second_path), center);
+	scalable_path_scale(face_layer_data->second_path, 0);
 
 	return (FaceLayer*)layer;
 }
@@ -162,12 +169,12 @@ void face_layer_set_colors(FaceLayer *face_layer, GColor hour, GColor minute, GC
 }
 
 /** Helper function to automate tedious setup in face_layer_animate_in */
-static void face_layer_animate(int duration,
-                               int delay,
-                               AnimationCurve curve,
-                               const AnimationImplementation *implementation,
-                               const AnimationHandlers *handlers,
-                               void *context)
+static Animation* face_layer_make_anim(int duration,
+                                       int delay,
+                                       AnimationCurve curve,
+                                       const AnimationImplementation *implementation,
+                                       const AnimationHandlers *handlers,
+                                       void *context)
 {
 	static const AnimationHandlers dummy_handlers = {
 		.started = NULL,
@@ -179,7 +186,8 @@ static void face_layer_animate(int duration,
 	animation_set_curve(anim, curve);
 	animation_set_implementation(anim, implementation);
 	animation_set_handlers(anim, handlers ? *handlers : dummy_handlers, context);
-	animation_schedule(anim);
+
+	return anim;
 }
 
 static int face_layer_scale(AnimationProgress dist_normalized, unsigned int max)
@@ -223,6 +231,31 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 	layer_mark_dirty(layer);
 }
 
+// A couple more helper functions to create zoom and roll animations
+static Animation* face_layer_make_zoom_anim(FaceLayer *face_layer)
+{
+	static const AnimationImplementation zoom_anim_impl = {
+		.update = face_layer_radius_anim_update
+	};
+
+	return face_layer_make_anim(1000, 0,
+	                            AnimationCurveEaseOut,
+	                            &zoom_anim_impl,
+	                            NULL, face_layer);
+}
+
+static Animation* face_layer_make_roll_anim(FaceLayer *face_layer)
+{
+	static const AnimationImplementation roll_anim_impl = {
+		.update = face_layer_roll_anim_update
+	};
+
+	return face_layer_make_anim(1000, 0,
+	                            AnimationCurveEaseInOut,
+	                            &roll_anim_impl,
+	                            NULL, face_layer);
+}
+
 static void face_layer_animation_start_handler(Animation *animation, void *context)
 {
 	FaceLayer *face_layer = context;
@@ -243,7 +276,12 @@ static void face_layer_animation_stop_handler(Animation *animation, bool finishe
 
 	face_layer_data->animating = false;
 
-	// This will set the hands to requested_time and update the display
+	// Set scale and roll to final values
+	scalable_path_scale(face_layer_data->hour_path, ANIMATION_NORMALIZED_MAX);
+	scalable_path_scale(face_layer_data->minute_path, ANIMATION_NORMALIZED_MAX);
+	scalable_path_scale(face_layer_data->second_path, ANIMATION_NORMALIZED_MAX);
+
+	// This will move the hands to requested_time and update the display
 	face_layer_set_time(face_layer,
 	                    face_layer_data->requested_time.hour,
 	                    face_layer_data->requested_time.minute,
@@ -252,37 +290,23 @@ static void face_layer_animation_stop_handler(Animation *animation, bool finishe
 
 void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 {
-	static const unsigned int duration = 1000;
-	static const unsigned int delay = 0;
-	static const AnimationImplementation radius_anim_impl = {
-		.update = face_layer_radius_anim_update
-	};
-	static const AnimationImplementation roll_anim_impl = {
-		.update = face_layer_roll_anim_update
-	};
+	// Collect all animations into this array to create a spawn animation later
+	Animation *animations[2];
+	unsigned int i = 0;
 
-	// The "end" handler should be scheduled at the end of the longer running animation, because it signals
-	// when it is OK to move the hands normally in face_layer_set_time
+	if(zoom) {
+		animations[i++] = face_layer_make_zoom_anim(face_layer);
+	}
+	if(roll) {
+		animations[i++] = face_layer_make_roll_anim(face_layer);
+	}
+
 	static const AnimationHandlers handlers = {
 		.started = face_layer_animation_start_handler,
 		.stopped = face_layer_animation_stop_handler
 	};
 
-	Layer *layer = face_layer_get_layer(face_layer);
-	FaceLayerData *face_layer_data = layer_get_data(layer);
-
-	if(zoom) {
-		face_layer_animate(duration, delay, AnimationCurveEaseOut, &radius_anim_impl, roll ? NULL : &handlers, face_layer);
-
-		// Go ahead and set the initial scale so that there's no flicker of large hands
-		scalable_path_scale(face_layer_data->hour_path, 0);
-		scalable_path_scale(face_layer_data->minute_path, 0);
-		scalable_path_scale(face_layer_data->second_path, 0);
-	}
-	if(roll) {
-		face_layer_animate(duration, delay, AnimationCurveEaseInOut, &roll_anim_impl, &handlers, face_layer);
-	}
-	if(!zoom && !roll) {
-		face_layer_data->animating = false;
-	}
+	Animation *spawn_anim = animation_spawn_create_from_array(animations, i);
+	animation_set_handlers(spawn_anim, handlers, face_layer);
+	animation_schedule(spawn_anim);
 }
