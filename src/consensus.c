@@ -4,15 +4,15 @@
 #include "face_layer.h"
 #include "complications/complication.h"
 
-static Window *window;
-static FaceLayer *face_layer;
-static Layer *black_layer;
-static DateComplication *date_complication;
-static BitmapLayer *no_bluetooth_layer;
-static BatteryComplication *battery_complication;
+static Window *window = NULL;
+static FaceLayer *face_layer = NULL;
+static Layer *black_layer = NULL;
+static DateComplication *date_complication = NULL;
+static BitmapLayer *no_bluetooth_layer = NULL;
+static BatteryComplication *battery_complication = NULL;
 
-static GDrawCommandImage *ticks_image;
-static GBitmap *no_bluetooth_image;
+static GDrawCommandImage *ticks_image = NULL;
+static GBitmap *no_bluetooth_image = NULL;
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
