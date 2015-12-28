@@ -120,7 +120,7 @@ static void init_layers(void)
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
 	face_layer_set_show_second(face_layer, false);
-	layer_add_child(window_get_root_layer(window), face_layer);
+	layer_add_child(window_get_root_layer(window), face_layer_get_layer(face_layer));
 	face_layer_animate_in(face_layer, true, true);
 }
 

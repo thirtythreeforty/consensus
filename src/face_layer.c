@@ -27,6 +27,11 @@ struct st_face_layer_data {
 };
 typedef struct st_face_layer_data FaceLayerData;
 
+Layer* face_layer_get_layer(FaceLayer *face_layer)
+{
+	return (Layer*)face_layer;
+}
+
 static void face_layer_redraw(Layer *layer, GContext *ctx)
 {
 	FaceLayerData *face_layer_data = layer_get_data(layer);
@@ -74,7 +79,7 @@ FaceLayer *face_layer_create(GRect frame)
 		.points = (GPoint*)second_hand_path_points
 	};
 
-	FaceLayer *layer = layer_create_with_data(frame, sizeof(FaceLayerData));
+	Layer *layer = layer_create_with_data(frame, sizeof(FaceLayerData));
 	layer_set_update_proc(layer, face_layer_redraw);
 
 	FaceLayerData *face_layer_data = layer_get_data(layer);
@@ -92,26 +97,28 @@ FaceLayer *face_layer_create(GRect frame)
 	face_layer_data->second_path = scalable_path_create(&second_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->second_path), center);
 
-	return layer;
+	return (FaceLayer*)layer;
 }
 
 void face_layer_destroy(FaceLayer *face_layer)
 {
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 	scalable_path_destroy(face_layer_data->hour_path);
 	scalable_path_destroy(face_layer_data->minute_path);
 	scalable_path_destroy(face_layer_data->second_path);
 
-	layer_destroy(face_layer);
+	layer_destroy(layer);
 }
 
 void face_layer_set_show_second(FaceLayer *face_layer, bool show)
 {
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->show_second = show;
 
-	layer_mark_dirty(face_layer);
+	layer_mark_dirty(layer);
 }
 
 static unsigned int face_layer_hour_angle(unsigned int hour, unsigned int minute)
@@ -128,7 +135,8 @@ static unsigned int face_layer_minute_angle(unsigned int minute, unsigned int se
 
 void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8_t sec)
 {
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->requested_time.hour = hour;
 	face_layer_data->requested_time.minute = min;
@@ -139,13 +147,14 @@ void face_layer_set_time(FaceLayer *face_layer, uint8_t hour, uint8_t min, uint8
 		gpath_rotate_to(scalable_path_get_path(face_layer_data->minute_path), face_layer_minute_angle(min, sec));
 		gpath_rotate_to(scalable_path_get_path(face_layer_data->second_path), face_layer_minute_angle(sec, 0));
 
-		layer_mark_dirty(face_layer);
+		layer_mark_dirty(layer);
 	}
 }
 
 void face_layer_set_colors(FaceLayer *face_layer, GColor hour, GColor minute, GColor second)
 {
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->hour_color = hour;
 	face_layer_data->minute_color = minute;
@@ -181,19 +190,21 @@ static int face_layer_scale(AnimationProgress dist_normalized, unsigned int max)
 static void face_layer_radius_anim_update(Animation *anim, AnimationProgress dist_normalized)
 {
 	FaceLayer *face_layer = animation_get_context(anim);
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	scalable_path_scale(face_layer_data->hour_path, dist_normalized);
 	scalable_path_scale(face_layer_data->minute_path, dist_normalized);
 	scalable_path_scale(face_layer_data->second_path, dist_normalized);
 
-	layer_mark_dirty(face_layer);
+	layer_mark_dirty(layer);
 }
 
 static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_normalized)
 {
 	FaceLayer *face_layer = animation_get_context(anim);
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	gpath_rotate_to(scalable_path_get_path(face_layer_data->hour_path),
 	                face_layer_scale(dist_normalized,
@@ -209,13 +220,14 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 	                face_layer_scale(dist_normalized,
 	                                 face_layer_minute_angle(face_layer_data->animation_time.second, 0)));
 
-	layer_mark_dirty(face_layer);
+	layer_mark_dirty(layer);
 }
 
 static void face_layer_animation_start_handler(Animation *animation, void *context)
 {
 	FaceLayer *face_layer = context;
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->animating = true;
 
@@ -226,7 +238,8 @@ static void face_layer_animation_start_handler(Animation *animation, void *conte
 static void face_layer_animation_stop_handler(Animation *animation, bool finished, void *context)
 {
 	FaceLayer *face_layer = context;
-	FaceLayerData *face_layer_data = layer_get_data(face_layer);
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
 
 	face_layer_data->animating = false;
 
@@ -255,11 +268,13 @@ void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 		.stopped = face_layer_animation_stop_handler
 	};
 
+	Layer *layer = face_layer_get_layer(face_layer);
+	FaceLayerData *face_layer_data = layer_get_data(layer);
+
 	if(zoom) {
 		face_layer_animate(duration, delay, AnimationCurveEaseOut, &radius_anim_impl, roll ? NULL : &handlers, face_layer);
 
 		// Go ahead and set the initial scale so that there's no flicker of large hands
-		FaceLayerData *face_layer_data = layer_get_data(face_layer);
 		scalable_path_scale(face_layer_data->hour_path, 0);
 		scalable_path_scale(face_layer_data->minute_path, 0);
 		scalable_path_scale(face_layer_data->second_path, 0);
@@ -268,7 +283,6 @@ void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 		face_layer_animate(duration, delay, AnimationCurveEaseInOut, &roll_anim_impl, &handlers, face_layer);
 	}
 	if(!zoom && !roll) {
-		FaceLayerData *face_layer_data = layer_get_data(face_layer);
 		face_layer_data->animating = false;
 	}
 }
