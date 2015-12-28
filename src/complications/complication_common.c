@@ -23,8 +23,8 @@ void base_complication_update(Layer *layer, GContext *ctx,
 	graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, max_angle, TRIG_MAX_ANGLE);
 }
 
-void base_complication_animate_in(const AnimationImplementation *impl,
-                                  const AnimationHandlers *handlers, void *ctx)
+Animation* base_complication_animate_in(const AnimationImplementation *impl,
+                                        const AnimationHandlers *handlers, void *ctx)
 {
 	static const unsigned int duration = 700;
 	static const unsigned int delay = 200;
@@ -35,5 +35,6 @@ void base_complication_animate_in(const AnimationImplementation *impl,
 	animation_set_curve(anim, AnimationCurveEaseInOut);
 	animation_set_implementation(anim, impl);
 	animation_set_handlers(anim, *handlers, ctx);
-	animation_schedule(anim);
+
+	return anim;
 }

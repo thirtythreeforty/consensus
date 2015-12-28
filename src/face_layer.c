@@ -288,7 +288,7 @@ static void face_layer_animation_stop_handler(Animation *animation, bool finishe
 	                    face_layer_data->requested_time.second);
 }
 
-void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
+Animation* face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 {
 	// Collect all animations into this array to create a spawn animation later
 	Animation *animations[2];
@@ -308,5 +308,6 @@ void face_layer_animate_in(FaceLayer *face_layer, bool zoom, bool roll)
 
 	Animation *spawn_anim = animation_spawn_create_from_array(animations, i);
 	animation_set_handlers(spawn_anim, handlers, face_layer);
-	animation_schedule(spawn_anim);
+
+	return spawn_anim;
 }

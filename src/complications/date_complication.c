@@ -114,7 +114,7 @@ static void date_complication_spinup_animation_stopped(Animation *animation, boo
 	date_complication_set_displayed(layer, data, data->requested_date);
 }
 
-void date_complication_animate_in(DateComplication *complication)
+Animation* date_complication_animate_in(DateComplication *complication)
 {
 	static const AnimationImplementation date_spinup_anim_impl = {
 		.update = date_complication_spinup_animation_update
@@ -124,8 +124,8 @@ void date_complication_animate_in(DateComplication *complication)
 		.stopped = date_complication_spinup_animation_stopped
 	};
 
-	base_complication_animate_in(&date_spinup_anim_impl,
-	                             &date_spinup_anim_handlers,
-	                             complication);
+	return base_complication_animate_in(&date_spinup_anim_impl,
+	                                    &date_spinup_anim_handlers,
+	                                    complication);
 }
 

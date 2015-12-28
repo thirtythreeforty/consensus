@@ -103,7 +103,7 @@ static void battery_complication_spinup_animation_stopped(Animation *anim, bool 
 	layer_mark_dirty(layer);
 }
 
-void battery_complication_animate_in(BatteryComplication *complication)
+Animation* battery_complication_animate_in(BatteryComplication *complication)
 {
 	static const AnimationImplementation battery_spinup_anim_impl = {
 		.update = battery_complication_spinup_animation_update
@@ -113,8 +113,8 @@ void battery_complication_animate_in(BatteryComplication *complication)
 		.stopped = battery_complication_spinup_animation_stopped
 	};
 
-	base_complication_animate_in(&battery_spinup_anim_impl,
-	                             &battery_spinup_anim_handlers,
-	                             complication);
+	return base_complication_animate_in(&battery_spinup_anim_impl,
+	                                    &battery_spinup_anim_handlers,
+	                                    complication);
 }
 

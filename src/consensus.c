@@ -106,7 +106,7 @@ static void init_layers(void)
 		   .w = complication_size }};
 	battery_complication = battery_complication_create(battery_complication_position, &charge_state);
 	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
-	battery_complication_animate_in(battery_complication);
+	animation_schedule(battery_complication_animate_in(battery_complication));
 
 	const GRect date_complication_position =
 		{{ .x = center.x + complication_offset_x,
@@ -115,13 +115,13 @@ static void init_layers(void)
 		   .w = complication_size }};
 	date_complication = date_complication_create(date_complication_position);
 	layer_add_child(window_get_root_layer(window), date_complication_get_layer(date_complication));
-	date_complication_animate_in(date_complication);
+	animation_schedule(date_complication_animate_in(date_complication));
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
 	face_layer_set_show_second(face_layer, false);
 	layer_add_child(window_get_root_layer(window), face_layer_get_layer(face_layer));
-	face_layer_animate_in(face_layer, true, true);
+	animation_schedule(face_layer_animate_in(face_layer, true, true));
 }
 
 static void deinit_layers(void)
