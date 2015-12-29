@@ -14,7 +14,7 @@ typedef struct {
 
 static void date_complication_update(Layer *layer, GContext *ctx)
 {
-	base_complication_update(layer, ctx, GColorClear, 0);
+	base_complication_update_1(layer, ctx, GColorClear, 0);
 }
 
 DateComplication* date_complication_create(GRect frame)
