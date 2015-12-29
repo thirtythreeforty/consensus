@@ -14,9 +14,12 @@ void base_complication_update(Layer *layer, GContext *ctx,
 	bounds.origin.x += (line_size / 2 + 1);
 	bounds.origin.y += (line_size / 2 + 1);
 
-	graphics_context_set_stroke_width(ctx, line_size);
-	graphics_context_set_stroke_color(ctx, color);
-	graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, 0, max_angle);
+	if(max_angle > 0) {
+		// Don't draw at all if the angle is zero, because it creates a small dot
+		graphics_context_set_stroke_width(ctx, line_size);
+		graphics_context_set_stroke_color(ctx, color);
+		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, 0, max_angle);
+	}
 
 	graphics_context_set_stroke_width(ctx, background_line_size);
 	graphics_context_set_stroke_color(ctx, GColorDarkGray);
