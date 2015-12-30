@@ -5,6 +5,8 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
+#define CLAMP(min, x, max) (MAX(min, MIN(x, max)))
+
 #define DEBUG
 
 #ifdef DEBUG

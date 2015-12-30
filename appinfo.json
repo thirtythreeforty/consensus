@@ -5,12 +5,17 @@
   "companyName": "George Hilliard",
   "versionLabel": "0.1",
   "sdkVersion": "3",
+  "capabilities": ["location"],
   "targetPlatforms": ["basalt", "chalk"],
   "watchapp": {
     "watchface": true
   },
   "appKeys": {
-    "dummy": 0
+    "KEY_WEATHER_TEMP_C": 0,
+    "KEY_WEATHER_RAINCHANCE_PCT": 1,
+    "KEY_WEATHER_CONDITIONS": 2,
+    "KEY_WEATHER_HUMIDITY": 3,
+    "KEY_WEATHER_ICON": 4
   },
   "resources": {
     "media": [
@@ -33,6 +38,51 @@
         "type": "raw",
         "name": "BATTERY_CHARGING",
         "file": "battery-charging.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_GENERIC",
+        "file": "weather/Generic_weather.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_SUNNY",
+        "file": "weather/Sunny_day.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_CLOUDY",
+        "file": "weather/Cloudy_day.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_PARTLY_CLOUDY",
+        "file": "weather/Partly_cloudy.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_RAIN_LIGHT",
+        "file": "weather/Light_rain.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_RAIN_HEAVY",
+        "file": "weather/Heavy_rain.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_RAIN_AND_SNOW",
+        "file": "weather/Raining_and_snowing.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_SNOW_LIGHT",
+        "file": "weather/Light_snow.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "WEATHER_SNOW_HEAVY",
+        "file": "weather/Heavy_snow.pdc"
       }
     ]
   }
