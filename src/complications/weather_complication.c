@@ -2,18 +2,12 @@
 
 #include "common.h"
 
+#include "constants.h"
+
 typedef struct {
 	WeatherData current_weather;
 	GDrawCommandImage *icon;
 } WeatherComplicationData;
-
-enum {
-	KEY_WEATHER_TEMP_C = 0,
-	KEY_WEATHER_RAINCHANCE_PCT = 1,
-	KEY_WEATHER_CONDITIONS = 2,
-	KEY_WEATHER_HUMIDITY = 3,
-	KEY_WEATHER_ICON = 4
-};
 
 WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 {
@@ -41,6 +35,37 @@ WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 		return (WeatherData) {
 			.valid = false
 		};
+	}
+}
+
+WeatherData weather_from_persist()
+{
+	if(!(persist_exists(PERSIST_WEATHER_TEMP_C) &&
+	     persist_exists(PERSIST_WEATHER_HUMIDITY) &&
+	     persist_exists(PERSIST_WEATHER_ICON))) {
+		return (WeatherData) {
+			.valid = false
+		};
+	}
+	return (WeatherData) {
+		.valid = true,
+		.temp_c = persist_read_int(PERSIST_WEATHER_TEMP_C),
+		.humidity = persist_read_int(PERSIST_WEATHER_HUMIDITY),
+		.icon = persist_read_int(PERSIST_WEATHER_ICON)
+	};
+}
+
+void weather_to_persist(WeatherData data)
+{
+	if(data.valid) {
+		persist_write_int(PERSIST_WEATHER_TEMP_C, data.temp_c);
+		persist_write_int(PERSIST_WEATHER_HUMIDITY, data.humidity);
+		persist_write_int(PERSIST_WEATHER_ICON, data.icon);
+	}
+	else {
+		persist_delete(PERSIST_WEATHER_TEMP_C);
+		persist_delete(PERSIST_WEATHER_HUMIDITY);
+		persist_delete(PERSIST_WEATHER_ICON);
 	}
 }
 
@@ -84,14 +109,14 @@ static void weather_complication_update(Layer *layer, GContext *ctx)
 	gdraw_command_image_draw(ctx, data->icon, shift);
 }
 
-WeatherComplication* weather_complication_create(GRect frame)
+WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata)
 {
 	Layer *layer = layer_create_with_data(frame, sizeof(WeatherComplicationData));
 	layer_set_update_proc(layer, weather_complication_update);
 
 	WeatherComplicationData *data = layer_get_data(layer);
-	data->current_weather.valid = false;
 	data->icon = NULL;
+	weather_complication_weather_changed((WeatherComplication*)layer, wdata);
 
 	return (WeatherComplication*)layer;
 }

@@ -27,7 +27,9 @@ typedef struct {
 } WeatherData;
 
 WeatherData weather_from_appmessage(DictionaryIterator *iter);
-WeatherComplication* weather_complication_create(GRect frame);
+WeatherData weather_from_persist();
+void weather_to_persist(WeatherData data);
+WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata);
 void weather_complication_destroy(WeatherComplication *complication);
 Layer* weather_complication_get_layer(WeatherComplication *complication);
 void weather_complication_weather_changed(WeatherComplication *complication, WeatherData data);
