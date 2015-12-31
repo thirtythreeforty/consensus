@@ -11,11 +11,12 @@
     "watchface": true
   },
   "appKeys": {
-    "KEY_WEATHER_TEMP_C": 0,
-    "KEY_WEATHER_RAINCHANCE_PCT": 1,
-    "KEY_WEATHER_CONDITIONS": 2,
-    "KEY_WEATHER_HUMIDITY": 3,
-    "KEY_WEATHER_ICON": 4
+    "KEY_WEATHER_REQUEST": 0,
+    "KEY_WEATHER_TEMP_C": 1,
+    "KEY_WEATHER_RAINCHANCE_PCT": 2,
+    "KEY_WEATHER_CONDITIONS": 3,
+    "KEY_WEATHER_HUMIDITY": 4,
+    "KEY_WEATHER_ICON": 5
   },
   "resources": {
     "media": [

@@ -104,14 +104,16 @@ function getWeather() {
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', function(e) {
 	console.log("PebbleKit JS ready!");
-
-	// Get the initial weather
-	getWeather();
 });
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage', function(e) {
 	console.log("AppMessage received!");
+	console.log(JSON.stringify(e.payload))
+	console.log(e.payload.KEY_WEATHER_ICON)
 
-	getWeather();
+	if("KEY_WEATHER_REQUEST" in e.payload) {
+		console.log("Got weather request");
+		getWeather();
+	}
 });

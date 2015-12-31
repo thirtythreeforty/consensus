@@ -7,6 +7,7 @@
 typedef struct {
 	WeatherData current_weather;
 	GDrawCommandImage *icon;
+	AppTimer *refresh_timer;
 } WeatherComplicationData;
 
 WeatherData weather_from_appmessage(DictionaryIterator *iterator)
@@ -22,6 +23,7 @@ WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 
 		return (WeatherData) {
 			.valid = true,
+			.time_updated = time(NULL),
 			.temp_c = temp,
 			.humidity = humidity,
 			.icon = icon
@@ -40,15 +42,18 @@ WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 
 WeatherData weather_from_persist()
 {
-	if(!(persist_exists(PERSIST_WEATHER_TEMP_C) &&
+	if(!(persist_exists(PERSIST_WEATHER_TIME_UPDATED) &&
+	     persist_exists(PERSIST_WEATHER_TEMP_C) &&
 	     persist_exists(PERSIST_WEATHER_HUMIDITY) &&
 	     persist_exists(PERSIST_WEATHER_ICON))) {
 		return (WeatherData) {
 			.valid = false
 		};
 	}
+
 	return (WeatherData) {
 		.valid = true,
+		.time_updated = persist_read_int(PERSIST_WEATHER_TIME_UPDATED),
 		.temp_c = persist_read_int(PERSIST_WEATHER_TEMP_C),
 		.humidity = persist_read_int(PERSIST_WEATHER_HUMIDITY),
 		.icon = persist_read_int(PERSIST_WEATHER_ICON)
@@ -58,11 +63,13 @@ WeatherData weather_from_persist()
 void weather_to_persist(WeatherData data)
 {
 	if(data.valid) {
+		persist_write_int(PERSIST_WEATHER_TIME_UPDATED, data.time_updated);
 		persist_write_int(PERSIST_WEATHER_TEMP_C, data.temp_c);
 		persist_write_int(PERSIST_WEATHER_HUMIDITY, data.humidity);
 		persist_write_int(PERSIST_WEATHER_ICON, data.icon);
 	}
 	else {
+		persist_delete(PERSIST_WEATHER_TIME_UPDATED);
 		persist_delete(PERSIST_WEATHER_TEMP_C);
 		persist_delete(PERSIST_WEATHER_HUMIDITY);
 		persist_delete(PERSIST_WEATHER_ICON);
@@ -109,6 +116,40 @@ static void weather_complication_update(Layer *layer, GContext *ctx)
 	gdraw_command_image_draw(ctx, data->icon, shift);
 }
 
+static void weather_complication_request_refresh(void *ptr)
+{
+	DictionaryIterator *iter;
+	static const uint8_t value = 0;
+	app_message_outbox_begin(&iter);
+	dict_write_int(iter, KEY_WEATHER_REQUEST, &value, sizeof value, false);
+	app_message_outbox_send();
+}
+
+static void weather_complication_cancel_timer(WeatherComplicationData *data)
+{
+	if(data->refresh_timer) {
+		app_timer_cancel(data->refresh_timer);
+		data->refresh_timer = NULL;
+	}
+}
+
+static void weather_complication_schedule_refresh(WeatherComplicationData *data)
+{
+	weather_complication_cancel_timer(data);
+
+	time_t now = time(NULL);
+
+	static const unsigned int refresh_interval = 60 * 60 * 3;
+	const unsigned int slight_future = now + 10;
+
+	const unsigned int next_refresh_time =
+		MAX(slight_future, data->current_weather.time_updated + refresh_interval);
+
+	const uint32_t delay_ms = (next_refresh_time - now) * 1000;
+
+	app_timer_register(delay_ms, weather_complication_request_refresh, data);
+}
+
 WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata)
 {
 	Layer *layer = layer_create_with_data(frame, sizeof(WeatherComplicationData));
@@ -116,6 +157,7 @@ WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata)
 
 	WeatherComplicationData *data = layer_get_data(layer);
 	data->icon = NULL;
+	data->refresh_timer = NULL;
 	weather_complication_weather_changed((WeatherComplication*)layer, wdata);
 
 	return (WeatherComplication*)layer;
@@ -127,6 +169,7 @@ void weather_complication_destroy(WeatherComplication *complication)
 
 	WeatherComplicationData *data = layer_get_data(layer);
 	free(data->icon);
+	weather_complication_cancel_timer(data);
 
 	layer_destroy(layer);
 }
@@ -183,6 +226,8 @@ void weather_complication_weather_changed(WeatherComplication *complication, Wea
 	else {
 		data->icon = NULL;
 	}
+
+	weather_complication_schedule_refresh(data);
 
 	layer_mark_dirty(layer);
 }

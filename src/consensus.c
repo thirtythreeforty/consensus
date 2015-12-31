@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "common.h"
+#include "constants.h"
 
 #include "face_layer.h"
 #include "complications/complication.h"
@@ -193,7 +194,7 @@ static void init(void)
 
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
-	app_message_open(1024, 0);
+	app_message_open(128, 64);
 
 	time_t abs_time = time(0);
 	struct tm *tick_time = localtime(&abs_time);

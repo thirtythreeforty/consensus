@@ -20,10 +20,12 @@ void date_complication_time_changed(DateComplication *complication, struct tm *t
 Animation* date_complication_animate_in(DateComplication *complication);
 
 typedef struct {
-	int temp_c;
+	bool valid;
+
+	time_t time_updated;
+	int8_t temp_c;
 	uint8_t humidity;
 	uint8_t icon;
-	bool valid;
 } WeatherData;
 
 WeatherData weather_from_appmessage(DictionaryIterator *iter);
