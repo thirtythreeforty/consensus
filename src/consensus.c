@@ -148,10 +148,11 @@ static void main_window_unload(Window *window)
 static void init(void)
 {
 	window = window_create();
-	window_set_window_handlers(window, (WindowHandlers) {
+	static const WindowHandlers h = {
 		.load = main_window_load,
 		.unload = main_window_unload,
-	});
+	};
+	window_set_window_handlers(window, h);
 	window_stack_push(window, true);
 
 	tick_timer_service_subscribe(MINUTE_UNIT, on_tick);
