@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "common.h"
+#include "constants.h"
 
 #include "face_layer.h"
 #include "complications/complication.h"
@@ -8,8 +9,9 @@ static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
 static Layer *background_layer = NULL;
 static DateComplication *date_complication = NULL;
-static BitmapLayer *no_bluetooth_layer = NULL;
 static BatteryComplication *battery_complication = NULL;
+static WeatherComplication *weather_complication = NULL;
+static BitmapLayer *no_bluetooth_layer = NULL;
 
 static GDrawCommandImage *ticks_image = NULL;
 static GBitmap *no_bluetooth_image = NULL;
@@ -57,6 +59,21 @@ void on_connection_change(bool connected)
 
 void ignore_connection_change(bool connected)
 {
+}
+
+void on_appmessage_in(DictionaryIterator *iterator, void *context)
+{
+	if(weather_complication) {
+		WeatherData wdata;
+		weather_from_appmessage(iterator, &wdata);
+		weather_complication_weather_changed(weather_complication, &wdata);
+		weather_to_persist(&wdata);
+	}
+}
+
+void on_appmessage_in_dropped(AppMessageResult reason, void *context)
+{
+	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
 }
 
 static void update_background(Layer *layer, GContext *ctx)
@@ -116,6 +133,17 @@ static void init_layers(void)
 	layer_add_child(window_get_root_layer(window), date_complication_get_layer(date_complication));
 	animation_schedule(date_complication_animate_in(date_complication));
 
+	const GRect weather_complication_position =
+		{{ .x = center.x - complication_size / 2,
+		   .y = center.y + complication_offset_y},
+		 { .h = complication_size,
+		   .w = complication_size }};
+	WeatherData wdata;
+	weather_from_persist(&wdata);
+	weather_complication = weather_complication_create(weather_complication_position, &wdata);
+	layer_add_child(window_get_root_layer(window), weather_complication_get_layer(weather_complication));
+	animation_schedule(weather_complication_animate_in(weather_complication));
+
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
 	face_layer_set_show_second(face_layer, false);
@@ -126,6 +154,7 @@ static void init_layers(void)
 static void deinit_layers(void)
 {
 	face_layer_destroy(face_layer);
+	weather_complication_destroy(weather_complication);
 	date_complication_destroy(date_complication);
 	battery_complication_destroy(battery_complication);
 	bitmap_layer_destroy(no_bluetooth_layer);
@@ -166,6 +195,10 @@ static void init(void)
 	};
 	connection_service_subscribe(conn_handlers);
 
+	app_message_register_inbox_received(on_appmessage_in);
+	app_message_register_inbox_dropped(on_appmessage_in_dropped);
+	app_message_open(128, 64);
+
 	time_t abs_time = time(0);
 	struct tm *tick_time = localtime(&abs_time);
 	on_tick(tick_time, MINUTE_UNIT);
@@ -174,6 +207,7 @@ static void init(void)
 static void deinit(void)
 {
 	animation_unschedule_all();
+	app_message_deregister_callbacks();
 	connection_service_unsubscribe();
 	accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();
