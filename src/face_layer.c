@@ -238,7 +238,7 @@ static Animation* face_layer_make_zoom_anim(FaceLayer *face_layer)
 		.update = face_layer_radius_anim_update
 	};
 
-	return face_layer_make_anim(1000, 0,
+	return face_layer_make_anim(1000, 200,
 	                            AnimationCurveEaseOut,
 	                            &zoom_anim_impl,
 	                            NULL, face_layer);
@@ -250,7 +250,7 @@ static Animation* face_layer_make_roll_anim(FaceLayer *face_layer)
 		.update = face_layer_roll_anim_update
 	};
 
-	return face_layer_make_anim(1000, 0,
+	return face_layer_make_anim(1000, 200,
 	                            AnimationCurveEaseInOut,
 	                            &roll_anim_impl,
 	                            NULL, face_layer);
