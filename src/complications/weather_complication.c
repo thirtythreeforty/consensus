@@ -11,7 +11,7 @@ typedef struct {
 	AppTimer *refresh_timer;
 } WeatherComplicationData;
 
-WeatherData weather_from_appmessage(DictionaryIterator *iterator)
+void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 {
 	Tuple *temp_tuple = dict_find(iterator, KEY_WEATHER_TEMP_C);
 	Tuple *humidity_tuple = dict_find(iterator, KEY_WEATHER_HUMIDITY);
@@ -22,7 +22,7 @@ WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 		uint8_t humidity = humidity_tuple->value->uint8;
 		uint8_t icon = icon_tuple->value->uint8;
 
-		return (WeatherData) {
+		*wdata = (WeatherData) {
 			.valid = true,
 			.time_updated = time(NULL),
 			.temp_c = temp,
@@ -35,24 +35,21 @@ WeatherData weather_from_appmessage(DictionaryIterator *iterator)
 		        "Bad weather data received (%p, %p, %p)",
 		        temp_tuple, humidity_tuple, icon_tuple);
 
-		return (WeatherData) {
-			.valid = false
-		};
+		wdata->valid = false;
 	}
 }
 
-WeatherData weather_from_persist()
+void weather_from_persist(WeatherData *wdata)
 {
 	if(!(persist_exists(PERSIST_WEATHER_TIME_UPDATED) &&
 	     persist_exists(PERSIST_WEATHER_TEMP_C) &&
 	     persist_exists(PERSIST_WEATHER_HUMIDITY) &&
 	     persist_exists(PERSIST_WEATHER_ICON))) {
-		return (WeatherData) {
-			.valid = false
-		};
+		wdata->valid = false;
+		return;
 	}
 
-	return (WeatherData) {
+	*wdata = (WeatherData) {
 		.valid = true,
 		.time_updated = persist_read_int(PERSIST_WEATHER_TIME_UPDATED),
 		.temp_c = persist_read_int(PERSIST_WEATHER_TEMP_C),
@@ -61,13 +58,13 @@ WeatherData weather_from_persist()
 	};
 }
 
-void weather_to_persist(WeatherData data)
+void weather_to_persist(const WeatherData *data)
 {
-	if(data.valid) {
-		persist_write_int(PERSIST_WEATHER_TIME_UPDATED, data.time_updated);
-		persist_write_int(PERSIST_WEATHER_TEMP_C, data.temp_c);
-		persist_write_int(PERSIST_WEATHER_HUMIDITY, data.humidity);
-		persist_write_int(PERSIST_WEATHER_ICON, data.icon);
+	if(data->valid) {
+		persist_write_int(PERSIST_WEATHER_TIME_UPDATED, data->time_updated);
+		persist_write_int(PERSIST_WEATHER_TEMP_C, data->temp_c);
+		persist_write_int(PERSIST_WEATHER_HUMIDITY, data->humidity);
+		persist_write_int(PERSIST_WEATHER_ICON, data->icon);
 	}
 	else {
 		persist_delete(PERSIST_WEATHER_TIME_UPDATED);
@@ -142,7 +139,7 @@ static void weather_complication_schedule_refresh(WeatherComplicationData *data)
 	app_timer_register(delay_ms, weather_complication_request_refresh, data);
 }
 
-WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata)
+WeatherComplication* weather_complication_create(GRect frame, const WeatherData *wdata)
 {
 	Layer *layer = layer_create_with_data(frame, sizeof(WeatherComplicationData));
 	layer_set_update_proc(layer, weather_complication_update);
@@ -179,16 +176,16 @@ static bool weather_complication_change_icon_color(GDrawCommand *command, uint32
 	return true;
 }
 
-void weather_complication_weather_changed(WeatherComplication *complication, WeatherData new_weather)
+void weather_complication_weather_changed(WeatherComplication *complication, const WeatherData *new_weather)
 {
 	Layer *layer = weather_complication_get_layer(complication);
 	WeatherComplicationData *data = layer_get_data(layer);
 
-	data->current_weather = new_weather;
+	data->current_weather = *new_weather;
 
 	// Set the new icon
 	free(data->icon);
-	if(new_weather.valid) {
+	if(new_weather->valid) {
 		static const uint32_t weather_icons[] = {
 			RESOURCE_ID_WEATHER_GENERIC,
 			RESOURCE_ID_WEATHER_SUNNY,
@@ -202,8 +199,8 @@ void weather_complication_weather_changed(WeatherComplication *complication, Wea
 		};
 
 		// Be sure and clamp the index so we're not accessing arbitrary memory.
-		if(new_weather.icon <= NELEM(weather_icons)) {
-			const uint32_t resource = weather_icons[new_weather.icon];
+		if(new_weather->icon <= NELEM(weather_icons)) {
+			const uint32_t resource = weather_icons[new_weather->icon];
 
 			data->icon = gdraw_command_image_create_with_resource(resource);
 

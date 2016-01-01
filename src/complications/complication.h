@@ -28,13 +28,13 @@ typedef struct {
 	uint8_t icon;
 } WeatherData;
 
-WeatherData weather_from_appmessage(DictionaryIterator *iter);
-WeatherData weather_from_persist();
-void weather_to_persist(WeatherData data);
-WeatherComplication* weather_complication_create(GRect frame, WeatherData wdata);
+void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
+void weather_from_persist(WeatherData *wdata);
+void weather_to_persist(const WeatherData *wdata);
+WeatherComplication* weather_complication_create(GRect frame, const WeatherData *wdata);
 void weather_complication_destroy(WeatherComplication *complication);
 Layer* weather_complication_get_layer(WeatherComplication *complication);
-void weather_complication_weather_changed(WeatherComplication *complication, WeatherData data);
+void weather_complication_weather_changed(WeatherComplication *complication, const WeatherData *wdata);
 Animation* weather_complication_animate_in(WeatherComplication *complication);
 
 #endif

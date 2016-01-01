@@ -65,15 +65,16 @@ void ignore_connection_change(bool connected)
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
 {
 	if(weather_complication) {
-		WeatherData wdata = weather_from_appmessage(iterator);
-		weather_complication_weather_changed(weather_complication, wdata);
-		weather_to_persist(wdata);
+		WeatherData wdata;
+		weather_from_appmessage(iterator, &wdata);
+		weather_complication_weather_changed(weather_complication, &wdata);
+		weather_to_persist(&wdata);
 	}
 }
 
 void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 {
-	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped!");
+	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
 }
 
 static void update_background(Layer *layer, GContext *ctx)
@@ -138,8 +139,9 @@ static void init_layers(void)
 		   .y = center.y + complication_offset_y},
 		 { .h = complication_size,
 		   .w = complication_size }};
-	WeatherData wdata = weather_from_persist();
-	weather_complication = weather_complication_create(weather_complication_position, wdata);
+	WeatherData wdata;
+	weather_from_persist(&wdata);
+	weather_complication = weather_complication_create(weather_complication_position, &wdata);
 	layer_add_child(window_get_root_layer(window), weather_complication_get_layer(weather_complication));
 
 	face_layer = face_layer_create(size);
