@@ -6,9 +6,16 @@
 
 typedef struct {
 	WeatherData current_weather;
+
 	GDrawCommandImage *icon;
 	GPoint icon_shift;
+
 	AppTimer *refresh_timer;
+
+	WeatherData animation_weather;
+	int32_t animation_temp_angle;
+	int32_t animation_humidity_angle;
+	bool animating;
 } WeatherComplicationData;
 
 void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
@@ -74,21 +81,38 @@ void weather_to_persist(const WeatherData *data)
 	}
 }
 
-static void weather_complication_update(Layer *layer, GContext *ctx)
+static int32_t weather_complication_temp_angle(int8_t temp_c)
 {
-	WeatherComplicationData *data = layer_get_data(layer);
-
 	static const int HALF_MAX_ANGLE = TRIG_MAX_ANGLE / 2;
-
-	int humidity_angle = data->current_weather.humidity * HALF_MAX_ANGLE / 100;
 
 	static const int min_temp = -5;
 	static const int max_temp = 43;
 
-	int temp_angle = (data->current_weather.temp_c - min_temp) * HALF_MAX_ANGLE / (max_temp - min_temp);
+	return (temp_c - min_temp) * HALF_MAX_ANGLE / (max_temp - min_temp);
+}
+
+static int32_t weather_complication_humidity_angle(uint8_t humidity)
+{
+	static const int HALF_MAX_ANGLE = TRIG_MAX_ANGLE / 2;
+
+	return humidity * HALF_MAX_ANGLE / 100;
+}
+
+static void weather_complication_update(Layer *layer, GContext *ctx)
+{
+	static const int HALF_MAX_ANGLE = TRIG_MAX_ANGLE / 2;
+
+	WeatherComplicationData *data = layer_get_data(layer);
 
 	// Always make the temp and angle show at least a little so the user is
 	// aware that the display is two-sided
+	int32_t humidity_angle = data->animating
+		? data->animation_humidity_angle
+		: weather_complication_humidity_angle(data->current_weather.humidity);
+	int32_t temp_angle = data->animating
+		? data->animation_temp_angle
+		: weather_complication_temp_angle(data->current_weather.temp_c);
+
 	humidity_angle = CLAMP(HALF_MAX_ANGLE / 90, humidity_angle, HALF_MAX_ANGLE);
 	temp_angle = CLAMP(HALF_MAX_ANGLE / 90, temp_angle, HALF_MAX_ANGLE);
 
@@ -229,8 +253,51 @@ void weather_complication_weather_changed(WeatherComplication *complication, con
 	layer_mark_dirty(layer);
 }
 
+static void weather_complication_spinup_animation_update(Animation *anim, AnimationProgress progress)
+{
+	WeatherComplication *complication = animation_get_context(anim);
+	Layer *layer = weather_complication_get_layer(complication);
+	WeatherComplicationData *data = layer_get_data(layer);
+
+	data->animation_temp_angle = weather_complication_temp_angle(data->animation_weather.temp_c * progress / ANIMATION_NORMALIZED_MAX);
+	data->animation_humidity_angle = weather_complication_humidity_angle(data->animation_weather.humidity * progress / ANIMATION_NORMALIZED_MAX);
+
+	layer_mark_dirty(layer);
+}
+
+static void weather_complication_spinup_animation_started(Animation *anim, void *context)
+{
+	WeatherComplication *complication = context;
+	Layer *layer = weather_complication_get_layer(complication);
+	WeatherComplicationData *data = layer_get_data(layer);
+
+	data->animating = true;
+	data->animation_weather = data->current_weather;
+	layer_mark_dirty(layer);
+}
+
+static void weather_complication_spinup_animation_stopped(Animation *anim, bool finished, void *context)
+{
+	WeatherComplication *complication = context;
+	Layer *layer = weather_complication_get_layer(complication);
+	WeatherComplicationData *data = layer_get_data(layer);
+
+	data->animating = false;
+	layer_mark_dirty(layer);
+}
+
 Animation* weather_complication_animate_in(WeatherComplication *complication)
 {
-	return animation_create();
+	static const AnimationImplementation weather_spinup_anim_impl = {
+		.update = weather_complication_spinup_animation_update
+	};
+	static const AnimationHandlers weather_spinup_anim_handlers = {
+		.started = weather_complication_spinup_animation_started,
+		.stopped = weather_complication_spinup_animation_stopped
+	};
+
+	return base_complication_animate_in(&weather_spinup_anim_impl,
+	                                    &weather_spinup_anim_handlers,
+	                                    complication);
 }
 

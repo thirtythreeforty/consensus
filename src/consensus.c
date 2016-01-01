@@ -143,6 +143,7 @@ static void init_layers(void)
 	weather_from_persist(&wdata);
 	weather_complication = weather_complication_create(weather_complication_position, &wdata);
 	layer_add_child(window_get_root_layer(window), weather_complication_get_layer(weather_complication));
+	animation_schedule(weather_complication_animate_in(weather_complication));
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
