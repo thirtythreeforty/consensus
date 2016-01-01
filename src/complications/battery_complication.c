@@ -42,7 +42,7 @@ BatteryComplication* battery_complication_create(GRect frame, BatteryChargeState
 
 	BatteryComplicationData *data = layer_get_data(layer);
 	data->icon = NULL;
-	data->animating = true; // Must call battery_complication_animate_in
+	data->animating = false;
 
 	battery_complication_state_changed((BatteryComplication*)layer, charge);
 
@@ -93,6 +93,16 @@ static void battery_complication_spinup_animation_update(Animation *anim, Animat
 	layer_mark_dirty(layer);
 }
 
+static void battery_complication_spinup_animation_started(Animation *anim, void *context)
+{
+	BatteryComplication *complication = context;
+	Layer *layer = battery_complication_get_layer(complication);
+	BatteryComplicationData *data = layer_get_data(layer);
+
+	data->animating = true;
+	layer_mark_dirty(layer);
+}
+
 static void battery_complication_spinup_animation_stopped(Animation *anim, bool finished, void *context)
 {
 	BatteryComplication *complication = context;
@@ -109,7 +119,7 @@ Animation* battery_complication_animate_in(BatteryComplication *complication)
 		.update = battery_complication_spinup_animation_update
 	};
 	static const AnimationHandlers battery_spinup_anim_handlers = {
-		.started = NULL,
+		.started = battery_complication_spinup_animation_started,
 		.stopped = battery_complication_spinup_animation_stopped
 	};
 
