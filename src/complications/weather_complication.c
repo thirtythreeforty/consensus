@@ -113,8 +113,10 @@ static void weather_complication_update(Layer *layer, GContext *ctx)
 		? data->animation_temp_angle
 		: weather_complication_temp_angle(data->current_weather.temp_c);
 
-	humidity_angle = CLAMP(HALF_MAX_ANGLE / 90, humidity_angle, HALF_MAX_ANGLE);
-	temp_angle = CLAMP(HALF_MAX_ANGLE / 90, temp_angle, HALF_MAX_ANGLE);
+	if(!data->animating) {
+		humidity_angle = CLAMP(HALF_MAX_ANGLE / 90, humidity_angle, HALF_MAX_ANGLE);
+		temp_angle = CLAMP(HALF_MAX_ANGLE / 90, temp_angle, HALF_MAX_ANGLE);
+	}
 
 	if(!data->current_weather.valid) {
 		humidity_angle = 0;
