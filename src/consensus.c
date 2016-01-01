@@ -38,7 +38,6 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 
 void on_tap(AccelAxisType axis, int32_t direction)
 {
-	APP_DEBUG("Handling acceleration on axis %i", axis);
 	if(axis == ACCEL_AXIS_Z) {
 		light_enable_interaction();
 	}
