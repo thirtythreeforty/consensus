@@ -42,7 +42,7 @@ BatteryComplication* battery_complication_create(GRect frame, BatteryChargeState
 
 	BatteryComplicationData *data = layer_get_data(layer);
 	data->icon = NULL;
-	data->animating = false;
+	data->animating = true;
 
 	battery_complication_state_changed((BatteryComplication*)layer, charge);
 

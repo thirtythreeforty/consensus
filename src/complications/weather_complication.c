@@ -173,6 +173,9 @@ WeatherComplication* weather_complication_create(GRect frame, const WeatherData 
 	WeatherComplicationData *data = layer_get_data(layer);
 	data->icon = NULL;
 	data->refresh_timer = NULL;
+	data->animating = true;
+	data->animation_temp_angle = 0;
+	data->animation_humidity_angle = 0;
 	weather_complication_weather_changed((WeatherComplication*)layer, wdata);
 
 	return (WeatherComplication*)layer;
