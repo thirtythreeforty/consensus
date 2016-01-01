@@ -7,6 +7,7 @@
 typedef struct {
 	WeatherData current_weather;
 	GDrawCommandImage *icon;
+	GPoint icon_shift;
 	AppTimer *refresh_timer;
 } WeatherComplicationData;
 
@@ -94,8 +95,6 @@ static void weather_complication_update(Layer *layer, GContext *ctx)
 	humidity_angle = CLAMP(HALF_MAX_ANGLE / 90, humidity_angle, HALF_MAX_ANGLE);
 	temp_angle = CLAMP(HALF_MAX_ANGLE / 90, temp_angle, HALF_MAX_ANGLE);
 
-	APP_DEBUG("temp angle is %i", temp_angle);
-
 	if(!data->current_weather.valid) {
 		humidity_angle = 0;
 		temp_angle = 0;
@@ -106,14 +105,7 @@ static void weather_complication_update(Layer *layer, GContext *ctx)
 	                           GColorRed, temp_angle);
 
 	// Draw icon (loaded in weather_complication_weather_changed).
-	// Need to shift it over to account for its size.
-	const GSize icon_size = gdraw_command_image_get_bounds_size(data->icon);
-	const GRect bounds = layer_get_bounds(layer);
-	const GPoint shift = {
-		.x = bounds.size.w / 2 - icon_size.w / 2,
-		.y = bounds.size.h / 2 - icon_size.h / 2
-	};
-	gdraw_command_image_draw(ctx, data->icon, shift);
+	gdraw_command_image_draw(ctx, data->icon, data->icon_shift);
 }
 
 static void weather_complication_request_refresh(void *ptr)
@@ -218,6 +210,14 @@ void weather_complication_weather_changed(WeatherComplication *complication, Wea
 			// Change the icon color.  This is gonna get ugly...
 			gdraw_command_list_iterate(gdraw_command_image_get_command_list(data->icon),
 			                           weather_complication_change_icon_color, NULL);
+
+			// Need to shift it over to account for its size.
+			const GSize icon_size = gdraw_command_image_get_bounds_size(data->icon);
+			const GRect bounds = layer_get_bounds(layer);
+			data->icon_shift = (GPoint) {
+				.x = bounds.size.w / 2 - icon_size.w / 2,
+				.y = bounds.size.h / 2 - icon_size.h / 2
+			};
 		}
 		else {
 			data->icon = NULL;
