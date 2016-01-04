@@ -61,6 +61,37 @@ void ignore_connection_change(bool connected)
 {
 }
 
+static void update_time_now()
+{
+	time_t abs_time = time(NULL);
+	struct tm *tick_time = localtime(&abs_time);
+	on_tick(tick_time, MINUTE_UNIT);
+}
+
+static bool should_show_second()
+{
+	// This will return false if the key does not exist, which is the desired default.
+	return persist_read_bool(KEY_PREF_SHOW_SECOND_HAND);
+}
+
+static TimeUnits update_time_interval(bool show_sec)
+{
+	return show_sec ? SECOND_UNIT : MINUTE_UNIT;
+}
+
+static void parse_preferences(DictionaryIterator *iterator)
+{
+	Tuple *show_second_tuple = dict_find(iterator, KEY_PREF_SHOW_SECOND_HAND);
+	if(show_second_tuple) {
+		const bool show_second = show_second_tuple->value->uint8;
+		persist_write_bool(PERSIST_PREF_SHOW_SECOND_HAND, show_second);
+
+		tick_timer_service_subscribe(update_time_interval(show_second), on_tick);
+		face_layer_set_show_second(face_layer, show_second);
+		update_time_now();
+	}
+}
+
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
 {
 	if(weather_complication) {
@@ -71,6 +102,8 @@ void on_appmessage_in(DictionaryIterator *iterator, void *context)
 			weather_to_persist(&wdata);
 		}
 	}
+
+	parse_preferences(iterator);
 }
 
 void on_appmessage_in_dropped(AppMessageResult reason, void *context)
@@ -148,7 +181,7 @@ static void init_layers(void)
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
-	face_layer_set_show_second(face_layer, false);
+	face_layer_set_show_second(face_layer, should_show_second());
 	layer_add_child(window_get_root_layer(window), face_layer_get_layer(face_layer));
 	animation_schedule(face_layer_animate_in(face_layer, true, true));
 }
@@ -185,7 +218,8 @@ static void init(void)
 	window_set_window_handlers(window, h);
 	window_stack_push(window, true);
 
-	tick_timer_service_subscribe(MINUTE_UNIT, on_tick);
+	const TimeUnits units = update_time_interval(should_show_second());
+	tick_timer_service_subscribe(units, on_tick);
 
 	battery_state_service_subscribe(on_battery_state_change);
 
@@ -201,9 +235,7 @@ static void init(void)
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
 	app_message_open(128, 64);
 
-	time_t abs_time = time(0);
-	struct tm *tick_time = localtime(&abs_time);
-	on_tick(tick_time, MINUTE_UNIT);
+	update_time_now();
 }
 
 static void deinit(void)
