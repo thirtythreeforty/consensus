@@ -119,7 +119,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'http://10.42.0.1/index.html';
+	var url = 'https://thirtythreeforty.github.io/consensus/config/';
 	console.log('Showing configuration page: ' + url);
 
 	Pebble.openURL(url);
