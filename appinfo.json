@@ -5,7 +5,10 @@
   "companyName": "George Hilliard",
   "versionLabel": "0.2",
   "sdkVersion": "3",
-  "capabilities": ["location"],
+  "capabilities": [
+    "location",
+    "configurable"
+  ],
   "targetPlatforms": ["basalt", "chalk"],
   "watchapp": {
     "watchface": true
@@ -16,7 +19,9 @@
     "KEY_WEATHER_RAINCHANCE_PCT": 2,
     "KEY_WEATHER_CONDITIONS": 3,
     "KEY_WEATHER_HUMIDITY": 4,
-    "KEY_WEATHER_ICON": 5
+    "KEY_WEATHER_ICON": 5,
+    "KEY_PREF_SHOW_SECOND_HAND": 6,
+    "KEY_PREF_SHOW_NO_CONNECTION": 7
   },
   "resources": {
     "media": [

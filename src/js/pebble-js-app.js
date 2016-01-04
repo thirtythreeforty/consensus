@@ -117,3 +117,33 @@ Pebble.addEventListener('appmessage', function(e) {
 		getWeather();
 	}
 });
+
+Pebble.addEventListener('showConfiguration', function() {
+	var url = 'http://10.42.0.1/index.html';
+	console.log('Showing configuration page: ' + url);
+
+	Pebble.openURL(url);
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+	var configStr = decodeURIComponent(e.response);
+	console.log('Configuration page returned: ' + configStr);
+	var configData = JSON.parse(configStr);
+
+	function toInt(val) { return val ? 1 : 0; }
+
+	var dict = {
+		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['disp_second_hand']),
+		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['disp_no_connection'])
+	};
+
+	// Send to watchapp
+	Pebble.sendAppMessage(dict,
+		function() {
+			console.log("Preferences updated successfully.");
+		},
+		function() {
+			console.log('Preference update failed!');
+		}
+	);
+});
