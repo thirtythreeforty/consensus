@@ -93,7 +93,11 @@
 
     for(var i = 0; i < configMapping.length; i++) {
       var elem = configMapping[i];
-      elem.set(options[elem.name] || elem.defval);
+      if(elem.name in options) {
+        elem.set(options[elem.name]);
+      } else {
+        elem.set(elem.defval);
+      }
     }
   }
 
