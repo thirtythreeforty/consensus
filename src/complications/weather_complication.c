@@ -38,9 +38,12 @@ void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 		};
 	}
 	else {
-		APP_LOG(APP_LOG_LEVEL_ERROR,
-		        "Bad weather data received (%p, %p, %p)",
-		        temp_tuple, humidity_tuple, icon_tuple);
+		// If some elements are present (but not all), there is an error
+		if(temp_tuple || humidity_tuple || icon_tuple) {
+			APP_LOG(APP_LOG_LEVEL_ERROR,
+			        "Bad weather data received (%p, %p, %p)",
+			        temp_tuple, humidity_tuple, icon_tuple);
+		}
 
 		wdata->valid = false;
 	}
