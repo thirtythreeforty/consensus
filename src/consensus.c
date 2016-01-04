@@ -66,8 +66,10 @@ void on_appmessage_in(DictionaryIterator *iterator, void *context)
 	if(weather_complication) {
 		WeatherData wdata;
 		weather_from_appmessage(iterator, &wdata);
-		weather_complication_weather_changed(weather_complication, &wdata);
-		weather_to_persist(&wdata);
+		if(wdata.valid) {
+			weather_complication_weather_changed(weather_complication, &wdata);
+			weather_to_persist(&wdata);
+		}
 	}
 }
 
