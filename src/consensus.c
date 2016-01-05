@@ -52,13 +52,29 @@ void on_battery_state_change(BatteryChargeState charge)
 	}
 }
 
+static bool should_hide_no_bluetooth()
+{
+	if(persist_exists(PERSIST_PREF_SHOW_NO_CONNECTION)) {
+		return !persist_read_bool(PERSIST_PREF_SHOW_NO_CONNECTION);
+	}
+	else {
+		return false;
+	}
+}
+
 void on_connection_change(bool connected)
 {
-	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer), connected);
+	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
+	                 connected || should_hide_no_bluetooth());
 }
 
 void ignore_connection_change(bool connected)
 {
+}
+
+static void update_connection_now()
+{
+	on_connection_change(connection_service_peek_pebble_app_connection());
 }
 
 static void update_time_now()
@@ -89,6 +105,13 @@ static void parse_preferences(DictionaryIterator *iterator)
 		tick_timer_service_subscribe(update_time_interval(show_second), on_tick);
 		face_layer_set_show_second(face_layer, show_second);
 		update_time_now();
+	}
+
+	Tuple *show_no_connection_tuple = dict_find(iterator, KEY_PREF_SHOW_NO_CONNECTION);
+	if(show_no_connection_tuple) {
+		const bool show_no_connection = show_no_connection_tuple->value->uint8;
+		persist_write_bool(PERSIST_PREF_SHOW_NO_CONNECTION, show_no_connection);
+		update_connection_now();
 	}
 }
 
@@ -146,7 +169,7 @@ static void init_layers(void)
 	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
 	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
 	// Immediately hide or show the icon
-	on_connection_change(connection_service_peek_pebble_app_connection());
+	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
 	BatteryChargeState charge_state = battery_state_service_peek();
