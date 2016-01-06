@@ -16,6 +16,26 @@ static BitmapLayer *no_bluetooth_layer = NULL;
 static GDrawCommandImage *ticks_image = NULL;
 static GBitmap *no_bluetooth_image = NULL;
 
+static bool persist_read_bool_default(uint32_t key, bool default_value)
+{
+	if(persist_exists(key)) {
+		return persist_read_bool(key);
+	}
+	else {
+		return default_value;
+	}
+}
+
+static bool should_vibrate_on_hour()
+{
+	return persist_read_bool_default(PERSIST_PREF_VIBRATE_ON_HOUR, true);
+}
+
+static bool should_vibrate_on_disconnect()
+{
+	return persist_read_bool_default(PERSIST_PREF_VIBRATE_ON_DISCONNECT, true);
+}
+
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
@@ -27,7 +47,8 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 	}
 
 	// Vibrate once on the hour and twice at noon.
-	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
+	if(should_vibrate_on_hour() &&
+	   tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
 		static const uint32_t vibe_pattern[] = {100, 250, 100};
 		VibePattern vibe = {
 			.durations = vibe_pattern,
@@ -54,18 +75,23 @@ void on_battery_state_change(BatteryChargeState charge)
 
 static bool should_hide_no_bluetooth()
 {
-	if(persist_exists(PERSIST_PREF_SHOW_NO_CONNECTION)) {
-		return !persist_read_bool(PERSIST_PREF_SHOW_NO_CONNECTION);
-	}
-	else {
-		return false;
-	}
+	return !persist_read_bool_default(PERSIST_PREF_SHOW_NO_CONNECTION, true);
 }
 
 void on_connection_change(bool connected)
 {
 	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
 	                 connected || should_hide_no_bluetooth());
+
+	if(!connected && should_vibrate_on_disconnect()) {
+		static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
+		static const VibePattern vibe = {
+			.durations = vibe_pattern,
+			.num_segments = NELEM(vibe_pattern)
+		};
+
+		vibes_enqueue_custom_pattern(vibe);
+	}
 }
 
 void ignore_connection_change(bool connected)
@@ -86,8 +112,7 @@ static void update_time_now()
 
 static bool should_show_second()
 {
-	// This will return false if the key does not exist, which is the desired default.
-	return persist_read_bool(KEY_PREF_SHOW_SECOND_HAND);
+	return persist_read_bool_default(KEY_PREF_SHOW_SECOND_HAND, false);
 }
 
 static TimeUnits update_time_interval(bool show_sec)
@@ -112,6 +137,18 @@ static void parse_preferences(DictionaryIterator *iterator)
 		const bool show_no_connection = show_no_connection_tuple->value->uint8;
 		persist_write_bool(PERSIST_PREF_SHOW_NO_CONNECTION, show_no_connection);
 		update_connection_now();
+	}
+
+	Tuple *vibrate_on_hour_tuple = dict_find(iterator, KEY_PREF_VIBRATE_ON_HOUR);
+	if(vibrate_on_hour_tuple) {
+		const bool vibrate_on_hour = vibrate_on_hour_tuple->value->uint8;
+		persist_write_bool(PERSIST_PREF_VIBRATE_ON_HOUR, vibrate_on_hour);
+	}
+
+	Tuple *vibrate_on_disconnect_tuple = dict_find(iterator, KEY_PREF_VIBRATE_ON_DISCONNECT);
+	if(vibrate_on_disconnect_tuple) {
+		const bool vibrate_on_disconnect = vibrate_on_hour_tuple->value->uint8;
+		persist_write_bool(PERSIST_PREF_VIBRATE_ON_DISCONNECT, vibrate_on_disconnect);
 	}
 }
 

@@ -134,7 +134,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 	var dict = {
 		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['disp_second_hand']),
-		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['disp_no_connection'])
+		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['disp_no_connection']),
+		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
+		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect'])
 	};
 
 	// Send to watchapp
