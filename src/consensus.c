@@ -3,6 +3,8 @@
 #include "constants.h"
 
 #include "face_layer.h"
+#include "preferences.h"
+
 #include "complications/complication.h"
 
 static Window *window = NULL;
@@ -15,26 +17,6 @@ static BitmapLayer *no_bluetooth_layer = NULL;
 
 static GDrawCommandImage *ticks_image = NULL;
 static GBitmap *no_bluetooth_image = NULL;
-
-static bool persist_read_bool_default(uint32_t key, bool default_value)
-{
-	if(persist_exists(key)) {
-		return persist_read_bool(key);
-	}
-	else {
-		return default_value;
-	}
-}
-
-static bool should_vibrate_on_hour()
-{
-	return persist_read_bool_default(PERSIST_PREF_VIBRATE_ON_HOUR, true);
-}
-
-static bool should_vibrate_on_disconnect()
-{
-	return persist_read_bool_default(PERSIST_PREF_VIBRATE_ON_DISCONNECT, true);
-}
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
@@ -73,11 +55,6 @@ void on_battery_state_change(BatteryChargeState charge)
 	}
 }
 
-static bool should_hide_no_bluetooth()
-{
-	return !persist_read_bool_default(PERSIST_PREF_SHOW_NO_CONNECTION, true);
-}
-
 void on_connection_change(bool connected)
 {
 	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
@@ -110,46 +87,19 @@ static void update_time_now()
 	on_tick(tick_time, MINUTE_UNIT);
 }
 
-static bool should_show_second()
-{
-	return persist_read_bool_default(KEY_PREF_SHOW_SECOND_HAND, false);
-}
-
 static TimeUnits update_time_interval(bool show_sec)
 {
 	return show_sec ? SECOND_UNIT : MINUTE_UNIT;
 }
 
-static void parse_preferences(DictionaryIterator *iterator)
+static void on_preferences_in(DictionaryIterator *iterator)
 {
-	Tuple *show_second_tuple = dict_find(iterator, KEY_PREF_SHOW_SECOND_HAND);
-	if(show_second_tuple) {
-		const bool show_second = show_second_tuple->value->uint8;
-		persist_write_bool(PERSIST_PREF_SHOW_SECOND_HAND, show_second);
+	parse_preferences(iterator);
 
-		tick_timer_service_subscribe(update_time_interval(show_second), on_tick);
-		face_layer_set_show_second(face_layer, show_second);
-		update_time_now();
-	}
+	face_layer_set_show_second(face_layer, should_show_second());
+	update_time_now();
 
-	Tuple *show_no_connection_tuple = dict_find(iterator, KEY_PREF_SHOW_NO_CONNECTION);
-	if(show_no_connection_tuple) {
-		const bool show_no_connection = show_no_connection_tuple->value->uint8;
-		persist_write_bool(PERSIST_PREF_SHOW_NO_CONNECTION, show_no_connection);
-		update_connection_now();
-	}
-
-	Tuple *vibrate_on_hour_tuple = dict_find(iterator, KEY_PREF_VIBRATE_ON_HOUR);
-	if(vibrate_on_hour_tuple) {
-		const bool vibrate_on_hour = vibrate_on_hour_tuple->value->uint8;
-		persist_write_bool(PERSIST_PREF_VIBRATE_ON_HOUR, vibrate_on_hour);
-	}
-
-	Tuple *vibrate_on_disconnect_tuple = dict_find(iterator, KEY_PREF_VIBRATE_ON_DISCONNECT);
-	if(vibrate_on_disconnect_tuple) {
-		const bool vibrate_on_disconnect = vibrate_on_hour_tuple->value->uint8;
-		persist_write_bool(PERSIST_PREF_VIBRATE_ON_DISCONNECT, vibrate_on_disconnect);
-	}
+	update_connection_now();
 }
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
@@ -163,7 +113,7 @@ void on_appmessage_in(DictionaryIterator *iterator, void *context)
 		}
 	}
 
-	parse_preferences(iterator);
+	on_preferences_in(iterator);
 }
 
 void on_appmessage_in_dropped(AppMessageResult reason, void *context)
