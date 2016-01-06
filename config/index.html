@@ -44,6 +44,28 @@
     </div>
 
     <div class='item-container'>
+      <div class='item-container-header'>Notifications</div>
+      <div class='item-container-content'>
+        <label class='item'>
+          Vibrate on the hour
+          <input id='vibrate_on_hour' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Briefly vibrate once at the top of every hour, and twice at noon and midnight.
+      </div>
+      <div class='item-container-content'>
+        <label class='item'>
+          Vibrate on Bluetooth disconnection
+          <input id='vibrate_on_disconnect' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Vibrate when the watch becomes disconnected from the phone.
+      </div>
+    </div>
+
+    <div class='item-container'>
       <div class='button-container'>
         <input id='submit_button' type='button' class='item-button' value='SAVE'>
       </div>
@@ -64,7 +86,9 @@
 
     return [
       cfgElement('disp_second_hand', 'checked', false),
-      cfgElement('disp_no_connection', 'checked', true)
+      cfgElement('disp_no_connection', 'checked', true),
+      cfgElement('vibrate_on_hour', 'checked', true),
+      cfgElement('vibrate_on_disconnect', 'checked', true)
     ];
   }
 
