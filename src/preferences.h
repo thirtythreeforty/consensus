@@ -10,4 +10,7 @@ bool should_show_second();
 
 void parse_preferences(DictionaryIterator *iterator);
 
+bool persist_watch_was_connected();
+void persist_watch_is_connected(bool connected);
+
 #endif

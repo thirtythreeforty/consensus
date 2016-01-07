@@ -49,3 +49,13 @@ void parse_preferences(DictionaryIterator *iterator)
 	update_bool_preference(iterator, KEY_PREF_VIBRATE_ON_DISCONNECT,
 	                                 PERSIST_PREF_VIBRATE_ON_DISCONNECT);
 }
+
+bool persist_watch_was_connected()
+{
+	return persist_read_bool_default(PERSIST_STATUS_WATCH_CONNECTED, true);
+}
+
+void persist_watch_is_connected(bool connected)
+{
+	persist_write_bool(PERSIST_STATUS_WATCH_CONNECTED, connected);
+}
