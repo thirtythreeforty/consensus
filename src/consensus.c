@@ -102,7 +102,10 @@ static void on_preferences_in(DictionaryIterator *iterator)
 {
 	parse_preferences(iterator);
 
-	face_layer_set_show_second(face_layer, should_show_second());
+	const bool show_second = should_show_second();
+	const TimeUnits units = update_time_interval(show_second);
+	tick_timer_service_subscribe(units, on_tick);
+	face_layer_set_show_second(face_layer, show_second);
 	update_time_now();
 
 	update_connection_now();
