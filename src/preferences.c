@@ -26,7 +26,7 @@ bool should_hide_no_bluetooth()
 
 bool should_show_second()
 {
-	return persist_read_bool_default(KEY_PREF_SHOW_SECOND_HAND, false);
+	return persist_read_bool_default(PERSIST_PREF_SHOW_SECOND_HAND, false);
 }
 
 static void update_bool_preference(DictionaryIterator *iter, uint32_t dict_key, uint32_t persist_key)
