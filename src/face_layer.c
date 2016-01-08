@@ -88,21 +88,15 @@ FaceLayer *face_layer_create(GRect frame)
 
 	GPoint center = grect_center_point(&frame);
 
-	// Create the hands.  Go ahead and set the initial scale so that there's no
-	// flicker of large hands.  Note that this means clients must call
-	// face_layer_animate_in at some point to get everything animated in.
-
+	// Create the hands
 	face_layer_data->hour_path = scalable_path_create(&hour_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->hour_path), center);
-	scalable_path_scale(face_layer_data->hour_path, 0);
 
 	face_layer_data->minute_path = scalable_path_create(&minute_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->minute_path), center);
-	scalable_path_scale(face_layer_data->minute_path, 0);
 
 	face_layer_data->second_path = scalable_path_create(&second_hand_path);
 	gpath_move_to(scalable_path_get_path(face_layer_data->second_path), center);
-	scalable_path_scale(face_layer_data->second_path, 0);
 
 	return (FaceLayer*)layer;
 }
@@ -208,6 +202,12 @@ static void face_layer_radius_anim_update(Animation *anim, AnimationProgress dis
 	layer_mark_dirty(layer);
 }
 
+static void face_layer_radius_anim_setup(Animation *anim)
+{
+	// Set the initial scale so there's no flicker of large hands.
+	face_layer_radius_anim_update(anim, 0);
+}
+
 static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_normalized)
 {
 	FaceLayer *face_layer = animation_get_context(anim);
@@ -235,7 +235,9 @@ static void face_layer_roll_anim_update(Animation *anim, AnimationProgress dist_
 static Animation* face_layer_make_zoom_anim(FaceLayer *face_layer)
 {
 	static const AnimationImplementation zoom_anim_impl = {
-		.update = face_layer_radius_anim_update
+		.setup = face_layer_radius_anim_setup,
+		.update = face_layer_radius_anim_update,
+		.teardown = NULL,
 	};
 
 	return face_layer_make_anim(1000, 200,
@@ -247,7 +249,9 @@ static Animation* face_layer_make_zoom_anim(FaceLayer *face_layer)
 static Animation* face_layer_make_roll_anim(FaceLayer *face_layer)
 {
 	static const AnimationImplementation roll_anim_impl = {
-		.update = face_layer_roll_anim_update
+		.setup = NULL,
+		.update = face_layer_roll_anim_update,
+		.teardown = NULL,
 	};
 
 	return face_layer_make_anim(1000, 200,
