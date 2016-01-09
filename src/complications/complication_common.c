@@ -54,14 +54,19 @@ void base_complication_update_2(Layer *layer, GContext *ctx,
 Animation* base_complication_animate_in(const AnimationImplementation *impl,
                                         const AnimationHandlers *handlers, void *ctx)
 {
+	Animation *anim = animation_create();
+	animation_set_implementation(anim, impl);
+	return base_complication_setup_animation(anim, handlers, ctx);
+}
+
+Animation* base_complication_setup_animation(Animation *anim, const AnimationHandlers *handlers, void *ctx)
+{
 	static const unsigned int duration = 700;
 	static const unsigned int delay = 200;
 
-	Animation *anim = animation_create();
 	animation_set_duration(anim, duration);
 	animation_set_delay(anim, delay);
 	animation_set_curve(anim, AnimationCurveEaseInOut);
-	animation_set_implementation(anim, impl);
 	animation_set_handlers(anim, *handlers, ctx);
 
 	return anim;

@@ -7,11 +7,10 @@ typedef struct BatteryComplication BatteryComplication;
 typedef struct DateComplication DateComplication;
 typedef struct WeatherComplication WeatherComplication;
 
-BatteryComplication* battery_complication_create(GRect frame, BatteryChargeState *charge);
+BatteryComplication* battery_complication_create(GRect frame);
 void battery_complication_destroy(BatteryComplication *complication);
 Layer* battery_complication_get_layer(BatteryComplication *complication);
-void battery_complication_state_changed(BatteryComplication *complication, BatteryChargeState *charge);
-Animation* battery_complication_animate_in(BatteryComplication *complication);
+void battery_complication_state_changed(BatteryComplication *complication, const BatteryChargeState *charge);
 
 DateComplication* date_complication_create(GRect frame);
 void date_complication_destroy(DateComplication *complication);

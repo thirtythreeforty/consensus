@@ -168,15 +168,15 @@ static void init_layers(void)
 	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
-	BatteryChargeState charge_state = battery_state_service_peek();
+	const BatteryChargeState charge_state = battery_state_service_peek();
 	const GRect battery_complication_position =
 		{{ .x = center.x - complication_size - complication_offset_x,
 		   .y = center.y - complication_size / 2 },
 		 { .h = complication_size,
 		   .w = complication_size }};
-	battery_complication = battery_complication_create(battery_complication_position, &charge_state);
+	battery_complication = battery_complication_create(battery_complication_position);
 	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
-	animation_schedule(battery_complication_animate_in(battery_complication));
+	battery_complication_state_changed(battery_complication, &charge_state);
 
 	const GRect date_complication_position =
 		{{ .x = center.x + complication_offset_x,
