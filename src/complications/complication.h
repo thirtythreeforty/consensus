@@ -30,10 +30,9 @@ typedef struct {
 void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
 void weather_from_persist(WeatherData *wdata);
 void weather_to_persist(const WeatherData *wdata);
-WeatherComplication* weather_complication_create(GRect frame, const WeatherData *wdata);
+WeatherComplication* weather_complication_create(GRect frame);
 void weather_complication_destroy(WeatherComplication *complication);
 Layer* weather_complication_get_layer(WeatherComplication *complication);
 void weather_complication_weather_changed(WeatherComplication *complication, const WeatherData *wdata);
-Animation* weather_complication_animate_in(WeatherComplication *complication);
 
 #endif
