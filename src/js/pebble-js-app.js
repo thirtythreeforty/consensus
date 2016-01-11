@@ -2,15 +2,15 @@ var myAPIKey = 'cc0cec2cf4c3ec9a8199933f34ad71ec';
 
 // Friendly names of Pebble app's icons, for KEY_WEATHER_ICON
 var pebbleIcons = {
-	"generic": 1,
-	"sunny": 2,
-	"cloudy": 3,
-	"partly_cloudy": 4,
-	"rain_light": 5,
-	"rain_heavy": 6,
-	"rain_and_snow": 7,
-	"snow_light": 8,
-	"snow_heavy": 9
+	"generic": 0,
+	"sunny": 1,
+	"cloudy": 2,
+	"partly_cloudy": 3,
+	"rain_light": 4,
+	"rain_heavy": 5,
+	"rain_and_snow": 6,
+	"snow_light": 7,
+	"snow_heavy": 8
 };
 
 function xhrRequest(url, type, callback) {
