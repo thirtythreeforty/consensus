@@ -13,6 +13,12 @@ static Layer *background_layer = NULL;
 static DateComplication *date_complication = NULL;
 static BatteryComplication *battery_complication = NULL;
 static WeatherComplication *weather_complication = NULL;
+
+static enum {
+	WAS_CONNECTED_INIT = 0,
+	WAS_CONNECTED_FALSE,
+	WAS_CONNECTED_TRUE
+} was_connected = WAS_CONNECTED_INIT;
 static BitmapLayer *no_bluetooth_layer = NULL;
 
 static GDrawCommandImage *ticks_image = NULL;
@@ -60,7 +66,9 @@ void on_connection_change(bool connected)
 	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
 	                 connected || should_hide_no_bluetooth());
 
-	if(!connected && should_vibrate_on_disconnect()) {
+	const bool became_disconnected = was_connected == WAS_CONNECTED_TRUE && !connected;
+
+	if(became_disconnected && should_vibrate_on_disconnect()) {
 		static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
 		static const VibePattern vibe = {
 			.durations = vibe_pattern,
@@ -69,6 +77,8 @@ void on_connection_change(bool connected)
 
 		vibes_enqueue_custom_pattern(vibe);
 	}
+
+	was_connected = connected ? WAS_CONNECTED_TRUE : WAS_CONNECTED_FALSE;
 }
 
 void ignore_connection_change(bool connected)
