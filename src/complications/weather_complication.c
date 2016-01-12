@@ -320,7 +320,7 @@ static void weather_complication_set_angles(void *subject, WeatherAngles angles)
 
 static inline int32_t int32_interpolate(uint32_t distance, int32_t from, int32_t to)
 {
-	return from + ((distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+	return from + (((int32_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 }
 
 static void property_animation_update_weather_angles(PropertyAnimation *property_animation, const uint32_t distance)
