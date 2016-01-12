@@ -60,11 +60,7 @@ void on_connection_change(bool connected)
 	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
 	                 connected || should_hide_no_bluetooth());
 
-	const bool became_disconnected =
-		persist_watch_was_connected() &&
-		!connected;
-
-	if(became_disconnected && should_vibrate_on_disconnect()) {
+	if(!connected && should_vibrate_on_disconnect()) {
 		static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
 		static const VibePattern vibe = {
 			.durations = vibe_pattern,
@@ -73,8 +69,6 @@ void on_connection_change(bool connected)
 
 		vibes_enqueue_custom_pattern(vibe);
 	}
-
-	persist_watch_is_connected(connected);
 }
 
 void ignore_connection_change(bool connected)
