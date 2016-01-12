@@ -162,7 +162,7 @@ static void weather_complication_schedule_refresh(WeatherComplicationData *data)
 
 	time_t now = time(NULL);
 
-	static const unsigned int refresh_interval = 60 * 60 * 3;
+	static const unsigned int refresh_interval = 60 * 60 * 2;
 	const unsigned int slight_future = now + 10;
 
 	const unsigned int next_refresh_time =
