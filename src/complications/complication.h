@@ -94,6 +94,32 @@ public:
 		type = complication_type_map<void>;
 	}
 };
+
+#include "boulder.h"
+
+class Complication
+{
+	Boulder::Layer blayer;
+
+public:
+	virtual ~Complication();
+
+	const Boulder::Layer& layer() const { return blayer; }
+};
+
+class BatteryComplication: Complication
+{
+	bool animating;
+
+	BatteryChargeState requested_state;
+
+	uint32_t angle;
+	GDrawCommandImage *icon;
+
+public:
+	BatteryComplication();
+	virtual ~BatteryComplication();
+};
 #endif
 
 #endif
