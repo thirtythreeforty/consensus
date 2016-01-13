@@ -10,9 +10,7 @@
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
 static Layer *background_layer = NULL;
-static DateComplication *date_complication = NULL;
-static BatteryComplication *battery_complication = NULL;
-static WeatherComplication *weather_complication = NULL;
+static AbstractComplication complications[3];
 
 static enum {
 	WAS_CONNECTED_INIT = 0,
@@ -24,15 +22,43 @@ static BitmapLayer *no_bluetooth_layer = NULL;
 static GDrawCommandImage *ticks_image = NULL;
 static GBitmap *no_bluetooth_image = NULL;
 
+static void update_date_complications(struct tm *tick_time)
+{
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		DateComplication *date_complication = abstract_complication_to_date(&complications[i]);
+		if(date_complication) {
+			date_complication_time_changed(date_complication, tick_time);
+		}
+	}
+}
+
+static void update_battery_complications(BatteryChargeState *state)
+{
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		BatteryComplication *battery_complication = abstract_complication_to_battery(&complications[i]);
+		if(battery_complication) {
+			battery_complication_state_changed(battery_complication, state);
+		}
+	}
+}
+
+static void update_weather_complications(WeatherData *wdata)
+{
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		WeatherComplication *weather_complication = abstract_complication_to_weather(&complications[i]);
+		if(weather_complication) {
+			weather_complication_weather_changed(weather_complication, wdata);
+		}
+	}
+}
+
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
 		face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
 	}
 
-	if(date_complication) {
-		date_complication_time_changed(date_complication, tick_time);
-	}
+	update_date_complications(tick_time);
 
 	// Vibrate once on the hour and twice at noon.
 	if(should_vibrate_on_hour() &&
@@ -56,9 +82,7 @@ void on_tap(AccelAxisType axis, int32_t direction)
 
 void on_battery_state_change(BatteryChargeState charge)
 {
-	if(battery_complication) {
-		battery_complication_state_changed(battery_complication, &charge);
-	}
+	update_battery_complications(&charge);
 }
 
 void on_connection_change(bool connected)
@@ -117,13 +141,11 @@ static void on_preferences_in(DictionaryIterator *iterator)
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
 {
-	if(weather_complication) {
-		WeatherData wdata;
-		weather_from_appmessage(iterator, &wdata);
-		if(wdata.valid) {
-			weather_complication_weather_changed(weather_complication, &wdata);
-			weather_to_persist(&wdata);
-		}
+	WeatherData wdata;
+	weather_from_appmessage(iterator, &wdata);
+	if(wdata.valid) {
+		update_weather_complications(&wdata);
+		weather_to_persist(&wdata);
 	}
 
 	on_preferences_in(iterator);
@@ -178,7 +200,8 @@ static void init_layers(void)
 		   .y = center.y - complication_size / 2 },
 		 { .h = complication_size,
 		   .w = complication_size }};
-	battery_complication = battery_complication_create(battery_complication_position);
+	BatteryComplication *battery_complication = battery_complication_create(battery_complication_position);
+	abstract_complication_from_battery(&complications[0], battery_complication);
 	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
 	battery_complication_state_changed(battery_complication, &charge_state);
 
@@ -187,7 +210,8 @@ static void init_layers(void)
 		   .y = center.y - complication_size / 2 },
 		 { .h = complication_size,
 		   .w = complication_size }};
-	date_complication = date_complication_create(date_complication_position);
+	DateComplication *date_complication = date_complication_create(date_complication_position);
+	abstract_complication_from_date(&complications[1], date_complication);
 	layer_add_child(window_get_root_layer(window), date_complication_get_layer(date_complication));
 	animation_schedule(date_complication_animate_in(date_complication));
 
@@ -198,8 +222,9 @@ static void init_layers(void)
 		   .w = complication_size }};
 	WeatherData wdata;
 	weather_from_persist(&wdata);
-	weather_complication = weather_complication_create(weather_complication_position);
+	WeatherComplication *weather_complication = weather_complication_create(weather_complication_position);
 	layer_add_child(window_get_root_layer(window), weather_complication_get_layer(weather_complication));
+	abstract_complication_from_weather(&complications[2], weather_complication);
 	weather_complication_weather_changed(weather_complication, &wdata);
 
 	face_layer = face_layer_create(size);
@@ -212,9 +237,9 @@ static void init_layers(void)
 static void deinit_layers(void)
 {
 	face_layer_destroy(face_layer);
-	weather_complication_destroy(weather_complication);
-	date_complication_destroy(date_complication);
-	battery_complication_destroy(battery_complication);
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		abstract_complication_destroy(&complications[i]);
+	}
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
 	layer_destroy(background_layer);
