@@ -26,7 +26,7 @@ def configure(ctx):
         e.CXX = cxx
         e.CXXFLAGS = list(ctx.env.CFLAGS)
         e.CXXFLAGS.remove('-std=c99')
-        e.CXXFLAGS.extend(['-c', '-std=c++11', '-fPIE', '-fno-unwind-tables', '-fno-exceptions'])
+        e.CXXFLAGS.extend(['-c', '-std=c++14', '-fPIE', '-fno-unwind-tables', '-fno-exceptions'])
         e.CXX_TGT_F = ['-o']
         e.AS = cxx
 
