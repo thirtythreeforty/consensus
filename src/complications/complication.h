@@ -71,13 +71,13 @@ inline void abstract_complication_destroy(AbstractComplication *abs_complication
 	case COMPLICATION_TYPE_NONE:
 		break;
 	case COMPLICATION_TYPE_BATTERY:
-		battery_complication_destroy(abs_complication->complication);
+		battery_complication_destroy((BatteryComplication*)abs_complication->complication);
 		break;
 	case COMPLICATION_TYPE_DATE:
-		date_complication_destroy(abs_complication->complication);
+		date_complication_destroy((DateComplication*)abs_complication->complication);
 		break;
 	case COMPLICATION_TYPE_WEATHER:
-		weather_complication_destroy(abs_complication->complication);
+		weather_complication_destroy((WeatherComplication*)abs_complication->complication);
 		break;
 	}
 	abs_complication->type = COMPLICATION_TYPE_NONE;

@@ -1,4 +1,6 @@
+extern "C" {
 #include <pebble.h>
+
 #include "common.h"
 #include "constants.h"
 
@@ -6,6 +8,7 @@
 #include "preferences.h"
 
 #include "complications/complication.h"
+}
 
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
@@ -66,7 +69,7 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 		static const uint32_t vibe_pattern[] = {100, 250, 100};
 		VibePattern vibe = {
 			.durations = vibe_pattern,
-			.num_segments = tick_time->tm_hour % 12 == 0 ? 3 : 1
+			.num_segments = static_cast<unsigned int>(tick_time->tm_hour % 12 == 0 ? 3 : 1)
 		};
 
 		vibes_enqueue_custom_pattern(vibe);
@@ -160,7 +163,7 @@ static void update_background(Layer *layer, GContext *ctx)
 {
 	GRect rect = layer_get_bounds(layer);
 	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_rect(ctx, rect, 0, 0);
+	graphics_fill_rect(ctx, rect, 0, GCornerNone);
 
 	gdraw_command_image_draw(ctx, ticks_image, GPointZero);
 }
@@ -177,49 +180,50 @@ static void init_layers(void)
 	layer_set_update_proc(background_layer, update_background);
 	layer_add_child(window_get_root_layer(window), background_layer);
 
-	const unsigned int complication_size = 51;
-	const unsigned int complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
-	const unsigned int complication_offset_y = 15;
+	const int16_t complication_size = 51;
+	const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
+	const int16_t complication_offset_y = 15;
 
 	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
 	const GRect bluetooth_layer_location =
-		{{ .x = center.x - bluetooth_image_size.size.w / 2,
-		   .y = center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2 },
-		 { .h = bluetooth_image_size.size.h,
-		   .w = bluetooth_image_size.size.w }};
+		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
+		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
+		      (int16_t)bluetooth_image_size.size.h,
+		      (int16_t)bluetooth_image_size.size.w);
 	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
 	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
 	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
+
 	// Immediately hide or show the icon
 	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
 	const BatteryChargeState charge_state = battery_state_service_peek();
 	const GRect battery_complication_position =
-		{{ .x = center.x - complication_size - complication_offset_x,
-		   .y = center.y - complication_size / 2 },
-		 { .h = complication_size,
-		   .w = complication_size }};
+		GRect((int16_t)(center.x - complication_size - complication_offset_x),
+		      (int16_t)(center.y - complication_size / 2),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
 	BatteryComplication *battery_complication = battery_complication_create(battery_complication_position);
 	abstract_complication_from_battery(&complications[0], battery_complication);
 	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
 	battery_complication_state_changed(battery_complication, &charge_state);
 
 	const GRect date_complication_position =
-		{{ .x = center.x + complication_offset_x,
-		   .y = center.y - complication_size / 2 },
-		 { .h = complication_size,
-		   .w = complication_size }};
+		GRect((int16_t)(center.x + complication_offset_x),
+		      (int16_t)(center.y - complication_size / 2),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
 	DateComplication *date_complication = date_complication_create(date_complication_position);
 	abstract_complication_from_date(&complications[1], date_complication);
 	layer_add_child(window_get_root_layer(window), date_complication_get_layer(date_complication));
 	animation_schedule(date_complication_animate_in(date_complication));
 
 	const GRect weather_complication_position =
-		{{ .x = center.x - complication_size / 2,
-		   .y = center.y + complication_offset_y},
-		 { .h = complication_size,
-		   .w = complication_size }};
+		GRect((int16_t)(center.x - complication_size / 2),
+		      (int16_t)(center.y + complication_offset_y),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
 	WeatherData wdata;
 	weather_from_persist(&wdata);
 	WeatherComplication *weather_complication = weather_complication_create(weather_complication_position);
@@ -246,22 +250,27 @@ static void deinit_layers(void)
 	free(ticks_image);
 }
 
-static void main_window_load(Window *window)
+extern "C" void main_window_load(Window *window)
 {
 	init_layers();
 }
 
-static void main_window_unload(Window *window)
+extern "C" void main_window_unload(Window *window)
 {
 	deinit_layers();
 }
 
 static void init(void)
 {
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		complications[i].type = COMPLICATION_TYPE_NONE;
+	}
 	window = window_create();
 	static const WindowHandlers h = {
-		.load = main_window_load,
-		.unload = main_window_unload,
+		main_window_load,
+		NULL,
+		NULL,
+		main_window_unload
 	};
 	window_set_window_handlers(window, h);
 	window_stack_push(window, true);
