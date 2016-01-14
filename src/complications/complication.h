@@ -7,14 +7,8 @@ extern "C" {
 
 #include <pebble.h>
 
-typedef struct BatteryComplication BatteryComplication;
 typedef struct DateComplication DateComplication;
 typedef struct WeatherComplication WeatherComplication;
-
-BatteryComplication* battery_complication_create(GRect frame);
-void battery_complication_destroy(BatteryComplication *complication);
-Layer* battery_complication_get_layer(BatteryComplication *complication);
-void battery_complication_state_changed(BatteryComplication *complication, const BatteryChargeState *charge);
 
 DateComplication* date_complication_create(GRect frame);
 void date_complication_destroy(DateComplication *complication);
@@ -42,6 +36,40 @@ void weather_complication_weather_changed(WeatherComplication *complication, con
 #ifdef __cplusplus
 } // extern "C"
 
+#include <experimental/optional>
+
+#include "boulder.h"
+
+class Complication: public Boulder::Layer
+{
+protected:
+	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
+};
+
+class BatteryComplication: public Complication
+{
+	bool animating;
+
+	BatteryChargeState requested_state;
+
+	uint32_t angle;
+	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+
+public:
+	explicit BatteryComplication(GRect frame);
+
+	void state_changed(const BatteryChargeState *state);
+	void update(GContext *ctx) override;
+
+private:
+	static void spinup_started(Animation *anim, void *context);
+	static void spinup_stopped(Animation *anim, bool finished, void *context);
+
+	static uint32_t angle_get(void *subject);
+	static void angle_set(void *subject, uint32_t angle);
+	void animate_to(uint32_t angle);
+};
+
 template<typename T> constexpr uint8_t complication_type_map;
 template<> constexpr uint8_t complication_type_map<void> = 0;
 template<> constexpr uint8_t complication_type_map<BatteryComplication> = 1;
@@ -53,14 +81,14 @@ class AbstractComplication
 	void *complication;
 	uint8_t type;
 
-public:
-	AbstractComplication() : type(complication_type_map<void>) {}
-
 	template<typename T>
 	AbstractComplication(T *ptr)
 		: complication(ptr)
 		, type(complication_type_map<T>)
 	{}
+
+public:
+	AbstractComplication() : type(complication_type_map<void>) {}
 
 	template<typename T>
 	auto downcast() -> T* {
@@ -82,7 +110,7 @@ public:
 		case complication_type_map<void>:
 			break;
 		case complication_type_map<BatteryComplication>:
-			battery_complication_destroy(downcast<BatteryComplication>());
+			delete static_cast<BatteryComplication*>(complication);
 			break;
 		case complication_type_map<DateComplication>:
 			date_complication_destroy(downcast<DateComplication>());
@@ -93,32 +121,6 @@ public:
 		}
 		type = complication_type_map<void>;
 	}
-};
-
-#include "boulder.h"
-
-class Complication
-{
-	Boulder::Layer blayer;
-
-public:
-	virtual ~Complication();
-
-	const Boulder::Layer& layer() const { return blayer; }
-};
-
-class BatteryComplication: Complication
-{
-	bool animating;
-
-	BatteryChargeState requested_state;
-
-	uint32_t angle;
-	GDrawCommandImage *icon;
-
-public:
-	BatteryComplication();
-	virtual ~BatteryComplication();
 };
 #endif
 

@@ -18,21 +18,15 @@ namespace Boulder {
 class Layer {
 	::Layer* _layer;
 
-	static void update_stub(::Layer *layer, GContext *ctx) {
-		Layer* b_layer = *static_cast<Layer**>(layer_get_data(layer));
-		b_layer->update(ctx);
-	}
-
-	operator ::Layer*() {
-		return _layer;
-	}
-
 public:
 	explicit Layer(GRect frame)
 		: _layer(layer_create_with_data(frame, sizeof(Layer*)))
 	{
-		layer_set_update_proc(_layer, Layer::update_stub);
 		*static_cast<Layer**>(layer_get_data(_layer)) = this;
+		layer_set_update_proc(_layer, [](::Layer *layer, GContext *ctx){
+			Layer* b_layer = *static_cast<Layer**>(layer_get_data(layer));
+			b_layer->update(ctx);
+		});
 	}
 	virtual ~Layer() {
 		if(_layer) layer_destroy(_layer);
@@ -58,8 +52,48 @@ public:
 	B_LAYER_METHOD(set_clips);
 
 	#undef B_LAYER_METHOD
+
+	operator ::Layer*() {
+		return _layer;
+	}
 protected:
 	virtual void update(GContext *ctx) {}
+};
+
+class GDrawCommandImage {
+	::GDrawCommandImage* _image;
+
+public:
+	explicit GDrawCommandImage(uint32_t resource_id)
+		: _image(gdraw_command_image_create_with_resource(resource_id))
+	{}
+	GDrawCommandImage(GDrawCommandImage& that)
+		: _image(gdraw_command_image_clone(that._image))
+	{}
+	~GDrawCommandImage() {
+		gdraw_command_image_destroy(_image);
+	}
+
+	void draw(::GContext *ctx, ::GPoint offset) const {
+		gdraw_command_image_draw(ctx, _image, offset);
+	}
+
+	#define B_GDRAWCOMMANDIMAGE_METHOD(M) \
+		B_PROXY_METHOD(M, gdraw_command_image_, _image)
+
+	B_GDRAWCOMMANDIMAGE_METHOD(get_bounds_size);
+	B_GDRAWCOMMANDIMAGE_METHOD(set_bounds_size);
+
+	template<typename F>
+	void iterate(F functor) {
+		gdraw_command_list_iterate(
+			gdraw_command_image_get_command_list(_image),
+			[](GDrawCommand *command, uint32_t index, void *ctx) -> bool {
+				return (*static_cast<F*>(ctx))(command, index);
+			},
+			&functor
+		);
+	}
 };
 
 }

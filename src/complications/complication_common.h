@@ -1,4 +1,11 @@
+#ifndef COMPLICATION_COMMON_H
+#define COMPLICATION_COMMON_H
+
 #include "complication.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void base_complication_update_1(Layer *layer, GContext *ctx,
                                 GColor color, int32_t max_angle);
@@ -10,3 +17,9 @@ Animation* base_complication_animate_in(const AnimationImplementation *impl,
 
 Animation* base_complication_setup_animation(Animation *anim,
                                        const AnimationHandlers *handlers, void *ctx);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif

@@ -1,3 +1,5 @@
+#include <memory>
+
 extern "C" {
 #include <pebble.h>
 
@@ -28,7 +30,7 @@ static GBitmap *no_bluetooth_image = NULL;
 static void update_date_complications(struct tm *tick_time)
 {
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto *date_complication = complications[i].downcast<DateComplication>();
+		auto date_complication = complications[i].downcast<DateComplication>();
 		if(date_complication) {
 			date_complication_time_changed(date_complication, tick_time);
 		}
@@ -38,9 +40,9 @@ static void update_date_complications(struct tm *tick_time)
 static void update_battery_complications(BatteryChargeState *state)
 {
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto *battery_complication = complications[i].downcast<BatteryComplication>();
+		auto battery_complication = complications[i].downcast<BatteryComplication>();
 		if(battery_complication) {
-			battery_complication_state_changed(battery_complication, state);
+			battery_complication->state_changed(state);
 		}
 	}
 }
@@ -48,7 +50,7 @@ static void update_battery_complications(BatteryChargeState *state)
 static void update_weather_complications(WeatherData *wdata)
 {
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto *weather_complication = complications[i].downcast<WeatherComplication>();
+		auto weather_complication = complications[i].downcast<WeatherComplication>();
 		if(weather_complication) {
 			weather_complication_weather_changed(weather_complication, wdata);
 		}
@@ -204,10 +206,10 @@ static void init_layers(void)
 		      (int16_t)(center.y - complication_size / 2),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	BatteryComplication *battery_complication = battery_complication_create(battery_complication_position);
+	BatteryComplication *battery_complication = new BatteryComplication(battery_complication_position);
 	complications[0] = AbstractComplication::from(battery_complication);
-	layer_add_child(window_get_root_layer(window), battery_complication_get_layer(battery_complication));
-	battery_complication_state_changed(battery_complication, &charge_state);
+	layer_add_child(window_get_root_layer(window), *battery_complication);
+	battery_complication->state_changed(&charge_state);
 
 	const GRect date_complication_position =
 		GRect((int16_t)(center.x + complication_offset_x),
@@ -250,12 +252,12 @@ static void deinit_layers(void)
 	free(ticks_image);
 }
 
-extern "C" void main_window_load(Window *window)
+void main_window_load(Window *window)
 {
 	init_layers();
 }
 
-extern "C" void main_window_unload(Window *window)
+void main_window_unload(Window *window)
 {
 	deinit_layers();
 }
