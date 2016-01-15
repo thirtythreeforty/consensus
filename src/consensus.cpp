@@ -52,7 +52,7 @@ static void update_weather_complications(WeatherData *wdata)
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
 		auto weather_complication = complications[i].downcast<WeatherComplication>();
 		if(weather_complication) {
-			weather_complication_weather_changed(weather_complication, wdata);
+			weather_complication->weather_changed(*wdata);
 		}
 	}
 }
@@ -228,10 +228,10 @@ static void init_layers(void)
 		      (int16_t)complication_size);
 	WeatherData wdata;
 	weather_from_persist(&wdata);
-	WeatherComplication *weather_complication = weather_complication_create(weather_complication_position);
-	layer_add_child(window_get_root_layer(window), weather_complication_get_layer(weather_complication));
+	WeatherComplication *weather_complication = new WeatherComplication(weather_complication_position);
+	layer_add_child(window_get_root_layer(window), *weather_complication);
 	complications[2] = AbstractComplication::from(weather_complication);
-	weather_complication_weather_changed(weather_complication, &wdata);
+	weather_complication->weather_changed(wdata);
 
 	face_layer = face_layer_create(size);
 	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);

@@ -60,6 +60,23 @@ protected:
 	virtual void update(GContext *ctx) {}
 };
 
+class AppTimer {
+	::AppTimer *timer;
+
+public:
+	AppTimer(uint32_t delay_ms, void (*callback)(void*), void *ptr)
+		: timer(app_timer_register(delay_ms, callback, ptr))
+	{}
+
+	~AppTimer() {
+		app_timer_cancel(timer);
+	}
+
+	void reschedule(uint32_t new_timeout_ms) {
+		app_timer_reschedule(timer, new_timeout_ms);
+	}
+};
+
 class GDrawCommandImage {
 	::GDrawCommandImage* _image;
 

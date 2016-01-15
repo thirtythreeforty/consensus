@@ -28,10 +28,6 @@ typedef struct {
 void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
 void weather_from_persist(WeatherData *wdata);
 void weather_to_persist(const WeatherData *wdata);
-WeatherComplication* weather_complication_create(GRect frame);
-void weather_complication_destroy(WeatherComplication *complication);
-Layer* weather_complication_get_layer(WeatherComplication *complication);
-void weather_complication_weather_changed(WeatherComplication *complication, const WeatherData *wdata);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -44,6 +40,45 @@ class Complication: public Boulder::Layer
 {
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
+	~Complication() = default;
+};
+
+class WeatherComplication: public Complication
+{
+	struct WeatherAngles {
+		int32_t temp_angle;
+		int32_t humidity_angle;
+	};
+
+	WeatherAngles angles;
+	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	GPoint icon_shift;
+
+	WeatherData requested_weather;
+	bool animating;
+
+	std::experimental::optional<Boulder::AppTimer> refresh_timer;
+
+public:
+	explicit WeatherComplication(GRect frame);
+	~WeatherComplication() = default;
+
+	void weather_changed(const WeatherData &new_weather);
+
+private:
+	void update(GContext *ctx) override;
+	void animate_to(WeatherAngles angles);
+
+	void schedule_refresh();
+
+	static WeatherAngles compute_angles(const WeatherData& wdata);
+	static void request_refresh(void*);
+	static void spinup_animation_started(Animation *anim, void *context);
+	static void spinup_animation_stopped(Animation *anim, bool finished, void *context);
+	static WeatherAngles get_angles(void *subject);
+	static void set_angles(void *subject, WeatherAngles angles);
+
+	friend void property_animation_update_weather_angles(PropertyAnimation*, const uint32_t);
 };
 
 class BatteryComplication: public Complication
@@ -116,7 +151,7 @@ public:
 			date_complication_destroy(downcast<DateComplication>());
 			break;
 		case complication_type_map<WeatherComplication>:
-			weather_complication_destroy(downcast<WeatherComplication>());
+			delete static_cast<WeatherComplication*>(complication);
 			break;
 		}
 		type = complication_type_map<void>;
