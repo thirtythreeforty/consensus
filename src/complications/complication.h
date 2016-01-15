@@ -71,14 +71,15 @@ private:
 
 	void schedule_refresh();
 
+	static const WeatherAngles& get_angles(const WeatherComplication& complication);
+	static void set_angles(WeatherComplication& complication, const WeatherAngles& angles);
+
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 	static void request_refresh(void*);
 	static void spinup_animation_started(Animation *anim, void *context);
 	static void spinup_animation_stopped(Animation *anim, bool finished, void *context);
-	static WeatherAngles get_angles(void *subject);
-	static void set_angles(void *subject, WeatherAngles angles);
 
-	friend void property_animation_update_weather_angles(PropertyAnimation*, const uint32_t);
+	friend WeatherComplication::WeatherAngles interpolate(uint32_t distance, WeatherComplication::WeatherAngles& from, WeatherComplication::WeatherAngles& to);
 };
 
 class BatteryComplication: public Complication

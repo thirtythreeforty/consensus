@@ -222,18 +222,15 @@ void WeatherComplication::spinup_animation_stopped(Animation *anim, bool finishe
 	}
 }
 
-auto WeatherComplication::get_angles(void *subject) -> WeatherAngles
+auto WeatherComplication::get_angles(const WeatherComplication& complication) -> const WeatherAngles&
 {
-	auto complication = static_cast<WeatherComplication*>(subject);
-	return complication->angles;
+	return complication.angles;
 }
 
-void WeatherComplication::set_angles(void *subject, WeatherAngles angles)
+void WeatherComplication::set_angles(WeatherComplication& complication, const WeatherAngles& angles)
 {
-	auto complication = static_cast<WeatherComplication*>(subject);
-	complication->angles = angles;
-
-	complication->mark_dirty();
+	complication.angles = angles;
+	complication.mark_dirty();
 }
 
 static inline int32_t int32_interpolate(uint32_t distance, int32_t from, int32_t to)
@@ -241,59 +238,31 @@ static inline int32_t int32_interpolate(uint32_t distance, int32_t from, int32_t
 	return from + (((int32_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 }
 
-void property_animation_update_weather_angles(PropertyAnimation *property_animation, const uint32_t distance)
+inline WeatherComplication::WeatherAngles
+interpolate(uint32_t distance, WeatherComplication::WeatherAngles& from, WeatherComplication::WeatherAngles& to)
 {
-	using WeatherAngles = WeatherComplication::WeatherAngles;
-	typedef void (*WeatherAnglesSetter)(void*, WeatherAngles);
-
-	WeatherAngles from, to;
-
-	property_animation_from(property_animation, &from, sizeof(from), false);
-	property_animation_to(property_animation, &to, sizeof(to), false);
-
-	WeatherAngles interpolated = {
+	WeatherComplication::WeatherAngles interpolated = {
 		.temp_angle = int32_interpolate(distance, from.temp_angle, to.temp_angle),
 		.humidity_angle = int32_interpolate(distance, from.humidity_angle, to.humidity_angle)
 	};
-
-	Animation *anim = property_animation_get_animation(property_animation);
-	PropertyAnimationImplementation *impl =
-		(PropertyAnimationImplementation*)animation_get_implementation(anim);
-	auto setter = reinterpret_cast<WeatherAnglesSetter>(impl->accessors.setter.uint32);
-	void *subject;
-	property_animation_subject(property_animation, &subject, false);
-	if(setter && subject) {
-		setter(subject, interpolated);
-	}
+	return interpolated;
 }
 
 void WeatherComplication::animate_to(WeatherAngles requested_angles)
 {
-	static const PropertyAnimationImplementation weather_spin_impl = {
-		.base = {
-			NULL,
-			(AnimationUpdateImplementation)property_animation_update_weather_angles,
-			NULL
-		},
-		.accessors = {
-			(Int16Setter)WeatherComplication::set_angles,
-			(Int16Getter)WeatherComplication::get_angles
-		}
-	};
 	static const AnimationHandlers weather_spinup_anim_handlers = {
 		.started = WeatherComplication::spinup_animation_started,
 		.stopped = WeatherComplication::spinup_animation_stopped
 	};
 
-	PropertyAnimation *property_anim = property_animation_create(
-		&weather_spin_impl,
-		this,
-		NULL, NULL
+	Boulder::PropertyAnimation<
+		WeatherComplication, WeatherAngles,
+		WeatherComplication::set_angles, WeatherComplication::get_angles>
+	anim(
+		*this,
+		&this->angles,
+		&requested_angles
 	);
-	property_animation_from(property_anim, &angles, sizeof(angles), true);
-	property_animation_to(property_anim, &requested_angles, sizeof(requested_angles), true);
-
-	Animation *anim = property_animation_get_animation(property_anim);
 	animation_schedule(base_complication_setup_animation(anim, &weather_spinup_anim_handlers, this));
 }
 

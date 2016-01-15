@@ -113,6 +113,77 @@ public:
 	}
 };
 
+template<typename S, typename T>
+using PropertyAnimationSetter = void (*)(S&, const T&);
+
+template<typename S, typename T>
+using PropertyAnimationGetter = const T& (*)(const S&);
+
+template<typename S, typename T, PropertyAnimationSetter<S, T> Setter, PropertyAnimationGetter<S, T> Getter>
+class PropertyAnimation {
+	::PropertyAnimation *anim;
+
+public:
+	PropertyAnimation(S& subject, const T* from, const T* to) {
+		static const PropertyAnimationImplementation impl = {
+			.base = {
+				NULL,
+				(AnimationUpdateImplementation)PropertyAnimation::update,
+				NULL,
+			},
+			.accessors = {
+				{ (Int16Setter)Setter },
+				{ (Int16Getter)Getter }
+			}
+		};
+		anim = property_animation_create(&impl, &subject, NULL, NULL);
+		if(from == nullptr) {
+			from = &Getter(subject);
+		}
+		if(to == nullptr) {
+			to = &Getter(subject);
+		}
+		property_animation_from(anim, const_cast<T*>(from), sizeof(T), true);
+		property_animation_to(anim, const_cast<T*>(to), sizeof(T), true);
+	}
+	~PropertyAnimation() {
+		if(!animation_is_scheduled(*this)) {
+			property_animation_destroy(anim);
+		}
+	}
+
+	void schedule() {
+		animation_schedule(*this);
+	}
+
+	operator ::Animation*() {
+		return reinterpret_cast<::Animation*>(anim);
+	}
+
+	operator ::PropertyAnimation*() {
+		return anim;
+	}
+
+private:
+	static void update(::PropertyAnimation *panim, const uint32_t distance) {
+		T from, to;
+		property_animation_from(panim, &from, sizeof(T), false);
+		property_animation_to(panim, &to, sizeof(T), false);
+
+		T interpolated = interpolate(distance, from, to);
+
+		auto impl = reinterpret_cast<const PropertyAnimationImplementation*>(animation_get_implementation(reinterpret_cast<::Animation*>(panim)));
+		auto setter = reinterpret_cast<PropertyAnimationSetter<S, T>>(impl->accessors.setter.int16);
+
+		S *subject;
+		property_animation_subject(panim, reinterpret_cast<void**>(&subject), false);
+
+		if(setter && subject) {
+			setter(*subject, interpolated);
+		}
+	}
+};
+
 }
 
 #endif
