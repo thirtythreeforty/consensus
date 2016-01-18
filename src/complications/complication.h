@@ -8,7 +8,6 @@ extern "C" {
 #include <pebble.h>
 
 typedef struct DateComplication DateComplication;
-typedef struct WeatherComplication WeatherComplication;
 
 DateComplication* date_complication_create(GRect frame);
 void date_complication_destroy(DateComplication *complication);
@@ -79,7 +78,7 @@ private:
 	static void spinup_animation_started(Animation *anim, void *context);
 	static void spinup_animation_stopped(Animation *anim, bool finished, void *context);
 
-	friend WeatherComplication::WeatherAngles interpolate(uint32_t distance, WeatherComplication::WeatherAngles& from, WeatherComplication::WeatherAngles& to);
+	friend WeatherAngles interpolate(uint32_t distance, WeatherAngles& from, WeatherAngles& to);
 };
 
 class BatteryComplication: public Complication
