@@ -28,6 +28,8 @@ public:
 			b_layer->update(ctx);
 		});
 	}
+	Layer(Layer&) = delete;
+
 	virtual ~Layer() {
 		if(_layer) layer_destroy(_layer);
 	}
@@ -58,6 +60,45 @@ public:
 	}
 protected:
 	virtual void update(GContext *ctx) {}
+};
+
+class TextLayer
+{
+	::TextLayer *text_layer;
+
+public:
+	TextLayer(GRect frame)
+		: text_layer(text_layer_create(frame))
+	{}
+	TextLayer(TextLayer&) = delete;
+
+	~TextLayer() {
+		text_layer_destroy(text_layer);
+	}
+
+	#define B_TEXTLAYER_METHOD(M) B_PROXY_METHOD(M, text_layer_, text_layer)
+
+	B_TEXTLAYER_METHOD(set_text);
+	B_TEXTLAYER_METHOD(get_text);
+	B_TEXTLAYER_METHOD(set_background_color);
+	B_TEXTLAYER_METHOD(set_text_color);
+	B_TEXTLAYER_METHOD(set_overflow_mode);
+	B_TEXTLAYER_METHOD(set_font);
+	B_TEXTLAYER_METHOD(set_text_alignment);
+	B_TEXTLAYER_METHOD(enable_screen_text_flow_and_paging);
+	B_TEXTLAYER_METHOD(restore_default_text_flow_and_paging);
+	B_TEXTLAYER_METHOD(get_content_size);
+	B_TEXTLAYER_METHOD(set_size);
+
+	#undef B_TEXTLAYER_METHOD
+
+	operator ::TextLayer*() {
+		return text_layer;
+	}
+
+	operator ::Layer*() {
+		return text_layer_get_layer(text_layer);
+	}
 };
 
 class AppTimer {

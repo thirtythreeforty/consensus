@@ -7,14 +7,6 @@ extern "C" {
 
 #include <pebble.h>
 
-typedef struct DateComplication DateComplication;
-
-DateComplication* date_complication_create(GRect frame);
-void date_complication_destroy(DateComplication *complication);
-Layer* date_complication_get_layer(DateComplication *complication);
-void date_complication_time_changed(DateComplication *complication, struct tm *time);
-Animation* date_complication_animate_in(DateComplication *complication);
-
 typedef struct {
 	bool valid;
 
@@ -40,6 +32,36 @@ class Complication: public Boulder::Layer
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
 	~Complication() = default;
+};
+
+class DateComplication: public Complication
+{
+	bool animating;
+	uint8_t anim_frames_skipped;
+
+	uint8_t requested_date;
+
+	Boulder::TextLayer date_layer;
+	std::array<char, 3> date_layer_text;
+
+public:
+	DateComplication(GRect frame);
+	~DateComplication() = default;
+
+	Animation* animate_in();
+
+	void time_changed(struct tm *time);
+
+protected:
+	void update(GContext*) override;
+
+private:
+	GRect calculate_date_frame();
+	void set_displayed(uint8_t mday);
+
+	static void spin_animation_started(Animation *animation, void *context);
+	static void spin_animation_stopped(Animation *animation, bool finished, void *context);
+	static void spin_animation_update(Animation* anim, AnimationProgress progress);
 };
 
 class WeatherComplication: public Complication
@@ -148,7 +170,7 @@ public:
 			delete static_cast<BatteryComplication*>(complication);
 			break;
 		case complication_type_map<DateComplication>:
-			date_complication_destroy(downcast<DateComplication>());
+			delete static_cast<DateComplication*>(complication);
 			break;
 		case complication_type_map<WeatherComplication>:
 			delete static_cast<WeatherComplication*>(complication);

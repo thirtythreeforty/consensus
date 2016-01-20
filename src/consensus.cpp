@@ -32,7 +32,7 @@ static void update_date_complications(struct tm *tick_time)
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
 		auto date_complication = complications[i].downcast<DateComplication>();
 		if(date_complication) {
-			date_complication_time_changed(date_complication, tick_time);
+			date_complication->time_changed(tick_time);
 		}
 	}
 }
@@ -216,10 +216,10 @@ static void init_layers(void)
 		      (int16_t)(center.y - complication_size / 2),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	DateComplication *date_complication = date_complication_create(date_complication_position);
+	DateComplication *date_complication = new DateComplication(date_complication_position);
 	complications[1] = AbstractComplication::from(date_complication);
-	layer_add_child(window_get_root_layer(window), date_complication_get_layer(date_complication));
-	animation_schedule(date_complication_animate_in(date_complication));
+	layer_add_child(window_get_root_layer(window), *date_complication);
+	animation_schedule(date_complication->animate_in());
 
 	const GRect weather_complication_position =
 		GRect((int16_t)(center.x - complication_size / 2),
