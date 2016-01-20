@@ -163,7 +163,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	icon = std::experimental::nullopt;
 
 	if(new_weather.valid) {
-		static const uint32_t weather_icons[] = {
+		static const std::array<uint32_t, 9> weather_icons = {
 			RESOURCE_ID_WEATHER_GENERIC,
 			RESOURCE_ID_WEATHER_SUNNY,
 			RESOURCE_ID_WEATHER_CLOUDY,
@@ -176,7 +176,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 		};
 
 		// Be sure and clamp the index so we're not accessing arbitrary memory.
-		if(new_weather.icon <= NELEM(weather_icons)) {
+		if(new_weather.icon <= weather_icons.size()) {
 			const uint32_t resource = weather_icons[new_weather.icon];
 
 			icon.emplace(resource);
