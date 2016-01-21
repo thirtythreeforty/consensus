@@ -2,12 +2,12 @@
 
 extern "C" {
 #include <pebble.h>
+}
 
 #include "common.h"
 #include "constants.h"
 
 #include "preferences.h"
-}
 
 #include "complications/complication.h"
 #include "face_layer.h"
