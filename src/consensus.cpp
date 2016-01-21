@@ -6,11 +6,11 @@ extern "C" {
 #include "common.h"
 #include "constants.h"
 
-#include "face_layer.h"
 #include "preferences.h"
 }
 
 #include "complications/complication.h"
+#include "face_layer.h"
 
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
@@ -60,7 +60,7 @@ static void update_weather_complications(WeatherData *wdata)
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
-		face_layer_set_time(face_layer, tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
+		face_layer->set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
 	}
 
 	update_date_complications(tick_time);
@@ -138,7 +138,7 @@ static void on_preferences_in(DictionaryIterator *iterator)
 	const bool show_second = should_show_second();
 	const TimeUnits units = update_time_interval(show_second);
 	tick_timer_service_subscribe(units, on_tick);
-	face_layer_set_show_second(face_layer, show_second);
+	face_layer->set_show_second(show_second);
 	update_time_now();
 
 	update_connection_now();
@@ -233,16 +233,16 @@ static void init_layers(void)
 	complications[2] = AbstractComplication::from(weather_complication);
 	weather_complication->weather_changed(wdata);
 
-	face_layer = face_layer_create(size);
-	face_layer_set_colors(face_layer, GColorCobaltBlue, GColorPictonBlue, GColorRed);
-	face_layer_set_show_second(face_layer, should_show_second());
-	layer_add_child(window_get_root_layer(window), face_layer_get_layer(face_layer));
-	animation_schedule(face_layer_animate_in(face_layer, true, true));
+	face_layer = new FaceLayer(size);
+	face_layer->set_colors(GColorCobaltBlue, GColorPictonBlue, GColorRed);
+	face_layer->set_show_second(should_show_second());
+	layer_add_child(window_get_root_layer(window), *face_layer);
+	animation_schedule(face_layer->animate_in(true, true));
 }
 
 static void deinit_layers(void)
 {
-	face_layer_destroy(face_layer);
+	delete face_layer;
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
 		complications[i].destroy();
 	}
