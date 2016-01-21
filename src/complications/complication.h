@@ -32,6 +32,11 @@ class Complication: public Boulder::Layer
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
 	~Complication() = default;
+
+	Animation* base_setup_animation(Animation *anim, const AnimationHandlers *handlers);
+
+	void redraw_1(GContext *ctx, GColor color, int32_t max_angle);
+	void redraw_2(GContext *ctx, GColor color_1, int32_t max_angle_1, GColor color_2, int32_t max_angle_2);
 };
 
 class DateComplication: public Complication

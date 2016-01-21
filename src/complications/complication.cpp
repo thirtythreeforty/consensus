@@ -1,4 +1,4 @@
-#include "complication_common.h"
+#include "complication.h"
 
 const unsigned int complication_line_size = 2;
 const unsigned int complication_background_line_size = 1;
@@ -29,21 +29,18 @@ static void base_complication_base_update(GContext *ctx, GRect *bounds, GColor c
 	}
 }
 
-void base_complication_update_1(Layer *layer, GContext *ctx,
-                                GColor color, int32_t max_angle)
+void Complication::redraw_1(GContext *ctx, GColor color, int32_t max_angle)
 {
-	GRect bounds = layer_get_bounds(layer);
+	GRect bounds = layer_get_bounds(*this);
 
 	base_complication_appropriate_bounds(&bounds);
 
 	base_complication_base_update(ctx, &bounds, color, 0, max_angle, TRIG_MAX_ANGLE);
 }
 
-void base_complication_update_2(Layer *layer, GContext *ctx,
-                                GColor color_1, int32_t max_angle_1,
-                                GColor color_2, int32_t max_angle_2)
+void Complication::redraw_2(GContext *ctx, GColor color_1, int32_t max_angle_1, GColor color_2, int32_t max_angle_2)
 {
-	GRect bounds = layer_get_bounds(layer);
+	GRect bounds = layer_get_bounds(*this);
 
 	base_complication_appropriate_bounds(&bounds);
 
@@ -51,15 +48,7 @@ void base_complication_update_2(Layer *layer, GContext *ctx,
 	base_complication_base_update(ctx, &bounds, color_2, TRIG_MAX_ANGLE / 2, max_angle_2, TRIG_MAX_ANGLE);
 }
 
-Animation* base_complication_animate_in(const AnimationImplementation *impl,
-                                        const AnimationHandlers *handlers, void *ctx)
-{
-	Animation *anim = animation_create();
-	animation_set_implementation(anim, impl);
-	return base_complication_setup_animation(anim, handlers, ctx);
-}
-
-Animation* base_complication_setup_animation(Animation *anim, const AnimationHandlers *handlers, void *ctx)
+Animation* Complication::base_setup_animation(Animation *anim, const AnimationHandlers *handlers)
 {
 	static const unsigned int duration = 700;
 	static const unsigned int delay = 200;
@@ -67,7 +56,7 @@ Animation* base_complication_setup_animation(Animation *anim, const AnimationHan
 	animation_set_duration(anim, duration);
 	animation_set_delay(anim, delay);
 	animation_set_curve(anim, AnimationCurveEaseInOut);
-	animation_set_handlers(anim, *handlers, ctx);
+	animation_set_handlers(anim, *handlers, this);
 
 	return anim;
 }

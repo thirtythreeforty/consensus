@@ -1,4 +1,4 @@
-#include "complication_common.h"
+#include "complication.h"
 
 #include "common.h"
 
@@ -12,7 +12,7 @@ static uint32_t battery_complication_angle(const BatteryChargeState *state)
 
 void BatteryComplication::update(GContext *ctx)
 {
-	base_complication_update_1(*this, ctx, GColorYellow, angle);
+	redraw_1(ctx, GColorYellow, angle);
 
 	// Draw the icon based on the charging state (icon is loaded/unloaded
 	// in battery_complication_state_changed)
@@ -109,6 +109,6 @@ void BatteryComplication::animate_to(uint32_t requested_angle)
 	property_animation_from(property_anim, &current_angle, sizeof(current_angle), true);
 	property_animation_to(property_anim, &requested_angle, sizeof(requested_angle), true);
 	Animation *anim = property_animation_get_animation(property_anim);
-	animation_schedule(base_complication_setup_animation(anim, &battery_spinup_anim_handlers, this));
+	animation_schedule(base_setup_animation(anim, &battery_spinup_anim_handlers));
 }
 

@@ -1,4 +1,4 @@
-#include "complication_common.h"
+#include "complication.h"
 
 #include "common.h"
 
@@ -14,7 +14,7 @@ typedef struct {
 
 void DateComplication::update(GContext *ctx)
 {
-	base_complication_update_1(*this, ctx, GColorClear, 0);
+	redraw_1(ctx, GColorClear, 0);
 }
 
 DateComplication::DateComplication(GRect frame)
@@ -102,8 +102,8 @@ Animation* DateComplication::animate_in()
 		.stopped = DateComplication::spin_animation_stopped
 	};
 
-	return base_complication_animate_in(&date_spinup_anim_impl,
-	                                    &date_spinup_anim_handlers,
-	                                    this);
+	Animation *anim = animation_create();
+	animation_set_implementation(anim, &date_spinup_anim_impl);
+	return base_setup_animation(anim, &date_spinup_anim_handlers);
 }
 

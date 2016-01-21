@@ -1,4 +1,4 @@
-#include "complication_common.h"
+#include "complication.h"
 
 #include "common.h"
 #include "constants.h"
@@ -109,9 +109,8 @@ auto WeatherComplication::compute_angles(const WeatherData &wdata) -> WeatherAng
 
 void WeatherComplication::update(GContext *ctx)
 {
-	base_complication_update_2(*this, ctx,
-	                           GColorBlue, angles.humidity_angle,
-	                           GColorRed, angles.temp_angle);
+	redraw_2(ctx, GColorBlue, angles.humidity_angle,
+	              GColorRed, angles.temp_angle);
 
 	// Draw icon (loaded in weather_complication_weather_changed).
 	if(icon) {
@@ -263,6 +262,6 @@ void WeatherComplication::animate_to(WeatherAngles requested_angles)
 		&this->angles,
 		&requested_angles
 	);
-	animation_schedule(base_complication_setup_animation(anim, &weather_spinup_anim_handlers, this));
+	animation_schedule(base_setup_animation(anim, &weather_spinup_anim_handlers));
 }
 
