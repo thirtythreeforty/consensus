@@ -6,16 +6,16 @@ void FaceLayer::update(GContext *ctx)
 {
 	graphics_context_set_stroke_width(ctx, 7);
 	graphics_context_set_stroke_color(ctx, hour_color);
-	gpath_draw_outline(ctx, scalable_path_get_path(hour_path));
+	gpath_draw_outline(ctx, hour_path);
 
 	graphics_context_set_stroke_width(ctx, 5);
 	graphics_context_set_stroke_color(ctx, minute_color);
-	gpath_draw_outline(ctx, scalable_path_get_path(minute_path));
+	gpath_draw_outline(ctx, minute_path);
 
 	if(show_second) {
 		graphics_context_set_stroke_width(ctx, 1);
 		graphics_context_set_stroke_color(ctx, second_color);
-		gpath_draw_outline_open(ctx, scalable_path_get_path(second_path));
+		gpath_draw_outline_open(ctx, second_path);
 	}
 
 	// Middle dot
@@ -30,44 +30,16 @@ void FaceLayer::update(GContext *ctx)
 FaceLayer::FaceLayer(GRect frame)
 	: Layer(frame)
 	, animating(false)
+	, hour_path(&hour_hand_path)
+	, minute_path(&minute_hand_path)
+	, second_path(&second_hand_path)
 	, show_second(false)
 {
-	static const GPoint hour_hand_path_points[] = {{0, 0}, {0, -35}};
-	static const GPathInfo hour_hand_path = {
-		.num_points = NELEM(hour_hand_path_points),
-		.points = (GPoint*)hour_hand_path_points
-	};
-	static const GPoint minute_hand_path_points[] = {{0, 0}, {0, -55}};
-	static const GPathInfo minute_hand_path = {
-		.num_points = NELEM(minute_hand_path_points),
-		.points = (GPoint*)minute_hand_path_points
-	};
-	// The extra {0, 0} point keeps the second hand always going through the center,
-	// even if the rotation makes the hand imperceptibly bent due to imperfect rotation.
-	static const GPoint second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -57}};
-	static const GPathInfo second_hand_path = {
-		.num_points = NELEM(second_hand_path_points),
-		.points = (GPoint*)second_hand_path_points
-	};
-
 	GPoint center = grect_center_point(&frame);
 
-	// Create the hands
-	hour_path = scalable_path_create(&hour_hand_path);
-	gpath_move_to(scalable_path_get_path(hour_path), center);
-
-	minute_path = scalable_path_create(&minute_hand_path);
-	gpath_move_to(scalable_path_get_path(minute_path), center);
-
-	second_path = scalable_path_create(&second_hand_path);
-	gpath_move_to(scalable_path_get_path(second_path), center);
-}
-
-FaceLayer::~FaceLayer()
-{
-	scalable_path_destroy(hour_path);
-	scalable_path_destroy(minute_path);
-	scalable_path_destroy(second_path);
+	gpath_move_to(hour_path, center);
+	gpath_move_to(minute_path, center);
+	gpath_move_to(second_path, center);
 }
 
 void FaceLayer::set_show_second(bool show)
@@ -96,9 +68,9 @@ void FaceLayer::set_time(uint8_t hour, uint8_t min, uint8_t sec)
 	requested_time.second = sec;
 
 	if(!animating) {
-		gpath_rotate_to(scalable_path_get_path(hour_path), face_layer_hour_angle(hour, min));
-		gpath_rotate_to(scalable_path_get_path(minute_path), face_layer_minute_angle(min, sec));
-		gpath_rotate_to(scalable_path_get_path(second_path), face_layer_minute_angle(sec, 0));
+		gpath_rotate_to(hour_path, face_layer_hour_angle(hour, min));
+		gpath_rotate_to(minute_path, face_layer_minute_angle(min, sec));
+		gpath_rotate_to(second_path, face_layer_minute_angle(sec, 0));
 
 		mark_dirty();
 	}
@@ -142,9 +114,10 @@ static int face_layer_scale(AnimationProgress dist_normalized, unsigned int max)
 void FaceLayer::radius_anim_update(Animation *anim, AnimationProgress dist_normalized)
 {
 	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-	scalable_path_scale(face_layer->hour_path, dist_normalized);
-	scalable_path_scale(face_layer->minute_path, dist_normalized);
-	scalable_path_scale(face_layer->second_path, dist_normalized);
+
+	face_layer->hour_path.scale(dist_normalized);
+	face_layer->minute_path.scale(dist_normalized);
+	face_layer->second_path.scale(dist_normalized);
 
 	face_layer->mark_dirty();
 }
@@ -158,17 +131,17 @@ void FaceLayer::radius_anim_setup(Animation *anim)
 void FaceLayer::roll_anim_update(Animation *anim, AnimationProgress dist_normalized)
 {
 	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-	gpath_rotate_to(scalable_path_get_path(face_layer->hour_path),
+	gpath_rotate_to(face_layer->hour_path,
 	                face_layer_scale(dist_normalized,
 	                                 face_layer_hour_angle(face_layer->animation_time.hour,
 	                                                       face_layer->animation_time.minute)));
 
-	gpath_rotate_to(scalable_path_get_path(face_layer->minute_path),
+	gpath_rotate_to(face_layer->minute_path,
 	                face_layer_scale(dist_normalized,
 	                                 face_layer_minute_angle(face_layer->animation_time.minute,
 	                                                         face_layer->animation_time.second)));
 
-	gpath_rotate_to(scalable_path_get_path(face_layer->second_path),
+	gpath_rotate_to(face_layer->second_path,
 	                face_layer_scale(dist_normalized,
 	                                 face_layer_minute_angle(face_layer->animation_time.second, 0)));
 
@@ -219,9 +192,9 @@ void FaceLayer::animation_stop_handler(Animation *animation, bool finished, void
 	face_layer->animating = false;
 
 	// Set scale and roll to final values
-	scalable_path_scale(face_layer->hour_path, ANIMATION_NORMALIZED_MAX);
-	scalable_path_scale(face_layer->minute_path, ANIMATION_NORMALIZED_MAX);
-	scalable_path_scale(face_layer->second_path, ANIMATION_NORMALIZED_MAX);
+	face_layer->hour_path.scale(ANIMATION_NORMALIZED_MAX);
+	face_layer->minute_path.scale(ANIMATION_NORMALIZED_MAX);
+	face_layer->second_path.scale(ANIMATION_NORMALIZED_MAX);
 
 	// This will move the hands to requested_time and update the display
 	face_layer->set_time(face_layer->requested_time.hour,
@@ -252,3 +225,23 @@ Animation* FaceLayer::animate_in(bool zoom, bool roll)
 
 	return spawn_anim;
 }
+
+const GPoint FaceLayer::hour_hand_path_points[] = {{0, 0}, {0, -35}};
+const GPathInfo FaceLayer::hour_hand_path = {
+	.num_points = NELEM(hour_hand_path_points),
+	.points = (GPoint*)hour_hand_path_points
+};
+const GPoint FaceLayer::minute_hand_path_points[] = {{0, 0}, {0, -55}};
+const GPathInfo FaceLayer::minute_hand_path = {
+	.num_points = NELEM(minute_hand_path_points),
+	.points = (GPoint*)minute_hand_path_points
+};
+
+// The extra {0, 0} point keeps the second hand always going through the
+// center, even if the rotation makes the hand imperceptibly bent due to
+// imperfect rotation.
+const GPoint FaceLayer::second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -57}};
+const GPathInfo FaceLayer::second_hand_path = {
+	.num_points = NELEM(second_hand_path_points),
+	.points = (GPoint*)second_hand_path_points
+};

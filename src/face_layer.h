@@ -5,6 +5,7 @@ extern "C" {
 #include <pebble.h>
 
 #include "scalable_path.h"
+#include "common.h"
 }
 
 #include "boulder.h"
@@ -22,9 +23,9 @@ class FaceLayer: public Boulder::Layer
 
 	bool animating;
 
-	ScalablePath *hour_path;
-	ScalablePath *minute_path;
-	ScalablePath *second_path;
+	ScalablePath hour_path;
+	ScalablePath minute_path;
+	ScalablePath second_path;
 
 	bool show_second;
 
@@ -34,7 +35,7 @@ class FaceLayer: public Boulder::Layer
 
 public:
 	FaceLayer(GRect frame);
-	~FaceLayer();
+	~FaceLayer() = default;
 
 	void set_show_second(bool show);
 	void set_time(uint8_t hour, uint8_t min, uint8_t sec);
@@ -60,6 +61,14 @@ private:
 
 	static void animation_start_handler(Animation *animation, void *context);
 	static void animation_stop_handler(Animation *animation, bool finished, void *context);
+
+	static const GPoint hour_hand_path_points[];
+	static const GPathInfo hour_hand_path;
+	static const GPoint minute_hand_path_points[];
+	static const GPathInfo minute_hand_path;
+
+	static const GPoint second_hand_path_points[];
+	static const GPathInfo second_hand_path;
 
 };
 
