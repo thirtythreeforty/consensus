@@ -190,8 +190,8 @@ static void init_layers(void)
 	const GRect bluetooth_layer_location =
 		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
 		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
-		      (int16_t)bluetooth_image_size.size.h,
-		      (int16_t)bluetooth_image_size.size.w);
+		      (int16_t)bluetooth_image_size.size.w,
+		      (int16_t)bluetooth_image_size.size.h);
 	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
 	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
 	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
