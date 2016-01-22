@@ -99,6 +99,21 @@
         "type": "raw",
         "name": "WEATHER_SNOW_HEAVY",
         "file": "weather/Heavy_snow.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "TASKS_UNDONE",
+        "file": "tasks-undone.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "TASKS_SOMEDONE",
+        "file": "tasks-somedone.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "TASKS_ALLDONE",
+        "file": "tasks-alldone.pdc"
       }
     ]
   }
