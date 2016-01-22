@@ -132,11 +132,42 @@ private:
 	void animate_to(uint32_t angle);
 };
 
+class HealthComplication: public Complication
+{
+	bool animating;
+
+	struct Steps {
+		uint32_t today;
+		uint32_t average;
+		Steps(uint32_t today, uint32_t average)
+			: today(today)
+			, average(average)
+		{}
+	};
+	std::experimental::optional<Steps> steps;
+
+	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	GPoint icon_shift;
+public:
+	explicit HealthComplication(GRect frame);
+	~HealthComplication() = default;
+
+	void on_movement_update();
+	void on_significant_update();
+
+protected:
+	void update(GContext* ctx) override;
+
+private:
+	void recalculate_average_steps();
+};
+
 template<typename T> constexpr uint8_t complication_type_map;
 template<> constexpr uint8_t complication_type_map<void> = 0;
 template<> constexpr uint8_t complication_type_map<BatteryComplication> = 1;
 template<> constexpr uint8_t complication_type_map<DateComplication> = 2;
 template<> constexpr uint8_t complication_type_map<WeatherComplication> = 3;
+template<> constexpr uint8_t complication_type_map<HealthComplication> = 4;
 
 class AbstractComplication
 {
@@ -180,6 +211,8 @@ public:
 		case complication_type_map<WeatherComplication>:
 			delete static_cast<WeatherComplication*>(complication);
 			break;
+		case complication_type_map<HealthComplication>:
+			delete static_cast<HealthComplication*>(complication);
 		}
 		type = complication_type_map<void>;
 	}

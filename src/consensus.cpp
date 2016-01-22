@@ -57,6 +57,22 @@ static void update_weather_complications(WeatherData *wdata)
 	}
 }
 
+static void update_health_complications(HealthEventType event, void*)
+{
+	APP_DEBUG("in update_health_complications reason %i", event);
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		auto health_complication = complications[i].downcast<HealthComplication>();
+		if(health_complication) {
+			if(event == HealthEventSignificantUpdate) {
+				health_complication->on_significant_update();
+			}
+			else if(event == HealthEventMovementUpdate) {
+				health_complication->on_movement_update();
+			}
+		}
+	}
+}
+
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
@@ -200,16 +216,15 @@ static void init_layers(void)
 	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
-	const BatteryChargeState charge_state = battery_state_service_peek();
 	const GRect battery_complication_position =
 		GRect((int16_t)(center.x - complication_size - complication_offset_x),
 		      (int16_t)(center.y - complication_size / 2),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	BatteryComplication *battery_complication = new BatteryComplication(battery_complication_position);
-	complications[0] = AbstractComplication::from(battery_complication);
-	layer_add_child(window_get_root_layer(window), *battery_complication);
-	battery_complication->state_changed(&charge_state);
+	auto health_complication = new HealthComplication(battery_complication_position);
+	complications[0] = AbstractComplication::from(health_complication);
+	layer_add_child(window_get_root_layer(window), *health_complication);
+	health_service_events_subscribe(update_health_complications, nullptr);
 
 	const GRect date_complication_position =
 		GRect((int16_t)(center.x + complication_offset_x),
