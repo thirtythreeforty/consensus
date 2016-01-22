@@ -59,7 +59,6 @@ static void update_weather_complications(WeatherData *wdata)
 
 static void update_health_complications(HealthEventType event, void*)
 {
-	APP_DEBUG("in update_health_complications reason %i", event);
 	for(unsigned int i = 0; i < NELEM(complications); ++i) {
 		auto health_complication = complications[i].downcast<HealthComplication>();
 		if(health_complication) {

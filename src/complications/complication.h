@@ -150,7 +150,7 @@ class HealthComplication: public Complication
 	GPoint icon_shift;
 public:
 	explicit HealthComplication(GRect frame);
-	~HealthComplication() = default;
+	~HealthComplication();
 
 	void on_movement_update();
 	void on_significant_update();
