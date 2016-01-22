@@ -110,6 +110,11 @@
         "type": "raw",
         "name": "HEALTH_CHECK",
         "file": "health-check.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "HEALTH_ERROR",
+        "file": "health-error.pdc"
       }
     ]
   }
