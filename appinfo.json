@@ -115,6 +115,11 @@
         "type": "raw",
         "name": "HEALTH_ERROR",
         "file": "health-error.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "SLEEP",
+        "file": "sleep.pdc"
       }
     ]
   }
