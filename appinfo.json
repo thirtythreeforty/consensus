@@ -31,7 +31,7 @@
     "media": [
       {
         "menuIcon": true,
-        "type": "png",
+        "type": "bitmap",
         "name": "MENU_ICON",
         "file": "icon.png"
       },
@@ -41,7 +41,7 @@
         "file": "ticks.pdc"
       },
       {
-        "type": "png",
+        "type": "bitmap",
         "name": "NO_BLUETOOTH",
         "file": "no-bluetooth.png"
       },
