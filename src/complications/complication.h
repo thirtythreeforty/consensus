@@ -33,10 +33,56 @@ protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
 	~Complication() = default;
 
-	Animation* base_setup_animation(Animation *anim, const AnimationHandlers *handlers);
+	virtual void update(GContext* ctx) override;
 
-	void redraw_1(GContext *ctx, GColor color, int32_t max_angle);
-	void redraw_2(GContext *ctx, GColor color_1, int32_t max_angle_1, GColor color_2, int32_t max_angle_2);
+	void base_setup_animation(Animation *anim, const AnimationHandlers &handlers);
+};
+
+class HighlightComplication: public Complication
+{
+	friend class HighlightComplication2;
+
+	bool animating = false;
+	uint32_t requested_angle = 0, angle = 0;
+
+protected:
+	using Complication::Complication;
+
+	virtual void update(GContext* ctx) override;
+
+	void set_angle(uint32_t new_angle);
+
+	virtual GColor highlight_color() const = 0;
+
+private:
+	// Helpers for animations
+	void animate_to_requested();
+	static void panim_set_angle(HighlightComplication& complication, const uint32_t& new_angle);
+	static const uint32_t& panim_get_angle(const HighlightComplication& complication);
+	static void panim_stopped(Animation *anim, bool finished, void *context);
+};
+
+class HighlightComplication2: public HighlightComplication
+{
+	bool animating2 = false;
+	uint32_t requested_angle2 = 0, angle2 = 0;
+
+protected:
+	using HighlightComplication::HighlightComplication;
+
+	virtual void update(GContext* ctx) override;
+
+	void set_angle2(uint32_t new_angle2);
+
+	virtual GColor highlight_color2() const = 0;
+
+private:
+	// The '2' versions of all these functions are kinda gross, but they all
+	// refer to angle2 of this class.
+	static void panim_set_angle2(HighlightComplication2& complication, const uint32_t& new_angle);
+	static const uint32_t& panim_get_angle2(const HighlightComplication2& complication);
+	void animate_to_requested2();
+	static void panim_stopped2(Animation *anim, bool finished, void *context);
 };
 
 class DateComplication: public Complication
@@ -57,9 +103,6 @@ public:
 
 	void time_changed(struct tm *time);
 
-protected:
-	void update(GContext*) override;
-
 private:
 	GRect calculate_date_frame();
 	void set_displayed(uint8_t mday);
@@ -69,19 +112,15 @@ private:
 	static void spin_animation_update(Animation* anim, AnimationProgress progress);
 };
 
-class WeatherComplication: public Complication
+class WeatherComplication: public HighlightComplication2
 {
 	struct WeatherAngles {
 		int32_t temp_angle;
 		int32_t humidity_angle;
 	};
 
-	WeatherAngles angles;
 	std::experimental::optional<Boulder::GDrawCommandImage> icon;
 	GPoint icon_shift;
-
-	WeatherData requested_weather;
-	bool animating;
 
 	std::experimental::optional<Boulder::AppTimer> refresh_timer;
 
@@ -91,45 +130,30 @@ public:
 
 	void weather_changed(const WeatherData &new_weather);
 
-private:
+protected:
 	void update(GContext *ctx) override;
-	void animate_to(WeatherAngles angles);
+	virtual GColor highlight_color() const override;
+	virtual GColor highlight_color2() const override;
 
-	void schedule_refresh();
-
-	static const WeatherAngles& get_angles(const WeatherComplication& complication);
-	static void set_angles(WeatherComplication& complication, const WeatherAngles& angles);
+private:
+	void schedule_refresh(time_t last_refresh_time);
 
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 	static void request_refresh(void*);
-	static void spinup_animation_started(Animation *anim, void *context);
-	static void spinup_animation_stopped(Animation *anim, bool finished, void *context);
-
-	friend WeatherAngles interpolate(uint32_t distance, WeatherAngles& from, WeatherAngles& to);
 };
 
-class BatteryComplication: public Complication
+class BatteryComplication: public HighlightComplication
 {
-	bool animating;
-
-	BatteryChargeState requested_state;
-
-	uint32_t angle;
 	std::experimental::optional<Boulder::GDrawCommandImage> icon;
 
 public:
 	explicit BatteryComplication(GRect frame);
 
 	void state_changed(const BatteryChargeState *state);
+
+protected:
 	void update(GContext *ctx) override;
-
-private:
-	static void spinup_started(Animation *anim, void *context);
-	static void spinup_stopped(Animation *anim, bool finished, void *context);
-
-	static uint32_t angle_get(void *subject);
-	static void angle_set(void *subject, uint32_t angle);
-	void animate_to(uint32_t angle);
+	GColor highlight_color() const override;
 };
 
 class HealthComplication: public Complication

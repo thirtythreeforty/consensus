@@ -176,6 +176,12 @@ namespace {
 
 	using updater_t = void (*)(::PropertyAnimation*, const uint32_t);
 
+	// Pebble's uint32 interpolator is very, very broken.  But the user will expect it to be defined.
+	inline uint32_t interpolate(uint32_t distance, uint32_t& from, uint32_t& to)
+	{
+		return from + (((int32_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+	}
+
 	template<typename S, typename T, PropertyAnimationSetter<S, T> Setter>
 	struct PAUpdate {
 		/* This struct is particularly interesting.  It provides the default
@@ -218,7 +224,6 @@ namespace {
 	};
 
 	B_SPECIALIZE_PAUPDATE(int16_t, property_animation_update_int16);
-	B_SPECIALIZE_PAUPDATE(uint32_t, property_animation_update_uint32);
 	B_SPECIALIZE_PAUPDATE(::GPoint, property_animation_update_gpoint);
 	B_SPECIALIZE_PAUPDATE(::GRect, property_animation_update_grect);
 	B_SPECIALIZE_PAUPDATE(::GColor8, property_animation_update_gcolor8);
