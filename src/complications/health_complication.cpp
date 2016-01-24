@@ -16,16 +16,14 @@ static time_t start_of_today()
 }
 
 HealthComplication::HealthComplication(GRect frame)
-	: Complication(frame)
-	, animating(false)
+	: HighlightComplication(frame)
 {
 	// Try to restore from persistent storage
 	const time_t day_start = start_of_today();
 	// persist_read_int() returns 0 if not set; since it is no longer 1970,
 	// this is acceptable.
 	if(persist_read_int(PERSIST_HEALTH_TIME_OF_AVERAGE) >= day_start) {
-		uint32_t average = persist_read_int(PERSIST_HEALTH_AVERAGE_STEPS);
-		steps.emplace(0, average);
+		average_steps.emplace(persist_read_int(PERSIST_HEALTH_AVERAGE_STEPS));
 		// Rest of the setup logic is identical to the update logic
 		on_movement_update();
 	}
@@ -39,9 +37,9 @@ HealthComplication::HealthComplication(GRect frame)
 HealthComplication::~HealthComplication()
 {
 	// If measurements are valid, persist them
-	if(steps) {
+	if(average_steps) {
 		persist_write_int(PERSIST_HEALTH_TIME_OF_AVERAGE, time(nullptr));
-		persist_write_int(PERSIST_HEALTH_AVERAGE_STEPS, steps->average);
+		persist_write_int(PERSIST_HEALTH_AVERAGE_STEPS, *average_steps);
 	}
 	else {
 		persist_delete(PERSIST_HEALTH_AVERAGE_STEPS);
@@ -57,11 +55,13 @@ void HealthComplication::on_significant_update()
 
 void HealthComplication::on_movement_update()
 {
-	if(steps) {
-		steps->today = health_service_sum_today(HealthMetricStepCount);
+	if(average_steps) {
+		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
+
+		set_angle(TRIG_MAX_ANGLE * today_steps / *average_steps);
 
 		// TODO only change if needed
-		icon.emplace(steps->today > steps->average ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
+		icon.emplace(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 
 		const GSize icon_size = icon->get_bounds_size();
 		const GRect bounds = this->get_bounds();
@@ -70,7 +70,6 @@ void HealthComplication::on_movement_update()
 			.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
 		};
 
-		// TODO animate if large distance
 		mark_dirty();
 	}
 	else {
@@ -80,11 +79,16 @@ void HealthComplication::on_movement_update()
 
 void HealthComplication::update(GContext *ctx)
 {
-	auto steps = this->steps.value_or(Steps(0, 1));
-	redraw_1(ctx, GColorGreen, TRIG_MAX_ANGLE * steps.today / steps.average);
+	HighlightComplication::update(ctx);
+
 	if(icon) {
 		icon->draw(ctx, icon_shift);
 	}
+}
+
+GColor HealthComplication::highlight_color() const
+{
+	return GColorGreen;
 }
 
 void HealthComplication::recalculate_average_steps()
@@ -99,9 +103,9 @@ void HealthComplication::recalculate_average_steps()
 		const time_t ago = today_start - seconds_in_day * days;
 		if(health_service_metric_accessible(HealthMetricStepCount, ago, today_start) ==
 		   HealthServiceAccessibilityMaskAvailable) {
-			steps.emplace(0, health_service_sum(HealthMetricStepCount, ago, today_start) / days);
+			average_steps.emplace(health_service_sum(HealthMetricStepCount, ago, today_start) / days);
 			return;
 		}
 	}
-	steps = nullopt;
+	average_steps = nullopt;
 }

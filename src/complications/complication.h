@@ -156,22 +156,13 @@ protected:
 	GColor highlight_color() const override;
 };
 
-class HealthComplication: public Complication
+class HealthComplication: public HighlightComplication
 {
-	bool animating;
-
-	struct Steps {
-		uint32_t today;
-		uint32_t average;
-		Steps(uint32_t today, uint32_t average)
-			: today(today)
-			, average(average)
-		{}
-	};
-	std::experimental::optional<Steps> steps;
+	std::experimental::optional<uint32_t> average_steps;
 
 	std::experimental::optional<Boulder::GDrawCommandImage> icon;
 	GPoint icon_shift;
+
 public:
 	explicit HealthComplication(GRect frame);
 	~HealthComplication();
@@ -181,6 +172,7 @@ public:
 
 protected:
 	void update(GContext* ctx) override;
+	virtual GColor highlight_color() const override;
 
 private:
 	void recalculate_average_steps();
