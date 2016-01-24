@@ -62,19 +62,19 @@ void HealthComplication::on_movement_update()
 
 		// TODO only change if needed
 		icon.emplace(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
-
-		const GSize icon_size = icon->get_bounds_size();
-		const GRect bounds = this->get_bounds();
-		icon_shift = {
-			.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
-			.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
-		};
-
-		mark_dirty();
 	}
 	else {
 		icon.emplace(RESOURCE_ID_HEALTH_ERROR);
 	}
+
+	const GSize icon_size = icon->get_bounds_size();
+	const GRect bounds = this->get_bounds();
+	icon_shift = {
+		.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
+		.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
+	};
+
+	mark_dirty();
 }
 
 void HealthComplication::update(GContext *ctx)
