@@ -33,3 +33,7 @@ void operator delete[](void *ptr, unsigned int) throw()
 {
   free(ptr);
 }
+
+extern "C" void __cxa_pure_virtual() {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Pure virtual function called!");
+}
