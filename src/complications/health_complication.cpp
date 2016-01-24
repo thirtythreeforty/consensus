@@ -21,15 +21,16 @@ HealthComplication::HealthComplication(GRect frame)
 {
 	// Try to restore from persistent storage
 	const time_t day_start = start_of_today();
-	if(persist_exists(PERSIST_HEALTH_TIME_OF_AVERAGE) &&
-	   persist_read_int(PERSIST_HEALTH_TIME_OF_AVERAGE) >= day_start) {
+	// persist_read_int() returns 0 if not set; since it is no longer 1970,
+	// this is acceptable.
+	if(persist_read_int(PERSIST_HEALTH_TIME_OF_AVERAGE) >= day_start) {
 		uint32_t average = persist_read_int(PERSIST_HEALTH_AVERAGE_STEPS);
 		steps.emplace(0, average);
 		// Rest of the setup logic is identical to the update logic
 		on_movement_update();
 	}
 	else {
-		// Just recalculate, whatever the problem
+		// Just recalculate...
 		// Don't initialize steps, recalculate_average_steps() will handle that
 		on_significant_update();
 	}
