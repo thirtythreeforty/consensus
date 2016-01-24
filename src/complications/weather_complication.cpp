@@ -109,8 +109,7 @@ auto WeatherComplication::compute_angles(const WeatherData &wdata) -> WeatherAng
 
 void WeatherComplication::update(GContext *ctx)
 {
-	redraw_2(ctx, GColorBlue, angles.humidity_angle,
-	              GColorRed, angles.temp_angle);
+	HighlightComplication2::update(ctx);
 
 	// Draw icon (loaded in weather_complication_weather_changed).
 	if(icon) {
@@ -127,7 +126,7 @@ void WeatherComplication::request_refresh(void*)
 	app_message_outbox_send();
 }
 
-void WeatherComplication::schedule_refresh()
+void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 {
 	time_t now = time(NULL);
 
@@ -135,7 +134,7 @@ void WeatherComplication::schedule_refresh()
 	const unsigned int slight_future = now + 10;
 
 	const unsigned int next_refresh_time =
-		MAX(slight_future, requested_weather.time_updated + refresh_interval);
+		MAX(slight_future, last_refresh_time + refresh_interval);
 
 	const uint32_t delay_ms = (next_refresh_time - now) * 1000;
 
@@ -143,20 +142,14 @@ void WeatherComplication::schedule_refresh()
 }
 
 WeatherComplication::WeatherComplication(GRect frame)
-	: Complication(frame)
-	, angles({0, 0})
-	, animating(false)
+	: HighlightComplication2(frame)
 {}
 
 void WeatherComplication::weather_changed(const WeatherData &new_weather)
 {
-	requested_weather = new_weather;
-
-	// Animate to the new weather
-	if(!animating) {
-		WeatherAngles angles = compute_angles(new_weather);
-		animate_to(angles);
-	}
+	auto angles = compute_angles(new_weather);
+	set_angle(angles.humidity_angle);
+	set_angle2(angles.temp_angle);
 
 	// Set the new icon
 	icon = std::experimental::nullopt;
@@ -197,71 +190,17 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 		}
 	}
 
-	schedule_refresh();
+	schedule_refresh(new_weather.time_updated);
 
 	mark_dirty();
 }
 
-void WeatherComplication::spinup_animation_started(Animation *anim, void *context)
+GColor WeatherComplication::highlight_color() const
 {
-	auto complication = static_cast<WeatherComplication*>(context);
-	complication->animating = true;
+	return GColorBlue;
 }
 
-void WeatherComplication::spinup_animation_stopped(Animation *anim, bool finished, void *context)
+GColor WeatherComplication::highlight_color2() const
 {
-	auto complication = static_cast<WeatherComplication*>(context);
-	complication->animating = false;
-
-	const WeatherAngles requested_angles = compute_angles(complication->requested_weather);
-
-	if(requested_angles.temp_angle != complication->angles.temp_angle ||
-	   requested_angles.humidity_angle != complication->angles.humidity_angle) {
-		complication->animate_to(requested_angles);
-	}
+	return GColorRed;
 }
-
-auto WeatherComplication::get_angles(const WeatherComplication& complication) -> const WeatherAngles&
-{
-	return complication.angles;
-}
-
-void WeatherComplication::set_angles(WeatherComplication& complication, const WeatherAngles& angles)
-{
-	complication.angles = angles;
-	complication.mark_dirty();
-}
-
-static inline int32_t int32_interpolate(uint32_t distance, int32_t from, int32_t to)
-{
-	return from + (((int32_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
-}
-
-inline WeatherComplication::WeatherAngles
-interpolate(uint32_t distance, WeatherComplication::WeatherAngles& from, WeatherComplication::WeatherAngles& to)
-{
-	WeatherComplication::WeatherAngles interpolated = {
-		.temp_angle = int32_interpolate(distance, from.temp_angle, to.temp_angle),
-		.humidity_angle = int32_interpolate(distance, from.humidity_angle, to.humidity_angle)
-	};
-	return interpolated;
-}
-
-void WeatherComplication::animate_to(WeatherAngles requested_angles)
-{
-	static const AnimationHandlers weather_spinup_anim_handlers = {
-		.started = WeatherComplication::spinup_animation_started,
-		.stopped = WeatherComplication::spinup_animation_stopped
-	};
-
-	Boulder::PropertyAnimation<
-		WeatherComplication, WeatherAngles,
-		WeatherComplication::set_angles, WeatherComplication::get_angles>
-	anim(
-		*this,
-		&this->angles,
-		&requested_angles
-	);
-	animation_schedule(base_setup_animation(anim, &weather_spinup_anim_handlers));
-}
-

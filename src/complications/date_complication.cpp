@@ -2,29 +2,12 @@
 
 #include "common.h"
 
-typedef struct {
-	bool animating;
-	uint8_t anim_frames_skipped;
-
-	uint8_t requested_date;
-
-	TextLayer *date_layer;
-	char date_layer_text[3];
-} DateComplicationData;
-
-void DateComplication::update(GContext *ctx)
-{
-	redraw_1(ctx, GColorClear, 0);
-}
-
 DateComplication::DateComplication(GRect frame)
 	: Complication(frame)
 	, animating(true)
 	, date_layer(calculate_date_frame())
 	, date_layer_text({0})
 {
-	animating = true; // Must call date_complication_animate_in
-
 	date_layer.set_background_color(GColorClear);
 	date_layer.set_text_color(GColorDarkGray);
 	date_layer.set_text_alignment(GTextAlignmentCenter);
@@ -104,6 +87,7 @@ Animation* DateComplication::animate_in()
 
 	Animation *anim = animation_create();
 	animation_set_implementation(anim, &date_spinup_anim_impl);
-	return base_setup_animation(anim, &date_spinup_anim_handlers);
+	base_setup_animation(anim, date_spinup_anim_handlers);
+	return anim;
 }
 
