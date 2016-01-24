@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16.000001"
-     inkscape:cx="2.4138038"
-     inkscape:cy="15.855241"
+     inkscape:zoom="32.000002"
+     inkscape:cx="8.2355878"
+     inkscape:cy="12.807574"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="true"
@@ -60,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="" />
       </cc:Work>
@@ -79,15 +79,15 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccccc" />
     <path
-       style="fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 12,27 0,13"
-       id="path4143"
+       style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 8.4999997,33.5 15.5,40.5"
+       id="path4145"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 12,43 0,4"
-       id="path4143-8"
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 8.4999995,40.5 15.5,33.5"
+       id="path4145-9"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
   </g>
