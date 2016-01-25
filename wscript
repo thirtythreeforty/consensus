@@ -15,21 +15,7 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('pebble_sdk')
-
-    CROSS_COMPILE_PREFIX = 'arm-none-eabi-'
-    cxx = CROSS_COMPILE_PREFIX + 'g++'
-    for p in ctx.env.TARGET_PLATFORMS:
-        e = ctx.all_envs[p]
-        ctx.env.CXX = cxx
-        ctx.load('g++')
-
-        e.CXX = cxx
-        e.CXXFLAGS = list(ctx.env.CFLAGS)
-        e.CXXFLAGS.remove('-std=c99')
-        e.CXXFLAGS.extend(['-c', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto'])
-        e.LINKFLAGS.extend(['-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto'])
-        e.CXX_TGT_F = ['-o']
-        e.LINK_CC = cxx
+    ctx.load('pebble_cxx', tooldir='waftools')
 
 def build(ctx):
     ctx.load('pebble_sdk')
