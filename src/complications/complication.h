@@ -1,11 +1,9 @@
 #ifndef COMPLICATION_H
 #define COMPLICATION_H
 
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 #include <pebble.h>
+}
 
 typedef struct {
 	bool valid;
@@ -19,9 +17,6 @@ typedef struct {
 void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
 void weather_from_persist(WeatherData *wdata);
 void weather_to_persist(const WeatherData *wdata);
-
-#ifdef __cplusplus
-} // extern "C"
 
 #include <experimental/optional>
 
@@ -208,6 +203,5 @@ public:
 		type = complication_type_map<void>;
 	}
 };
-#endif
 
 #endif
