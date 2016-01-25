@@ -1,22 +1,11 @@
 #ifndef COMPLICATION_H
 #define COMPLICATION_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <pebble.h>
-
-typedef struct BatteryComplication BatteryComplication;
-typedef struct DateComplication DateComplication;
-typedef struct WeatherComplication WeatherComplication;
-
-BatteryComplication* battery_complication_create(GRect frame);
-void battery_complication_destroy(BatteryComplication *complication);
-Layer* battery_complication_get_layer(BatteryComplication *complication);
-void battery_complication_state_changed(BatteryComplication *complication, const BatteryChargeState *charge);
-
-DateComplication* date_complication_create(GRect frame);
-void date_complication_destroy(DateComplication *complication);
-Layer* date_complication_get_layer(DateComplication *complication);
-void date_complication_time_changed(DateComplication *complication, struct tm *time);
-Animation* date_complication_animate_in(DateComplication *complication);
 
 typedef struct {
 	bool valid;
@@ -30,70 +19,195 @@ typedef struct {
 void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
 void weather_from_persist(WeatherData *wdata);
 void weather_to_persist(const WeatherData *wdata);
-WeatherComplication* weather_complication_create(GRect frame);
-void weather_complication_destroy(WeatherComplication *complication);
-Layer* weather_complication_get_layer(WeatherComplication *complication);
-void weather_complication_weather_changed(WeatherComplication *complication, const WeatherData *wdata);
 
-typedef enum {
-	COMPLICATION_TYPE_NONE,
-	COMPLICATION_TYPE_BATTERY,
-	COMPLICATION_TYPE_DATE,
-	COMPLICATION_TYPE_WEATHER,
-} ComplicationType;
+#ifdef __cplusplus
+} // extern "C"
 
-typedef struct {
-	void *complication;
-	ComplicationType type;
-} AbstractComplication;
+#include <experimental/optional>
 
-inline void* abstract_complication_to_helper(const AbstractComplication *abs_complication, ComplicationType type)
+#include "boulder.h"
+
+class Complication: public Boulder::Layer
 {
-	if(abs_complication->type == type) {
-		return abs_complication->complication;
-	}
-	else {
-		return NULL;
-	}
-}
+protected:
+	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
+	~Complication() = default;
 
-inline void abstract_complication_from_helper(AbstractComplication *abs_complication, void *complication, ComplicationType type)
+	virtual void update(GContext* ctx) override;
+
+	void base_setup_animation(Animation *anim, const AnimationHandlers &handlers);
+};
+
+class HighlightComplication: public Complication
 {
-	*abs_complication = (AbstractComplication) {
-		.complication = complication,
-		.type = type
+	friend class HighlightComplication2;
+
+	bool animating = false;
+	uint32_t requested_angle = 0, angle = 0;
+
+protected:
+	using Complication::Complication;
+
+	virtual void update(GContext* ctx) override;
+
+	void set_angle(uint32_t new_angle);
+
+	virtual GColor highlight_color() const = 0;
+
+private:
+	// Helpers for animations
+	void animate_to_requested();
+	static void panim_set_angle(HighlightComplication& complication, const uint32_t& new_angle);
+	static const uint32_t& panim_get_angle(const HighlightComplication& complication);
+	static void panim_stopped(Animation *anim, bool finished, void *context);
+};
+
+class HighlightComplication2: public HighlightComplication
+{
+	bool animating2 = false;
+	uint32_t requested_angle2 = 0, angle2 = 0;
+
+protected:
+	using HighlightComplication::HighlightComplication;
+
+	virtual void update(GContext* ctx) override;
+
+	void set_angle2(uint32_t new_angle2);
+
+	virtual GColor highlight_color2() const = 0;
+
+private:
+	// The '2' versions of all these functions are kinda gross, but they all
+	// refer to angle2 of this class.
+	static void panim_set_angle2(HighlightComplication2& complication, const uint32_t& new_angle);
+	static const uint32_t& panim_get_angle2(const HighlightComplication2& complication);
+	void animate_to_requested2();
+	static void panim_stopped2(Animation *anim, bool finished, void *context);
+};
+
+class DateComplication: public Complication
+{
+	bool animating;
+	uint8_t anim_frames_skipped;
+
+	uint8_t requested_date;
+
+	Boulder::TextLayer date_layer;
+	std::array<char, 3> date_layer_text;
+
+public:
+	DateComplication(GRect frame);
+	~DateComplication() = default;
+
+	Animation* animate_in();
+
+	void time_changed(struct tm *time);
+
+private:
+	GRect calculate_date_frame();
+	void set_displayed(uint8_t mday);
+
+	static void spin_animation_started(Animation *animation, void *context);
+	static void spin_animation_stopped(Animation *animation, bool finished, void *context);
+	static void spin_animation_update(Animation* anim, AnimationProgress progress);
+};
+
+class WeatherComplication: public HighlightComplication2
+{
+	struct WeatherAngles {
+		int32_t temp_angle;
+		int32_t humidity_angle;
 	};
-}
 
-inline void abstract_complication_destroy(AbstractComplication *abs_complication)
+	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	GPoint icon_shift;
+
+	std::experimental::optional<Boulder::AppTimer> refresh_timer;
+
+public:
+	explicit WeatherComplication(GRect frame);
+	~WeatherComplication() = default;
+
+	void weather_changed(const WeatherData &new_weather);
+
+protected:
+	void update(GContext *ctx) override;
+	virtual GColor highlight_color() const override;
+	virtual GColor highlight_color2() const override;
+
+private:
+	void schedule_refresh(time_t last_refresh_time);
+
+	static WeatherAngles compute_angles(const WeatherData& wdata);
+	static void request_refresh(void*);
+};
+
+class BatteryComplication: public HighlightComplication
 {
-	switch(abs_complication->type) {
-	case COMPLICATION_TYPE_NONE:
-		break;
-	case COMPLICATION_TYPE_BATTERY:
-		battery_complication_destroy(abs_complication->complication);
-		break;
-	case COMPLICATION_TYPE_DATE:
-		date_complication_destroy(abs_complication->complication);
-		break;
-	case COMPLICATION_TYPE_WEATHER:
-		weather_complication_destroy(abs_complication->complication);
-		break;
-	}
-	abs_complication->type = COMPLICATION_TYPE_NONE;
-}
+	std::experimental::optional<Boulder::GDrawCommandImage> icon;
 
-#define abstract_complication_to_battery(abs_complication) \
-	((BatteryComplication*)abstract_complication_to_helper(abs_complication, COMPLICATION_TYPE_BATTERY))
-#define abstract_complication_to_date(abs_complication) \
-	((DateComplication*)abstract_complication_to_helper(abs_complication, COMPLICATION_TYPE_DATE))
-#define abstract_complication_to_weather(abs_complication) \
-	((WeatherComplication*)abstract_complication_to_helper(abs_complication, COMPLICATION_TYPE_WEATHER))
-#define abstract_complication_from_battery(abs_complication, complication) \
-	abstract_complication_from_helper(abs_complication, complication, COMPLICATION_TYPE_BATTERY)
-#define abstract_complication_from_date(abs_complication, complication) \
-	abstract_complication_from_helper(abs_complication, complication, COMPLICATION_TYPE_DATE)
-#define abstract_complication_from_weather(abs_complication, complication) \
-	abstract_complication_from_helper(abs_complication, complication, COMPLICATION_TYPE_WEATHER)
+public:
+	explicit BatteryComplication(GRect frame);
+
+	void state_changed(const BatteryChargeState *state);
+
+protected:
+	void update(GContext *ctx) override;
+	GColor highlight_color() const override;
+};
+
+template<typename T> constexpr uint8_t complication_type_map;
+template<> constexpr uint8_t complication_type_map<void> = 0;
+template<> constexpr uint8_t complication_type_map<BatteryComplication> = 1;
+template<> constexpr uint8_t complication_type_map<DateComplication> = 2;
+template<> constexpr uint8_t complication_type_map<WeatherComplication> = 3;
+
+class AbstractComplication
+{
+	void *complication;
+	uint8_t type;
+
+	template<typename T>
+	AbstractComplication(T *ptr)
+		: complication(ptr)
+		, type(complication_type_map<T>)
+	{}
+
+public:
+	AbstractComplication() : type(complication_type_map<void>) {}
+
+	template<typename T>
+	auto downcast() -> T* {
+		if(type == complication_type_map<T>) {
+			return static_cast<T*>(complication);
+		}
+		else {
+			return nullptr;
+		}
+	}
+
+	template<typename T>
+	static auto from(T *ptr) -> AbstractComplication {
+		return AbstractComplication{ptr};
+	}
+
+	void destroy() {
+		switch(type) {
+		case complication_type_map<void>:
+			break;
+		case complication_type_map<BatteryComplication>:
+			delete static_cast<BatteryComplication*>(complication);
+			break;
+		case complication_type_map<DateComplication>:
+			delete static_cast<DateComplication*>(complication);
+			break;
+		case complication_type_map<WeatherComplication>:
+			delete static_cast<WeatherComplication*>(complication);
+			break;
+		}
+		type = complication_type_map<void>;
+	}
+};
+#endif
 
 #endif
