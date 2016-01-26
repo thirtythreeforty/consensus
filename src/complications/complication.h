@@ -1,11 +1,9 @@
 #ifndef COMPLICATION_H
 #define COMPLICATION_H
 
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 #include <pebble.h>
+}
 
 typedef struct {
 	bool valid;
@@ -19,9 +17,6 @@ typedef struct {
 void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
 void weather_from_persist(WeatherData *wdata);
 void weather_to_persist(const WeatherData *wdata);
-
-#ifdef __cplusplus
-} // extern "C"
 
 #include <experimental/optional>
 
@@ -41,46 +36,47 @@ protected:
 class HighlightComplication: public Complication
 {
 	friend class HighlightComplication2;
+	using angle_t = int32_t;
 
 	bool animating = false;
-	uint32_t requested_angle = 0, angle = 0;
+	angle_t requested_angle = 0, angle = 0;
 
 protected:
 	using Complication::Complication;
 
 	virtual void update(GContext* ctx) override;
 
-	void set_angle(uint32_t new_angle);
+	void set_angle(angle_t new_angle);
 
 	virtual GColor highlight_color() const = 0;
 
 private:
 	// Helpers for animations
 	void animate_to_requested();
-	static void panim_set_angle(HighlightComplication& complication, const uint32_t& new_angle);
-	static const uint32_t& panim_get_angle(const HighlightComplication& complication);
+	static void panim_set_angle(HighlightComplication& complication, const angle_t& new_angle);
+	static const angle_t& panim_get_angle(const HighlightComplication& complication);
 	static void panim_stopped(Animation *anim, bool finished, void *context);
 };
 
 class HighlightComplication2: public HighlightComplication
 {
 	bool animating2 = false;
-	uint32_t requested_angle2 = 0, angle2 = 0;
+	angle_t requested_angle2 = 0, angle2 = 0;
 
 protected:
 	using HighlightComplication::HighlightComplication;
 
 	virtual void update(GContext* ctx) override;
 
-	void set_angle2(uint32_t new_angle2);
+	void set_angle2(angle_t new_angle2);
 
 	virtual GColor highlight_color2() const = 0;
 
 private:
 	// The '2' versions of all these functions are kinda gross, but they all
 	// refer to angle2 of this class.
-	static void panim_set_angle2(HighlightComplication2& complication, const uint32_t& new_angle);
-	static const uint32_t& panim_get_angle2(const HighlightComplication2& complication);
+	static void panim_set_angle2(HighlightComplication2& complication, const angle_t& new_angle);
+	static const angle_t& panim_get_angle2(const HighlightComplication2& complication);
 	void animate_to_requested2();
 	static void panim_stopped2(Animation *anim, bool finished, void *context);
 };
@@ -233,6 +229,5 @@ public:
 		type = complication_type_map<void>;
 	}
 };
-#endif
 
 #endif

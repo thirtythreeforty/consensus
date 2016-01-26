@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <array>
 #include <memory>
 
 extern "C" {
@@ -15,7 +17,7 @@ extern "C" {
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
 static Layer *background_layer = NULL;
-static AbstractComplication complications[3];
+static std::array<AbstractComplication, 3> complications;
 
 static enum {
 	WAS_CONNECTED_INIT = 0,
@@ -27,34 +29,18 @@ static BitmapLayer *no_bluetooth_layer = NULL;
 static GDrawCommandImage *ticks_image = NULL;
 static GBitmap *no_bluetooth_image = NULL;
 
-static void update_date_complications(struct tm *tick_time)
-{
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto date_complication = complications[i].downcast<DateComplication>();
-		if(date_complication) {
-			date_complication->time_changed(tick_time);
-		}
-	}
-}
+using std::begin;
+using std::end;
 
-static void update_battery_complications(BatteryChargeState *state)
+template<typename C, typename F>
+void complication_do(const F& f)
 {
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto battery_complication = complications[i].downcast<BatteryComplication>();
-		if(battery_complication) {
-			battery_complication->state_changed(state);
+	std::for_each(begin(complications), end(complications), [&](auto& c) {
+		auto downcast_complication = c.template downcast<C>();
+		if(downcast_complication) {
+			f(*downcast_complication);
 		}
-	}
-}
-
-static void update_weather_complications(WeatherData *wdata)
-{
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto weather_complication = complications[i].downcast<WeatherComplication>();
-		if(weather_complication) {
-			weather_complication->weather_changed(*wdata);
-		}
-	}
+	});
 }
 
 static void update_health_complications(HealthEventType event, void*)
@@ -78,7 +64,9 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 		face_layer->set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
 	}
 
-	update_date_complications(tick_time);
+	complication_do<DateComplication>([&](auto& c) {
+		c.time_changed(tick_time);
+	});
 
 	// Vibrate once on the hour and twice at noon.
 	if(should_vibrate_on_hour() &&
@@ -102,7 +90,9 @@ void on_tap(AccelAxisType axis, int32_t direction)
 
 void on_battery_state_change(BatteryChargeState charge)
 {
-	update_battery_complications(&charge);
+	complication_do<BatteryComplication>([&](auto& c){
+		c.state_changed(&charge);
+	});
 }
 
 void on_connection_change(bool connected)
@@ -164,7 +154,9 @@ void on_appmessage_in(DictionaryIterator *iterator, void *context)
 	WeatherData wdata;
 	weather_from_appmessage(iterator, &wdata);
 	if(wdata.valid) {
-		update_weather_complications(&wdata);
+		complication_do<WeatherComplication>([&](auto& c) {
+			c.weather_changed(wdata);
+		});
 		weather_to_persist(&wdata);
 	}
 
@@ -248,7 +240,7 @@ static void init_layers(void)
 	weather_complication->weather_changed(wdata);
 
 	face_layer = new FaceLayer(size);
-	face_layer->set_colors(GColorCobaltBlue, GColorPictonBlue, GColorRed);
+	face_layer->set_colors(GColorVeryLightBlue, GColorPictonBlue, GColorRed);
 	face_layer->set_show_second(should_show_second());
 	layer_add_child(window_get_root_layer(window), *face_layer);
 	animation_schedule(face_layer->animate_in(true, true));
