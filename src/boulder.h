@@ -176,10 +176,13 @@ namespace {
 
 	using updater_t = void (*)(::PropertyAnimation*, const uint32_t);
 
-	// Pebble's uint32 interpolator is very, very broken.  But the user will expect it to be defined.
-	inline uint32_t interpolate(uint32_t distance, uint32_t& from, uint32_t& to)
+	// Provide a default interpolate() when then template will instantiate.
+	// Also, Pebble's uint32 interpolator is very, very broken.  But the user
+	// will expect it to be defined.  This takes care of that, too.
+	template<typename T>
+	inline T interpolate(uint32_t distance, const T& from, const T& to)
 	{
-		return from + (((int32_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+		return from + (((T)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 	}
 
 	template<typename S, typename T, PropertyAnimationSetter<S, T> Setter>

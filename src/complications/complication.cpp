@@ -56,7 +56,7 @@ void HighlightComplication2::update(GContext *ctx)
 	draw_arc(ctx, bounds, highlight_color2(), TRIG_MAX_ANGLE / 2, angle2, TRIG_MAX_ANGLE);
 }
 
-void HighlightComplication::set_angle(uint32_t new_angle)
+void HighlightComplication::set_angle(angle_t new_angle)
 {
 	if(requested_angle == new_angle) {
 		return;
@@ -69,7 +69,7 @@ void HighlightComplication::set_angle(uint32_t new_angle)
 	}
 }
 
-void HighlightComplication2::set_angle2(uint32_t new_angle)
+void HighlightComplication2::set_angle2(angle_t new_angle)
 {
 	if(requested_angle2 == new_angle) {
 		return;
@@ -91,7 +91,7 @@ void HighlightComplication::animate_to_requested()
 	using Boulder::PropertyAnimationSetter;
 
 	Boulder::PropertyAnimation<
-		HighlightComplication, uint32_t,
+		HighlightComplication, angle_t,
 		panim_set_angle, panim_get_angle
 	> anim(*this, &angle, &requested_angle);
 
@@ -112,7 +112,7 @@ void HighlightComplication2::animate_to_requested2()
 	using Boulder::PropertyAnimationSetter;
 
 	Boulder::PropertyAnimation<
-		HighlightComplication2, uint32_t,
+		HighlightComplication2, angle_t,
 		panim_set_angle2, panim_get_angle2
 	> anim(*this, &this->angle2, &requested_angle2);
 
@@ -146,21 +146,21 @@ void HighlightComplication2::panim_stopped2(Animation *anim, bool finished, void
 	}
 }
 
-void HighlightComplication::panim_set_angle(HighlightComplication& complication, const uint32_t& new_angle) {
+void HighlightComplication::panim_set_angle(HighlightComplication& complication, const angle_t& new_angle) {
 	complication.angle = new_angle;
 	complication.mark_dirty();
 }
 
-const uint32_t& HighlightComplication::panim_get_angle(const HighlightComplication& complication) {
+auto HighlightComplication::panim_get_angle(const HighlightComplication& complication) -> const angle_t& {
 	return complication.angle;
 }
 
-void HighlightComplication2::panim_set_angle2(HighlightComplication2& complication, const uint32_t& new_angle) {
+void HighlightComplication2::panim_set_angle2(HighlightComplication2& complication, const angle_t& new_angle) {
 	complication.angle2 = new_angle;
 	complication.mark_dirty();
 }
 
-const uint32_t& HighlightComplication2::panim_get_angle2(const HighlightComplication2& complication) {
+auto HighlightComplication2::panim_get_angle2(const HighlightComplication2& complication) -> const angle_t& {
 	return complication.angle2;
 }
 
