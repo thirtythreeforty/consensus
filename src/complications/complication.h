@@ -21,6 +21,7 @@ void weather_to_persist(const WeatherData *wdata);
 #include <experimental/optional>
 
 #include "boulder.h"
+#include "lazy_icon.h"
 
 class Complication: public Boulder::Layer
 {
@@ -47,6 +48,7 @@ protected:
 	virtual void update(GContext* ctx) override;
 
 	void set_angle(angle_t new_angle);
+	inline const angle_t& get_angle() { return requested_angle; }
 
 	virtual GColor highlight_color() const = 0;
 
@@ -69,6 +71,7 @@ protected:
 	virtual void update(GContext* ctx) override;
 
 	void set_angle2(angle_t new_angle2);
+	inline const angle_t& get_angle2() { return requested_angle2; }
 
 	virtual GColor highlight_color2() const = 0;
 
@@ -115,7 +118,7 @@ class WeatherComplication: public HighlightComplication2
 		int32_t humidity_angle;
 	};
 
-	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	LazyIcon icon;
 	GPoint icon_shift;
 
 	std::experimental::optional<Boulder::AppTimer> refresh_timer;
@@ -156,7 +159,7 @@ class HealthComplication: public HighlightComplication
 {
 	std::experimental::optional<uint32_t> average_steps;
 
-	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	LazyIcon icon;
 	GPoint icon_shift;
 
 public:

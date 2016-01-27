@@ -59,15 +59,13 @@ void HealthComplication::on_movement_update()
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
 
 		set_angle(TRIG_MAX_ANGLE * today_steps / *average_steps);
-
-		// TODO only change if needed
-		icon.emplace(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
+		icon.reset(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 	}
 	else {
-		icon.emplace(RESOURCE_ID_HEALTH_ERROR);
+		icon.reset(RESOURCE_ID_HEALTH_ERROR);
 	}
 
-	const GSize icon_size = icon->get_bounds_size();
+	const GSize icon_size = icon.get_bounds_size();
 	const GRect bounds = this->get_bounds();
 	icon_shift = {
 		.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
@@ -81,9 +79,7 @@ void HealthComplication::update(GContext *ctx)
 {
 	HighlightComplication::update(ctx);
 
-	if(icon) {
-		icon->draw(ctx, icon_shift);
-	}
+	icon.draw(ctx, icon_shift);
 }
 
 GColor HealthComplication::highlight_color() const
