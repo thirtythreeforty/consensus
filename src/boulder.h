@@ -180,9 +180,20 @@ namespace {
 	// Also, Pebble's uint32 interpolator is very, very broken.  But the user
 	// will expect it to be defined.  This takes care of that, too.
 	template<typename T>
-	inline T interpolate(uint32_t distance, const T& from, const T& to)
+	inline auto interpolate(uint32_t distance, const T& from, const T& to)
+		-> std::enable_if_t<std::is_unsigned<T>::value, T>
 	{
-		return from + (((T)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+		if(to > from)
+			return from + ((distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+		else
+			return from - ((distance * (from - to)) / ANIMATION_NORMALIZED_MAX);
+	}
+
+	template<typename T>
+	inline auto interpolate(uint32_t distance, const T& from, const T& to)
+		-> std::enable_if_t<!std::is_unsigned<T>::value, T>
+	{
+		return from + ((distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 	}
 
 	template<typename S, typename T, PropertyAnimationSetter<S, T> Setter>
