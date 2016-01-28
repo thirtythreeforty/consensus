@@ -184,16 +184,16 @@ namespace {
 		-> std::enable_if_t<std::is_unsigned<T>::value, T>
 	{
 		if(to > from)
-			return from + ((distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+			return from + (((uint64_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 		else
-			return from - ((distance * (from - to)) / ANIMATION_NORMALIZED_MAX);
+			return from - (((uint64_t)distance * (from - to)) / ANIMATION_NORMALIZED_MAX);
 	}
 
 	template<typename T>
 	inline auto interpolate(uint32_t distance, const T& from, const T& to)
-		-> std::enable_if_t<!std::is_unsigned<T>::value, T>
+		-> std::enable_if_t<std::is_signed<T>::value, T>
 	{
-		return from + ((distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
+		return from + (((int64_t)distance * (to - from)) / ANIMATION_NORMALIZED_MAX);
 	}
 
 	template<typename S, typename T, PropertyAnimationSetter<S, T> Setter>
