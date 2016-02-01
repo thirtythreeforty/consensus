@@ -13,6 +13,15 @@ var pebbleIcons = {
 	"snow_heavy": 8
 };
 
+// Map of configuration page's values for complications to integers to send
+var pebbleComplicationNames = {
+	"None": 0,
+	"Battery": 1,
+	"Date": 2,
+	"Weather": 3,
+	"Health": 4
+}
+
 function xhrRequest(url, type, callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function () {
@@ -131,12 +140,18 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	var configData = JSON.parse(configStr);
 
 	function toInt(val) { return val ? 1 : 0; }
+	function complicationToInt(val) {
+		return pebbleComplicationNames[val];
+	}
 
 	var dict = {
 		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['disp_second_hand']),
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['disp_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
-		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect'])
+		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
+		KEY_PREF_LEFT_COMPLICATION: complicationToInt(configData['left_complication']),
+		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(configData['bottom_complication']),
+		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(configData['right_complication'])
 	};
 
 	// Send to watchapp

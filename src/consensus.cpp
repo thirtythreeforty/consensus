@@ -17,6 +17,7 @@ extern "C" {
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
 static Layer *background_layer = NULL;
+static Boulder::Layer *complications_layer = NULL;
 static std::array<AbstractComplication, 3> complications;
 
 static enum {
@@ -136,6 +137,61 @@ static TimeUnits update_time_interval(bool show_sec)
 	return show_sec ? SECOND_UNIT : MINUTE_UNIT;
 }
 
+static const int16_t complication_size = 51;
+static const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
+static const int16_t complication_offset_y = 15;
+
+static void reinit_complications()
+{
+	GRect size = complications_layer->get_frame();
+	GPoint center = grect_center_point(&size);
+
+	for(auto& complication: complications) {
+		complication.destroy();
+	}
+
+	const GRect left_complication_position =
+		GRect((int16_t)(center.x - complication_size - complication_offset_x),
+		      (int16_t)(center.y - complication_size / 2),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
+	complications[0] = AbstractComplication::create(left_complication_type(), left_complication_position);
+
+	const GRect right_complication_position =
+		GRect((int16_t)(center.x + complication_offset_x),
+		      (int16_t)(center.y - complication_size / 2),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
+	complications[1] = AbstractComplication::create(right_complication_type(), right_complication_position);
+
+	const GRect bottom_complication_position =
+		GRect((int16_t)(center.x - complication_size / 2),
+		      (int16_t)(center.y + complication_offset_y),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
+	complications[2] = AbstractComplication::create(bottom_complication_type(), bottom_complication_position);
+
+	// Initialize the complications
+	for(auto& complication: complications) {
+		if(complication.valid()) {
+			complications_layer->add_child(static_cast<Complication&>(complication));
+		}
+	}
+
+	const BatteryChargeState charge_state = battery_state_service_peek();
+	on_battery_state_change(charge_state);
+
+	WeatherData wdata;
+	weather_from_persist(&wdata);
+	complication_do<WeatherComplication>([&](auto& c) {
+		c.weather_changed(wdata);
+	});
+
+	complication_do<DateComplication>([](auto& c) {
+		animation_schedule(c.animate_in());
+	});
+}
+
 static void on_preferences_in(DictionaryIterator *iterator)
 {
 	parse_preferences(iterator);
@@ -147,16 +203,16 @@ static void on_preferences_in(DictionaryIterator *iterator)
 	update_time_now();
 
 	update_connection_now();
+
+	reinit_complications();
 }
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
 {
 	WeatherData wdata;
 	weather_from_appmessage(iterator, &wdata);
+	// Weather complications are getting recreated below, so no point in telling them about this now
 	if(wdata.valid) {
-		complication_do<WeatherComplication>([&](auto& c) {
-			c.weather_changed(wdata);
-		});
 		weather_to_persist(&wdata);
 	}
 
@@ -189,10 +245,6 @@ static void init_layers(void)
 	layer_set_update_proc(background_layer, update_background);
 	layer_add_child(window_get_root_layer(window), background_layer);
 
-	const int16_t complication_size = 51;
-	const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
-	const int16_t complication_offset_y = 15;
-
 	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
 	const GRect bluetooth_layer_location =
 		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
@@ -207,37 +259,10 @@ static void init_layers(void)
 	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
-	const GRect battery_complication_position =
-		GRect((int16_t)(center.x - complication_size - complication_offset_x),
-		      (int16_t)(center.y - complication_size / 2),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-	auto health_complication = new HealthComplication(battery_complication_position);
-	complications[0] = AbstractComplication::from(health_complication);
-	layer_add_child(window_get_root_layer(window), *health_complication);
-	health_service_events_subscribe(update_health_complications, nullptr);
+	complications_layer = new Boulder::Layer(size);
+	layer_add_child(window_get_root_layer(window), *complications_layer);
 
-	const GRect date_complication_position =
-		GRect((int16_t)(center.x + complication_offset_x),
-		      (int16_t)(center.y - complication_size / 2),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-	DateComplication *date_complication = new DateComplication(date_complication_position);
-	complications[1] = AbstractComplication::from(date_complication);
-	layer_add_child(window_get_root_layer(window), *date_complication);
-	animation_schedule(date_complication->animate_in());
-
-	const GRect weather_complication_position =
-		GRect((int16_t)(center.x - complication_size / 2),
-		      (int16_t)(center.y + complication_offset_y),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-	WeatherData wdata;
-	weather_from_persist(&wdata);
-	WeatherComplication *weather_complication = new WeatherComplication(weather_complication_position);
-	layer_add_child(window_get_root_layer(window), *weather_complication);
-	complications[2] = AbstractComplication::from(weather_complication);
-	weather_complication->weather_changed(wdata);
+	reinit_complications();
 
 	face_layer = new FaceLayer(size);
 	face_layer->set_colors(GColorVeryLightBlue, GColorPictonBlue, GColorRed);
@@ -249,9 +274,10 @@ static void init_layers(void)
 static void deinit_layers(void)
 {
 	delete face_layer;
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		complications[i].destroy();
+	for(auto& complication: complications) {
+		complication.destroy();
 	}
+	delete complications_layer;
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
 	layer_destroy(background_layer);
@@ -292,6 +318,8 @@ static void init(void)
 		.pebblekit_connection_handler = ignore_connection_change,
 	};
 	connection_service_subscribe(conn_handlers);
+
+	health_service_events_subscribe(update_health_complications, nullptr);
 
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);

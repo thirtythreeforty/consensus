@@ -64,6 +64,24 @@
         Vibrate when the watch loses its Bluetooth connection to the phone.
       </div>
     </div>
+    <div class='item-container'>
+      <div class='item-container-header'>Complications</div>
+      <div class='item-container-content' id='complication-container'>
+        <!-- The JS will inflate these to avoid duplicating markup -->
+        <template id='complication-dropdown'>
+          <label class="item">
+            <span id='complication-label'></span>
+            <select id="complication-select" dir='rtl' class="item-select">
+              <option class="item-select-option">None</option>
+              <option class="item-select-option">Battery</option>
+              <option class="item-select-option">Health</option>
+              <option class="item-select-option">Date</option>
+              <option class="item-select-option">Weather</option>
+            </select>
+          </label>
+        </template>
+      </div>
+    </div>
 
     <div class='item-container'>
       <div class='button-container'>
@@ -88,7 +106,10 @@
       cfgElement('disp_second_hand', 'checked', false),
       cfgElement('disp_no_connection', 'checked', true),
       cfgElement('vibrate_on_hour', 'checked', true),
-      cfgElement('vibrate_on_disconnect', 'checked', true)
+      cfgElement('vibrate_on_disconnect', 'checked', true),
+      cfgElement('left_complication', 'value', 'Battery'),
+      cfgElement('bottom_complication', 'value', 'Weather'),
+      cfgElement('right_complication', 'value', 'Date')
     ];
   }
 
@@ -138,6 +159,23 @@
     return defaultValue || false;
   }
 
+  // Inflate the complication pickers
+  var cTemplate = document.getElementById('complication-dropdown');
+  var cContainer = document.getElementById('complication-container');
+  for(var name of ["Left", "Bottom", "Right"]) {
+    function makeID(name) {
+      return name.toLowerCase() + '_complication';
+    }
+
+    var inflated = cTemplate.content.cloneNode(true);
+    var label = inflated.getElementById('complication-label');
+    var select = inflated.getElementById('complication-select');
+    label.textContent = name;
+    select.id = makeID(name);
+    cContainer.appendChild(inflated);
+  }
+
+  // Set up the 'submit' button
   var submitButton = document.getElementById('submit_button');
   submitButton.addEventListener('click', function() {
     console.log('Submit');
