@@ -243,8 +243,8 @@ static void init_layers(void)
 static void deinit_layers(void)
 {
 	delete face_layer;
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		complications[i].destroy();
+	for(auto& complication: complications) {
+		complication.destroy();
 	}
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
