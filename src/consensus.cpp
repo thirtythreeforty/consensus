@@ -121,76 +121,18 @@ static TimeUnits update_time_interval(bool show_sec)
 	return show_sec ? SECOND_UNIT : MINUTE_UNIT;
 }
 
-static void on_preferences_in(DictionaryIterator *iterator)
-{
-	parse_preferences(iterator);
+static const int16_t complication_size = 51;
+static const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
+static const int16_t complication_offset_y = 15;
 
-	const bool show_second = should_show_second();
-	const TimeUnits units = update_time_interval(show_second);
-	tick_timer_service_subscribe(units, on_tick);
-	face_layer->set_show_second(show_second);
-	update_time_now();
-
-	update_connection_now();
-}
-
-void on_appmessage_in(DictionaryIterator *iterator, void *context)
-{
-	WeatherData wdata;
-	weather_from_appmessage(iterator, &wdata);
-	if(wdata.valid) {
-		complication_do<WeatherComplication>([&](auto& c) {
-			c.weather_changed(wdata);
-		});
-		weather_to_persist(&wdata);
-	}
-
-	on_preferences_in(iterator);
-}
-
-void on_appmessage_in_dropped(AppMessageResult reason, void *context)
-{
-	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
-}
-
-static void update_background(Layer *layer, GContext *ctx)
-{
-	GRect rect = layer_get_bounds(layer);
-	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_rect(ctx, rect, 0, GCornerNone);
-
-	gdraw_command_image_draw(ctx, ticks_image, GPointZero);
-}
-
-static void init_layers(void)
+static void reinit_complications()
 {
 	GRect size = layer_get_bounds(window_get_root_layer(window));
 	GPoint center = grect_center_point(&size);
 
-	ticks_image = gdraw_command_image_create_with_resource(RESOURCE_ID_TICKS);
-	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
-
-	background_layer = layer_create(size);
-	layer_set_update_proc(background_layer, update_background);
-	layer_add_child(window_get_root_layer(window), background_layer);
-
-	const int16_t complication_size = 51;
-	const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
-	const int16_t complication_offset_y = 15;
-
-	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
-	const GRect bluetooth_layer_location =
-		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
-		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
-		      (int16_t)bluetooth_image_size.size.w,
-		      (int16_t)bluetooth_image_size.size.h);
-	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
-	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
-	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
-
-	// Immediately hide or show the icon
-	update_connection_now();
-	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
+	for(auto& complication: complications) {
+		complication.destroy();
+	}
 
 	const GRect left_complication_position =
 		GRect((int16_t)(center.x - complication_size - complication_offset_x),
@@ -232,6 +174,76 @@ static void init_layers(void)
 	complication_do<DateComplication>([](auto& c) {
 		animation_schedule(c.animate_in());
 	});
+}
+
+static void on_preferences_in(DictionaryIterator *iterator)
+{
+	parse_preferences(iterator);
+
+	const bool show_second = should_show_second();
+	const TimeUnits units = update_time_interval(show_second);
+	tick_timer_service_subscribe(units, on_tick);
+	face_layer->set_show_second(show_second);
+	update_time_now();
+
+	update_connection_now();
+
+	reinit_complications();
+}
+
+void on_appmessage_in(DictionaryIterator *iterator, void *context)
+{
+	WeatherData wdata;
+	weather_from_appmessage(iterator, &wdata);
+	// Weather complications are getting recreated below, so no point in telling them about this now
+	if(wdata.valid) {
+		weather_to_persist(&wdata);
+	}
+
+	on_preferences_in(iterator);
+}
+
+void on_appmessage_in_dropped(AppMessageResult reason, void *context)
+{
+	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
+}
+
+static void update_background(Layer *layer, GContext *ctx)
+{
+	GRect rect = layer_get_bounds(layer);
+	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_fill_rect(ctx, rect, 0, GCornerNone);
+
+	gdraw_command_image_draw(ctx, ticks_image, GPointZero);
+}
+
+static void init_layers(void)
+{
+	GRect size = layer_get_bounds(window_get_root_layer(window));
+	GPoint center = grect_center_point(&size);
+
+	ticks_image = gdraw_command_image_create_with_resource(RESOURCE_ID_TICKS);
+	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
+
+	background_layer = layer_create(size);
+	layer_set_update_proc(background_layer, update_background);
+	layer_add_child(window_get_root_layer(window), background_layer);
+
+	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
+	const GRect bluetooth_layer_location =
+		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
+		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
+		      (int16_t)bluetooth_image_size.size.w,
+		      (int16_t)bluetooth_image_size.size.h);
+	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
+	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
+	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
+
+	// Immediately hide or show the icon
+	update_connection_now();
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
+
+	reinit_complications();
 
 	face_layer = new FaceLayer(size);
 	face_layer->set_colors(GColorVeryLightBlue, GColorPictonBlue, GColorRed);
