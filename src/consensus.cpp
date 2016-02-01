@@ -332,6 +332,7 @@ static void deinit(void)
 {
 	animation_unschedule_all();
 	app_message_deregister_callbacks();
+	health_service_events_unsubscribe();
 	connection_service_unsubscribe();
 	accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();
