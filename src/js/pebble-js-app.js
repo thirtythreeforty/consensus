@@ -17,8 +17,8 @@ var pebbleIcons = {
 var pebbleComplicationNames = {
 	"None": 0,
 	"Battery": 1,
-	"Weather": 2,
-	"Date": 3,
+	"Date": 2,
+	"Weather": 3,
 	"Health": 4
 }
 
