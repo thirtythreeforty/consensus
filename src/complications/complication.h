@@ -224,6 +224,8 @@ public:
 			return {new DateComplication(frame)};
 		case complication_type_map<WeatherComplication>:
 			return {new WeatherComplication(frame)};
+		case complication_type_map<HealthComplication>:
+			return {new HealthComplication(frame)};
 		default:
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Asked for bad complication type %i", type);
 			return {};
