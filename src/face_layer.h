@@ -3,12 +3,11 @@
 
 extern "C" {
 #include <pebble.h>
-
-#include "scalable_path.h"
-#include "common.h"
 }
 
 #include "boulder.h"
+#include "common.h"
+#include "scalable_path.h"
 
 class FaceLayer: public Boulder::Layer
 {

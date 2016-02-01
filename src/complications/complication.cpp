@@ -18,6 +18,7 @@ static void base_complication_appropriate_bounds(GRect& bounds)
 static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
                      int32_t min_angle, int32_t angle, int32_t max_angle)
 {
+	angle = clamp((long int)0, angle, max_angle - min_angle);
 	if(angle > 0) {
 		graphics_context_set_stroke_width(ctx, complication_line_size);
 		graphics_context_set_stroke_color(ctx, color);
