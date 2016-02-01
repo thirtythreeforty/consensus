@@ -69,7 +69,7 @@ void weather_to_persist(const WeatherData *data)
 	}
 }
 
-static int32_t weather_complication_temp_angle(int8_t temp_c)
+static int weather_complication_temp_angle(int8_t temp_c)
 {
 	static const int HALF_MAX_ANGLE = TRIG_MAX_ANGLE / 2;
 
@@ -79,7 +79,7 @@ static int32_t weather_complication_temp_angle(int8_t temp_c)
 	return (temp_c - min_temp) * HALF_MAX_ANGLE / (max_temp - min_temp);
 }
 
-static int32_t weather_complication_humidity_angle(uint8_t humidity)
+static int weather_complication_humidity_angle(uint8_t humidity)
 {
 	static const int HALF_MAX_ANGLE = TRIG_MAX_ANGLE / 2;
 
@@ -94,10 +94,10 @@ auto WeatherComplication::compute_angles(const WeatherData &wdata) -> WeatherAng
 		// Always make the temp and angle show at least a little so the user is
 		// aware that the display is two-sided
 		return (WeatherAngles) {
-			.temp_angle = CLAMP(HALF_MAX_ANGLE / 90,
+			.temp_angle = clamp(static_cast<int>(HALF_MAX_ANGLE / 90),
 			                    weather_complication_temp_angle(wdata.temp_c),
 			                    HALF_MAX_ANGLE),
-			.humidity_angle = CLAMP(HALF_MAX_ANGLE / 90,
+			.humidity_angle = clamp(static_cast<int>(HALF_MAX_ANGLE / 90),
 			                        weather_complication_humidity_angle(wdata.humidity),
 			                        HALF_MAX_ANGLE)
 		};
@@ -128,11 +128,11 @@ void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 {
 	time_t now = time(NULL);
 
-	static const unsigned int refresh_interval = 60 * 60 * 2;
-	const unsigned int slight_future = now + 10;
+	static const time_t refresh_interval = 60 * 60 * 2;
+	const time_t slight_future = now + 10;
 
 	const unsigned int next_refresh_time =
-		MAX(slight_future, last_refresh_time + refresh_interval);
+		std::max(slight_future, last_refresh_time + refresh_interval);
 
 	const uint32_t delay_ms = (next_refresh_time - now) * 1000;
 

@@ -1,11 +1,15 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define NELEM(x) (sizeof(x)/sizeof(x[0]))
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#include <algorithm>
 
-#define CLAMP(min, x, max) (MAX(min, MIN(x, max)))
+#define NELEM(x) (sizeof(x)/sizeof(x[0]))
+
+template<typename T, typename U, typename V>
+inline const T& clamp(const T& min, const U& x, const V& max)
+{
+	return std::max(min, std::min(x, max));
+}
 
 #define DEBUG
 
