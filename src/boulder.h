@@ -295,6 +295,70 @@ public:
 	}
 };
 
+class Tuple {
+	::Tuple *_tuple;
+public:
+	Tuple(::Tuple *tuple)
+		: _tuple(tuple)
+	{}
+	::TupleType type() const {
+		return _tuple->type;
+	}
+	template<typename T> inline T value() const;
+
+	bool valid() const { return _tuple != nullptr; }
+};
+
+template<>
+inline uint8_t Tuple::value<uint8_t>() const {
+	return _tuple->value[0].uint8;
+}
+template<>
+inline uint16_t Tuple::value<uint16_t>() const {
+	return _tuple->value[0].uint16;
+}
+template<>
+inline uint32_t Tuple::value<uint32_t>() const {
+	return _tuple->value[0].uint32;
+}
+template<>
+inline bool Tuple::value<bool>() const {
+	return _tuple->value[0].uint32;
+}
+
+namespace persist
+{
+
+// These templates will not be defined, except for their specializations
+template<typename T>
+inline void save(uint32_t persist_key, T value);
+template<typename T>
+inline T load(uint32_t persist_key);
+template<typename T>
+inline T load_default(uint32_t persist_key, T default_value);
+
+#define B_SPECIALIZE_PERSIST(Type, FunctionSuffix) \
+	template<> \
+	inline void save<Type>(uint32_t persist_key, Type value) { \
+		persist_write_ ## FunctionSuffix (persist_key, value); \
+	} \
+	template<> \
+	inline Type load<Type>(uint32_t persist_key) { \
+		return persist_read_ ## FunctionSuffix (persist_key); \
+	} \
+	template<> \
+	inline Type load_default<Type>(uint32_t persist_key, Type default_value) { \
+		if(persist_exists(persist_key)) \
+			return persist_read_ ## FunctionSuffix (persist_key); \
+		else \
+			return default_value; \
+	}
+
+B_SPECIALIZE_PERSIST(bool, bool)
+B_SPECIALIZE_PERSIST(unsigned int, int)
+
+}
+
 }
 
 #endif
