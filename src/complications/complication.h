@@ -160,7 +160,7 @@ template<> constexpr uint8_t complication_type_map<WeatherComplication> = 3;
 
 class AbstractComplication
 {
-	void *complication;
+	Complication *complication;
 	uint8_t type;
 
 	template<typename T>
@@ -182,15 +182,30 @@ public:
 		}
 	}
 
-	template<typename T>
-	static auto from(T *ptr) -> AbstractComplication {
-		return AbstractComplication{ptr};
+	bool valid() { return complication != nullptr; }
+
+	operator Complication&() {
+		return *complication;
+	}
+
+	static AbstractComplication create(unsigned int type, const GRect& frame) {
+		switch(type) {
+		case complication_type_map<void>:
+			return {};
+		case complication_type_map<BatteryComplication>:
+			return {new BatteryComplication(frame)};
+		case complication_type_map<DateComplication>:
+			return {new DateComplication(frame)};
+		case complication_type_map<WeatherComplication>:
+			return {new WeatherComplication(frame)};
+		default:
+			APP_LOG(APP_LOG_LEVEL_ERROR, "Asked for bad complication type %i", type);
+			return {};
+		}
 	}
 
 	void destroy() {
 		switch(type) {
-		case complication_type_map<void>:
-			break;
 		case complication_type_map<BatteryComplication>:
 			delete static_cast<BatteryComplication*>(complication);
 			break;
@@ -199,6 +214,8 @@ public:
 			break;
 		case complication_type_map<WeatherComplication>:
 			delete static_cast<WeatherComplication*>(complication);
+			break;
+		default:
 			break;
 		}
 		type = complication_type_map<void>;

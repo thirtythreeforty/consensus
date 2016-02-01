@@ -322,6 +322,10 @@ inline uint32_t Tuple::value<uint32_t>() const {
 	return _tuple->value[0].uint32;
 }
 template<>
+inline unsigned int Tuple::value<unsigned int>() const {
+	return _tuple->value[0].uint32;
+}
+template<>
 inline bool Tuple::value<bool>() const {
 	return _tuple->value[0].uint32;
 }
