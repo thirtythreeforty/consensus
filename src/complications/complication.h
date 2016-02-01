@@ -182,7 +182,7 @@ public:
 		}
 	}
 
-	bool valid() { return complication != nullptr; }
+	bool valid() { return type != complication_type_map<void>; }
 
 	operator Complication&() {
 		return *complication;
