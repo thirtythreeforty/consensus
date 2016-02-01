@@ -17,6 +17,7 @@ extern "C" {
 static Window *window = NULL;
 static FaceLayer *face_layer = NULL;
 static Layer *background_layer = NULL;
+static Boulder::Layer *complications_layer = NULL;
 static std::array<AbstractComplication, 3> complications;
 
 static enum {
@@ -127,7 +128,7 @@ static const int16_t complication_offset_y = 15;
 
 static void reinit_complications()
 {
-	GRect size = layer_get_bounds(window_get_root_layer(window));
+	GRect size = complications_layer->get_frame();
 	GPoint center = grect_center_point(&size);
 
 	for(auto& complication: complications) {
@@ -158,7 +159,7 @@ static void reinit_complications()
 	// Initialize the complications
 	for(auto& complication: complications) {
 		if(complication.valid()) {
-			layer_add_child(window_get_root_layer(window), static_cast<Complication&>(complication));
+			complications_layer->add_child(static_cast<Complication&>(complication));
 		}
 	}
 
@@ -243,6 +244,9 @@ static void init_layers(void)
 	update_connection_now();
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
 
+	complications_layer = new Boulder::Layer(size);
+	layer_add_child(window_get_root_layer(window), *complications_layer);
+
 	reinit_complications();
 
 	face_layer = new FaceLayer(size);
@@ -258,6 +262,7 @@ static void deinit_layers(void)
 	for(auto& complication: complications) {
 		complication.destroy();
 	}
+	delete complications_layer;
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
 	layer_destroy(background_layer);
