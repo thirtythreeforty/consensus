@@ -162,7 +162,9 @@
   // Inflate the complication pickers
   var cTemplate = document.getElementById('complication-dropdown');
   var cContainer = document.getElementById('complication-container');
-  for(var name of ["Left", "Bottom", "Right"]) {
+  var complicationNames = ["Left", "Bottom", "Right"];
+  for(var i = 0; i < complicationNames.length; i++) {
+    var name = complicationNames[i];
     function makeID(name) {
       return name.toLowerCase() + '_complication';
     }
