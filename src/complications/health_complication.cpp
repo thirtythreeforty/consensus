@@ -95,7 +95,9 @@ void HealthComplication::recalculate_average_steps()
 	// No matter what we do, we'll need a redraw
 	mark_dirty();
 
-	for(unsigned int days = 7; days > 0; --days) {
+	// Pebble takes the average over the past 30 days, although there isn't an API for this
+	// yet. See https://pebbledev.slack.com/archives/health-beta/p1454373385000080 (private channel)
+	for(unsigned int days = 30; days > 0; --days) {
 		const time_t ago = today_start - seconds_in_day * days;
 		if(health_service_metric_accessible(HealthMetricStepCount, ago, today_start) ==
 		   HealthServiceAccessibilityMaskAvailable) {
