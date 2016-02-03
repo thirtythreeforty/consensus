@@ -146,35 +146,41 @@ static void reinit_complications()
 	GRect size = complications_layer->get_frame();
 	GPoint center = grect_center_point(&size);
 
-	for(auto& complication: complications) {
-		complication.destroy();
-	}
-
 	const GRect left_complication_position =
 		GRect((int16_t)(center.x - complication_size - complication_offset_x),
 		      (int16_t)(center.y - complication_size / 2),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	complications[0] = AbstractComplication::create(left_complication_type(), left_complication_position);
 
 	const GRect right_complication_position =
 		GRect((int16_t)(center.x + complication_offset_x),
 		      (int16_t)(center.y - complication_size / 2),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	complications[1] = AbstractComplication::create(right_complication_type(), right_complication_position);
 
 	const GRect bottom_complication_position =
 		GRect((int16_t)(center.x - complication_size / 2),
 		      (int16_t)(center.y + complication_offset_y),
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
-	complications[2] = AbstractComplication::create(bottom_complication_type(), bottom_complication_position);
 
-	// Initialize the complications
-	for(auto& complication: complications) {
-		if(complication.valid()) {
-			complications_layer->add_child(static_cast<Complication&>(complication));
+	const std::array<std::pair<const GRect&, unsigned int>, 3> complication_params = {{
+		{ left_complication_position, left_complication_type() },
+		{ bottom_complication_position, bottom_complication_type() },
+		{ right_complication_position, right_complication_type() },
+	}};
+	// Make sure we don't walk off of the complications array if its size changes
+	static_assert(std::tuple_size<decltype(complication_params)>::value ==
+	              std::tuple_size<decltype(complications)>::value,
+	              "Complication parameter array size mismatch");
+
+	for(size_t i = 0; i < complication_params.size(); ++i) {
+		using std::get;
+		if(complications[i].change_type(get<1>(complication_params[i]),
+		                                get<0>(complication_params[i])))
+		{
+			// Type was changed, add the child
+			complications_layer->add_child(static_cast<Complication&>(complications[i]));
 		}
 	}
 

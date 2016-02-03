@@ -25,9 +25,11 @@ void weather_to_persist(const WeatherData *wdata);
 
 class Complication: public Boulder::Layer
 {
+public:
+	~Complication() = default;
+
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
-	~Complication() = default;
 
 	virtual void update(GContext* ctx) override;
 
@@ -187,20 +189,20 @@ template<> constexpr uint8_t complication_type_map<HealthComplication> = 4;
 class AbstractComplication
 {
 	Complication *complication;
-	uint8_t type;
+	uint8_t _type;
 
 	template<typename T>
 	AbstractComplication(T *ptr)
 		: complication(ptr)
-		, type(complication_type_map<T>)
+		, _type(complication_type_map<T>)
 	{}
 
 public:
-	AbstractComplication() : type(complication_type_map<void>) {}
+	AbstractComplication() : _type(complication_type_map<void>) {}
 
 	template<typename T>
 	auto downcast() -> T* {
-		if(type == complication_type_map<T>) {
+		if(_type == complication_type_map<T>) {
 			return static_cast<T*>(complication);
 		}
 		else {
@@ -208,11 +210,13 @@ public:
 		}
 	}
 
-	bool valid() { return type != complication_type_map<void>; }
+	bool valid() { return _type != complication_type_map<void>; }
 
 	operator Complication&() {
 		return *complication;
 	}
+
+	auto type() { return _type; }
 
 	static AbstractComplication create(unsigned int type, const GRect& frame) {
 		switch(type) {
@@ -232,24 +236,20 @@ public:
 		}
 	}
 
-	void destroy() {
-		switch(type) {
-		case complication_type_map<BatteryComplication>:
-			delete static_cast<BatteryComplication*>(complication);
-			break;
-		case complication_type_map<DateComplication>:
-			delete static_cast<DateComplication*>(complication);
-			break;
-		case complication_type_map<WeatherComplication>:
-			delete static_cast<WeatherComplication*>(complication);
-			break;
-		case complication_type_map<HealthComplication>:
-			delete static_cast<HealthComplication*>(complication);
-			break;
-		default:
-			break;
+	bool change_type(unsigned int type, const GRect& frame) {
+		if(type == this->_type) {
+			return false;
 		}
-		type = complication_type_map<void>;
+		destroy();
+		*this = create(type, frame);
+		return true;
+	}
+
+	void destroy() {
+		if(_type != complication_type_map<void>) {
+			delete complication;
+			_type = complication_type_map<void>;
+		}
 	}
 };
 
