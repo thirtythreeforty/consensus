@@ -7,6 +7,7 @@
   "sdkVersion": "3",
   "capabilities": [
     "location",
+    "health",
     "configurable"
   ],
   "targetPlatforms": ["basalt", "chalk"],
@@ -35,7 +36,7 @@
     "media": [
       {
         "menuIcon": true,
-        "type": "png",
+        "type": "bitmap",
         "name": "MENU_ICON",
         "file": "icon.png"
       },
@@ -45,7 +46,7 @@
         "file": "ticks.pdc"
       },
       {
-        "type": "png",
+        "type": "bitmap",
         "name": "NO_BLUETOOTH",
         "file": "no-bluetooth.png"
       },
@@ -103,6 +104,26 @@
         "type": "raw",
         "name": "WEATHER_SNOW_HEAVY",
         "file": "weather/Heavy_snow.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "HEALTH",
+        "file": "health.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "HEALTH_CHECK",
+        "file": "health-check.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "HEALTH_ERROR",
+        "file": "health-error.pdc"
+      },
+      {
+        "type": "raw",
+        "name": "SLEEP",
+        "file": "sleep.pdc"
       }
     ]
   }

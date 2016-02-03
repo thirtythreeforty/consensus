@@ -13,6 +13,17 @@ extern "C" {
 		return Prefix ## MethodName(WrappedObject, std::forward<Args>(args)...); \
 	}
 
+#define B_CHECKED_PROXY_METHOD(MethodName, Prefix, WrappedObject, DefaultValue) \
+	template<class...Args> auto MethodName(Args&&... args) { \
+		if(WrappedObject != nullptr) { \
+			return Prefix ## MethodName(WrappedObject, std::forward<Args>(args)...); \
+		} \
+		else { \
+			return DefaultValue; \
+		} \
+	}
+#define VOID_RETURN ((void)0)
+
 namespace Boulder {
 
 class Layer {
@@ -122,28 +133,50 @@ class GDrawCommandImage {
 	::GDrawCommandImage* _image;
 
 public:
+	GDrawCommandImage()
+		: _image(nullptr)
+	{}
 	explicit GDrawCommandImage(uint32_t resource_id)
 		: _image(gdraw_command_image_create_with_resource(resource_id))
 	{}
 	GDrawCommandImage(GDrawCommandImage& that)
 		: _image(gdraw_command_image_clone(that._image))
 	{}
+	GDrawCommandImage(GDrawCommandImage&& that)
+		: _image(that._image)
+	{
+		that._image = nullptr;
+	}
+	GDrawCommandImage& operator=(GDrawCommandImage that) {
+		swap(that);
+		return *this;
+	}
 	~GDrawCommandImage() {
-		gdraw_command_image_destroy(_image);
+		if(_image) {
+			gdraw_command_image_destroy(_image);
+		}
+	}
+	void swap(GDrawCommandImage& that) {
+		std::swap(this->_image, that._image);
 	}
 
 	void draw(::GContext *ctx, ::GPoint offset) const {
-		gdraw_command_image_draw(ctx, _image, offset);
+		if(_image != nullptr) {
+			gdraw_command_image_draw(ctx, _image, offset);
+		}
 	}
 
-	#define B_GDRAWCOMMANDIMAGE_METHOD(M) \
-		B_PROXY_METHOD(M, gdraw_command_image_, _image)
+	#define B_GDRAWCOMMANDIMAGE_METHOD(M, DefaultValue) \
+		B_CHECKED_PROXY_METHOD(M, gdraw_command_image_, _image, DefaultValue)
 
-	B_GDRAWCOMMANDIMAGE_METHOD(get_bounds_size);
-	B_GDRAWCOMMANDIMAGE_METHOD(set_bounds_size);
+	B_GDRAWCOMMANDIMAGE_METHOD(get_bounds_size, GSizeZero);
+	B_GDRAWCOMMANDIMAGE_METHOD(set_bounds_size, VOID_RETURN);
 
 	template<typename F>
 	void iterate(F functor) {
+		if(_image == nullptr) {
+			return;
+		}
 		gdraw_command_list_iterate(
 			gdraw_command_image_get_command_list(_image),
 			[](GDrawCommand *command, uint32_t index, void *ctx) -> bool {

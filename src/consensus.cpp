@@ -44,6 +44,21 @@ void complication_do(const F& f)
 	});
 }
 
+static void update_health_complications(HealthEventType event, void*)
+{
+	for(unsigned int i = 0; i < NELEM(complications); ++i) {
+		auto health_complication = complications[i].downcast<HealthComplication>();
+		if(health_complication) {
+			if(event == HealthEventSignificantUpdate) {
+				health_complication->on_significant_update();
+			}
+			else if(event == HealthEventMovementUpdate) {
+				health_complication->on_movement_update();
+			}
+		}
+	}
+}
+
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
@@ -304,6 +319,8 @@ static void init(void)
 	};
 	connection_service_subscribe(conn_handlers);
 
+	health_service_events_subscribe(update_health_complications, nullptr);
+
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
 	app_message_open(128, 64);
@@ -315,6 +332,7 @@ static void deinit(void)
 {
 	animation_unschedule_all();
 	app_message_deregister_callbacks();
+	health_service_events_unsubscribe();
 	connection_service_unsubscribe();
 	accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();

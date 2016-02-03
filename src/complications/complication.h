@@ -21,6 +21,7 @@ void weather_to_persist(const WeatherData *wdata);
 #include <experimental/optional>
 
 #include "boulder.h"
+#include "lazy_icon.h"
 
 class Complication: public Boulder::Layer
 {
@@ -47,6 +48,7 @@ protected:
 	virtual void update(GContext* ctx) override;
 
 	void set_angle(angle_t new_angle);
+	inline const angle_t& get_angle() { return requested_angle; }
 
 	virtual GColor highlight_color() const = 0;
 
@@ -69,6 +71,7 @@ protected:
 	virtual void update(GContext* ctx) override;
 
 	void set_angle2(angle_t new_angle2);
+	inline const angle_t& get_angle2() { return requested_angle2; }
 
 	virtual GColor highlight_color2() const = 0;
 
@@ -115,7 +118,7 @@ class WeatherComplication: public HighlightComplication2
 		int32_t humidity_angle;
 	};
 
-	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	LazyIcon icon;
 	GPoint icon_shift;
 
 	std::experimental::optional<Boulder::AppTimer> refresh_timer;
@@ -152,11 +155,34 @@ protected:
 	GColor highlight_color() const override;
 };
 
+class HealthComplication: public HighlightComplication
+{
+	std::experimental::optional<uint32_t> average_steps;
+
+	LazyIcon icon;
+	GPoint icon_shift;
+
+public:
+	explicit HealthComplication(GRect frame);
+	~HealthComplication();
+
+	void on_movement_update();
+	void on_significant_update();
+
+protected:
+	void update(GContext* ctx) override;
+	virtual GColor highlight_color() const override;
+
+private:
+	void recalculate_average_steps();
+};
+
 template<typename T> constexpr uint8_t complication_type_map;
 template<> constexpr uint8_t complication_type_map<void> = 0;
 template<> constexpr uint8_t complication_type_map<BatteryComplication> = 1;
 template<> constexpr uint8_t complication_type_map<DateComplication> = 2;
 template<> constexpr uint8_t complication_type_map<WeatherComplication> = 3;
+template<> constexpr uint8_t complication_type_map<HealthComplication> = 4;
 
 class AbstractComplication
 {
@@ -198,6 +224,8 @@ public:
 			return {new DateComplication(frame)};
 		case complication_type_map<WeatherComplication>:
 			return {new WeatherComplication(frame)};
+		case complication_type_map<HealthComplication>:
+			return {new HealthComplication(frame)};
 		default:
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Asked for bad complication type %i", type);
 			return {};
@@ -214,6 +242,9 @@ public:
 			break;
 		case complication_type_map<WeatherComplication>:
 			delete static_cast<WeatherComplication*>(complication);
+			break;
+		case complication_type_map<HealthComplication>:
+			delete static_cast<HealthComplication*>(complication);
 			break;
 		default:
 			break;
