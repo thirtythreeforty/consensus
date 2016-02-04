@@ -245,16 +245,18 @@
       logs: capturedLogs
     };
 
+    // If we don't leave by, say, 7 seconds, there's an issue, send the logs to Keen
+    var delayTimer = window.setTimeout(function() {
+      reportBug("didnt_submit", {});
+    }, 10000);
+
     keenclient.addEvent("configuration", keenStats, function(err, res) {
       console.log("Stat collection finished, (err, res) = " + err + " " + res);
+      window.clearTimeout(delayTimer);
       document.location.href = return_to + encodeURIComponent(encodedOptions);
     });
 
     console.log("Started Keen request");
-    // If we don't leave by, say, 7 seconds, there's an issue, send the logs to Keen
-    window.setTimeout(function() {
-      reportBug("didnt_submit", {});
-    }, 4000);
   });
 
   // Load any previously saved configuration, if available
