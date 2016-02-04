@@ -317,7 +317,8 @@ static void init(void)
 
 	battery_state_service_subscribe(on_battery_state_change);
 
-	accel_tap_service_subscribe(on_tap);
+	// Disable this until we have a preference for it
+	// accel_tap_service_subscribe(on_tap);
 
 	static const ConnectionHandlers conn_handlers = {
 		.pebble_app_connection_handler = on_connection_change,
@@ -340,7 +341,7 @@ static void deinit(void)
 	app_message_deregister_callbacks();
 	health_service_events_unsubscribe();
 	connection_service_unsubscribe();
-	accel_tap_service_unsubscribe();
+	// accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();
 	tick_timer_service_unsubscribe();
 	window_destroy(window);
