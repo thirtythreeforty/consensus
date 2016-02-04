@@ -4,6 +4,8 @@
   <head>
   <title>Slate Example Configuration</title>
   <link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+  <!-- Load Keen -->
+  <script src="js/keen-tracker.min.js"></script>
   <script src='js/slate.min.js'></script>
   <style>
   .title {
@@ -16,6 +18,7 @@
     text-align: center;
   }
   </style>
+
   </head>
 
   <body>
@@ -91,6 +94,49 @@
   </body>
   <script>
 
+  var keenclient = new Keen({
+    projectId: "56b3b7c3d2eaaa3152913416",
+    writeKey: "190551833b9b0715e11d868e62488f0ef97a8b161ce34b2bd633d79afe38618ca2bd91aeba6bce58b355e5705be3d7f378efddc5bb3e9e72de98f8b1fde5363b969b0f1225339bedb4e2f751c93b660ca4d4701d8de1ed2b458a22608bb8695e",   // String (required for sending data)
+    protocol: "https",            // String (optional: https | http | auto)
+  });
+
+  capturedLogs = [];
+  (function(){
+    var oldLog = console.log;
+    console.log = function (message) {
+     capturedLogs.push(message);
+     oldLog.apply(console, arguments);
+    };
+  })();
+
+  function reportBug(bugType, bugDetails) {
+    console.log("Reporting bug type " + bugType);
+    var keenBug = {
+      analytics_version: 1,
+      logs: capturedLogs,
+      bug_type: bugType,
+      bug_details: bugDetails
+    };
+    keenclient.addEvent("error", keenBug, function(err, res) {
+      console.log("Bug reported, (err, res) = ");
+      console.log(err);
+      console.log(res);
+    });
+  }
+
+  window.onerror = function(msg, url, line, col, error) {
+    console.log("Caught error, reporting!");
+    reportBug("unhandled_error", {
+      message: msg,
+      url: url,
+      line: line,
+      column: col,
+      error: error
+    });
+    var suppressErrorAlert = true;
+    return suppressErrorAlert;
+  };
+
   function getConfigMapping() {
     function cfgElement(name, attrib, defval) {
       var elem = document.getElementById(name);
@@ -123,9 +169,7 @@
     }
 
     // Save for next launch
-    strOptions = JSON.stringify(options);
-
-    return strOptions;
+    return options;
   }
 
   function loadConfigData() {
@@ -182,12 +226,35 @@
   submitButton.addEventListener('click', function() {
     console.log('Submit');
 
-    var encodedOptions = getConfigData();
+    var options = getConfigData();
+    var encodedOptions = JSON.stringify(options);
     localStorage['options'] = encodedOptions;
 
     // Set the return URL depending on the runtime environment
     var return_to = getQueryParam('return_to', 'pebblejs://close#');
-    document.location.href = return_to + encodeURIComponent(encodedOptions);
+
+    // Submit analytics
+    console.log("Collecting Keen stats...");
+
+    keenStats = {
+      analytics_version: 1,
+      return_to: return_to,
+      selected_prefs: options,
+      acct_token: (typeof Pebble !== 'undefined') ? Pebble.getAccountToken() : null,
+      referrer: document.referrer,
+      logs: capturedLogs
+    };
+
+    keenclient.addEvent("configuration", keenStats, function(err, res) {
+      console.log("Stat collection finished, (err, res) = " + err + " " + res);
+      document.location.href = return_to + encodeURIComponent(encodedOptions);
+    });
+
+    console.log("Started Keen request");
+    // If we don't leave by, say, 7 seconds, there's an issue, send the logs to Keen
+    window.setTimeout(function() {
+      reportBug("didnt_submit", {});
+    }, 4000);
   });
 
   // Load any previously saved configuration, if available
