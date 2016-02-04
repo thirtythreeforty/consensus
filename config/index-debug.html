@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+  <title>Slate Example Configuration</title>
+  <link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+  <!-- Load Keen -->
+  <script type="text/javascript">
+    !function(a,b){a("Keen","https://d26b395fwzu5fz.cloudfront.net/3.4.0-rc/keen-tracker.min.js",b)}(function(a,b,c){var d,e,f;c["_"+a]={},c[a]=function(b){c["_"+a].clients=c["_"+a].clients||{},c["_"+a].clients[b.projectId]=this,this._config=b},c[a].ready=function(b){c["_"+a].ready=c["_"+a].ready||[],c["_"+a].ready.push(b)},d=["addEvent","setGlobalProperties","trackExternalLink","on"];for(var g=0;g<d.length;g++){var h=d[g],i=function(a){return function(){return this["_"+a]=this["_"+a]||[],this["_"+a].push(arguments),this}};c[a].prototype[h]=i(h)}e=document.createElement("script"),e.async=!0,e.src=b,f=document.getElementsByTagName("script")[0],f.parentNode.insertBefore(e,f)},this);
+  </script>
+  <script src='js/slate.min.js'></script>
+  <style>
+  .title {
+    padding: 15px 10px;
+    text-transform: uppercase;
+    font-family: 'PT Sans', sans-serif;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #888888;
+    text-align: center;
+  }
+  </style>
+
+  </head>
+
+  <body>
+    <h1 class='title'>Consensus Configuration</h1>
+
+    <div class='item-container'>
+      <div class='item-container-header'>Appearance</div>
+      <div class='item-container-content'>
+        <label class='item'>
+          Second hand
+          <input id='disp_second_hand' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Display the second hand.  Note that this may increase battery consumption.
+      </div>
+      <div class='item-container-content'>
+        <label class='item'>
+          "No connection" icon
+          <input id='disp_no_connection' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Display a "no connection" icon when the watch is disconnected from the phone.
+      </div>
+    </div>
+
+    <div class='item-container'>
+      <div class='item-container-header'>Notifications</div>
+      <div class='item-container-content'>
+        <label class='item'>
+          Vibrate on the hour
+          <input id='vibrate_on_hour' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Briefly vibrate once at the top of every hour, and twice at noon and midnight.
+      </div>
+      <div class='item-container-content'>
+        <label class='item'>
+          Vibrate on disconnection
+          <input id='vibrate_on_disconnect' type='checkbox' class='item-toggle'>
+        </label>
+      </div>
+      <div class='item-container-footer'>
+        Vibrate when the watch loses its Bluetooth connection to the phone.
+      </div>
+    </div>
+    <div class='item-container'>
+      <div class='item-container-header'>Complications</div>
+      <div class='item-container-content' id='complication-container'>
+        <!-- The JS will inflate these to avoid duplicating markup -->
+        <template id='complication-dropdown'>
+          <label class="item">
+            <span id='complication-label'></span>
+            <select id="complication-select" dir='rtl' class="item-select">
+              <option class="item-select-option">None</option>
+              <option class="item-select-option">Battery</option>
+              <option class="item-select-option">Health</option>
+              <option class="item-select-option">Date</option>
+              <option class="item-select-option">Weather</option>
+            </select>
+          </label>
+        </template>
+      </div>
+    </div>
+
+    <div class='item-container'>
+      <div class='button-container'>
+        <input id='submit_button' type='button' class='item-button' value='SAVE'>
+      </div>
+    </div>
+  </body>
+  <script>
+
+  var keenclient = new Keen({
+    projectId: "56b3b7c3d2eaaa3152913416",
+    writeKey: "190551833b9b0715e11d868e62488f0ef97a8b161ce34b2bd633d79afe38618ca2bd91aeba6bce58b355e5705be3d7f378efddc5bb3e9e72de98f8b1fde5363b969b0f1225339bedb4e2f751c93b660ca4d4701d8de1ed2b458a22608bb8695e",   // String (required for sending data)
+    protocol: "https",            // String (optional: https | http | auto)
+  });
+
+  capturedLogs = [];
+  (function(){
+    var oldLog = console.log;
+    console.log = function (message) {
+     capturedLogs.push(message);
+     oldLog.apply(console, arguments);
+    };
+  })();
+
+  function reportBug(bugType, bugDetails) {
+    console.log("Reporting bug type " + bugType);
+    var keenBug = {
+      analytics_version: 1,
+      logs: capturedLogs,
+      bug_type: bugType,
+      bug_details: bugDetails
+    };
+    keenclient.addEvent("error", keenBug, function(err, res) {
+      console.log("Bug reported, (err, res) = ");
+      console.log(err);
+      console.log(res);
+    });
+  }
+
+  window.onerror = function(msg, url, line, col, error) {
+    console.log("Caught error, reporting!");
+    reportBug("unhandled_error", {
+      message: msg,
+      url: url,
+      line: line,
+      column: col,
+      error: error
+    });
+    var suppressErrorAlert = true;
+    return suppressErrorAlert;
+  };
+
+  function getConfigMapping() {
+    function cfgElement(name, attrib, defval) {
+      var elem = document.getElementById(name);
+      return {
+        'name': name,
+        'defval': defval,
+        'get': function() { return elem[attrib]; },
+        'set': function(value) { elem[attrib] = value; },
+      };
+    }
+
+    return [
+      cfgElement('disp_second_hand', 'checked', false),
+      cfgElement('disp_no_connection', 'checked', true),
+      cfgElement('vibrate_on_hour', 'checked', true),
+      cfgElement('vibrate_on_disconnect', 'checked', true),
+      cfgElement('left_complication', 'value', 'Battery'),
+      cfgElement('bottom_complication', 'value', 'Weather'),
+      cfgElement('right_complication', 'value', 'Date')
+    ];
+  }
+
+  function getConfigData() {
+    var configMapping = getConfigMapping();
+    var options = {};
+
+    for(var i = 0; i < configMapping.length; i++) {
+      var elem = configMapping[i];
+      options[elem.name] = elem.get();
+    }
+
+    // Save for next launch
+    return options;
+  }
+
+  function loadConfigData() {
+    var options;
+    if(localStorage["options"]) {
+      options = JSON.parse(localStorage['options']);
+    } else {
+      options = {};
+    }
+    var configMapping = getConfigMapping();
+
+    for(var i = 0; i < configMapping.length; i++) {
+      var elem = configMapping[i];
+      if(elem.name in options) {
+        elem.set(options[elem.name]);
+      } else {
+        elem.set(elem.defval);
+      }
+    }
+  }
+
+  function getQueryParam(variable, defaultValue) {
+    var query = location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split('=');
+      if (pair[0] === variable) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+    return defaultValue || false;
+  }
+
+  // Inflate the complication pickers
+  var cTemplate = document.getElementById('complication-dropdown');
+  var cContainer = document.getElementById('complication-container');
+  var complicationNames = ["Left", "Bottom", "Right"];
+  for(var i = 0; i < complicationNames.length; i++) {
+    var name = complicationNames[i];
+    function makeID(name) {
+      return name.toLowerCase() + '_complication';
+    }
+
+    var inflated = cTemplate.content.cloneNode(true);
+    var label = inflated.getElementById('complication-label');
+    var select = inflated.getElementById('complication-select');
+    label.textContent = name;
+    select.id = makeID(name);
+    cContainer.appendChild(inflated);
+  }
+
+  // Set up the 'submit' button
+  var submitButton = document.getElementById('submit_button');
+  submitButton.addEventListener('click', function() {
+    console.log('Submit');
+
+    var options = getConfigData();
+    var encodedOptions = JSON.stringify(options);
+    localStorage['options'] = encodedOptions;
+
+    // Set the return URL depending on the runtime environment
+    var return_to = getQueryParam('return_to', 'pebblejs://close#');
+
+    // Submit analytics
+    console.log("Collecting Keen stats...");
+
+    keenStats = {
+      analytics_version: 1,
+      return_to: return_to,
+      selected_prefs: options,
+      acct_token: (typeof Pebble !== 'undefined') ? Pebble.getAccountToken() : null,
+      referrer: document.referrer,
+      logs: capturedLogs
+    };
+
+    keenclient.addEvent("configuration", keenStats, function(err, res) {
+      console.log("Stat collection finished, (err, res) = " + err + " " + res);
+      document.location.href = return_to + encodeURIComponent(encodedOptions);
+    });
+
+    console.log("Started Keen request");
+    // If we don't leave by, say, 7 seconds, there's an issue, send the logs to Keen
+    window.setTimeout(function() {
+      reportBug("didnt_submit", {});
+    }, 4000);
+  });
+
+  // Load any previously saved configuration, if available
+  loadConfigData();
+  </script>
+</html>
