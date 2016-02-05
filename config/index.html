@@ -215,10 +215,15 @@
     }
 
     var inflated = cTemplate.content.cloneNode(true);
-    var label = inflated.getElementById('complication-label');
-    var select = inflated.getElementById('complication-select');
+    var label = inflated.querySelector('#complication-label');
+    var select = inflated.querySelector('#complication-select');
     label.textContent = name;
+
+    // Fix the IDs, they can't be the same
     select.id = makeID(name);
+    label.id = undefined;
+    inflated.id = undefined;
+
     cContainer.appendChild(inflated);
   }
 
