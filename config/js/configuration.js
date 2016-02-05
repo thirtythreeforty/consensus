@@ -29,6 +29,7 @@ function reportBug(bugType, bugDetails) {
 	});
 }
 
+/*
 window.onerror = function(msg, url, line, col, error) {
 	console.log("Caught error, reporting!");
 	reportBug("unhandled_error", {
@@ -41,6 +42,7 @@ window.onerror = function(msg, url, line, col, error) {
 	var suppressErrorAlert = true;
 	return suppressErrorAlert;
 };
+*/
 
 function getConfigMapping() {
 	function cfgElement(name, attrib, defval) {
@@ -106,29 +108,6 @@ function getQueryParam(variable, defaultValue) {
 		}
 	}
 	return defaultValue || false;
-}
-
-// Inflate the complication pickers
-var cTemplate = document.getElementById('complication-dropdown');
-var cContainer = document.getElementById('complication-container');
-var complicationNames = ["Left", "Bottom", "Right"];
-for(var i = 0; i < complicationNames.length; i++) {
-	var name = complicationNames[i];
-	function makeID(name) {
-		return name.toLowerCase() + '_complication';
-	}
-
-	var inflated = cTemplate.content.cloneNode(true);
-	var label = inflated.querySelector('#complication-label');
-	var select = inflated.querySelector('#complication-select');
-	label.textContent = name;
-
-	// Fix the IDs, they can't be the same
-	select.id = makeID(name);
-	label.id = undefined;
-	inflated.id = undefined;
-
-	cContainer.appendChild(inflated);
 }
 
 // Set up the 'submit' button

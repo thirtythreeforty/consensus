@@ -4,12 +4,9 @@
   <head>
   <title>Slate Example Configuration</title>
   <link rel='stylesheet' type='text/css' href='css/slate.min.css'>
-  <script src='js/riot+compiler.min.js'></script>
   <script src="js/keen-tracker.min.js"></script>
   <script src='js/slate.min.js'></script>
-
-  <!-- Riot tags -->
-  <script src="complication-chooser.tag" type="riot/tag"></script>
+  <script src='js/riot+compiler.min.js'></script>
 
   <style>
   .title {
@@ -28,49 +25,14 @@
   <body>
     <h1 class='title'>Consensus Configuration</h1>
 
-    <div class='item-container'>
-      <div class='item-container-header'>Appearance</div>
-      <div class='item-container-content'>
-        <label class='item'>
-          Second hand
-          <input id='disp_second_hand' type='checkbox' class='item-toggle'>
-        </label>
-      </div>
-      <div class='item-container-footer'>
-        Display the second hand.  Note that this may increase battery consumption.
-      </div>
-      <div class='item-container-content'>
-        <label class='item'>
-          "No connection" icon
-          <input id='disp_no_connection' type='checkbox' class='item-toggle'>
-        </label>
-      </div>
-      <div class='item-container-footer'>
-        Display a "no connection" icon when the watch is disconnected from the phone.
-      </div>
-    </div>
+    <configure-appearance></configure-appearance>
 
-    <div class='item-container'>
-      <div class='item-container-header'>Notifications</div>
-      <div class='item-container-content'>
-        <label class='item'>
-          Vibrate on the hour
-          <input id='vibrate_on_hour' type='checkbox' class='item-toggle'>
-        </label>
-      </div>
-      <div class='item-container-footer'>
-        Briefly vibrate once at the top of every hour, and twice at noon and midnight.
-      </div>
-      <div class='item-container-content'>
-        <label class='item'>
-          Vibrate on disconnection
-          <input id='vibrate_on_disconnect' type='checkbox' class='item-toggle'>
-        </label>
-      </div>
-      <div class='item-container-footer'>
-        Vibrate when the watch loses its Bluetooth connection to the phone.
-      </div>
-    </div>
+    <configure-notifications></configure-notifications>
+
+    <script src="containers.tag" type="riot/tag"></script>
+    <script src="configuration.tag" type="riot/tag"></script>
+    <script src="complication-chooser.tag" type="riot/tag"></script>
+
     <div class='item-container'>
       <complication-chooser-list/>
     </div>
