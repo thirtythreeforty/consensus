@@ -31,6 +31,8 @@
 		</configuration-footer>
 		<configuration-content>
 			<configuration-checkbox inputid='vibrate_on_disconnect'>
+				Vibrate on disconnect
+			</configuration-checkbox>
 		</configuration-content>
 		<configuration-footer>
 			Vibrate when the watch loses its Bluetooth connection to the phone.

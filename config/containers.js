@@ -5,10 +5,6 @@
 		</div>
 
 		<yield />
-
-		<div class='item-container-footer'>
-			{ opts.footer }
-		</div>
 	</div>
 </configuration-container>
 

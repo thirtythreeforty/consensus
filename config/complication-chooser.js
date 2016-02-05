@@ -1,10 +1,11 @@
-<complication-chooser-list>
-	<div class='item-container-header'>Complications</div>
-	<complication-chooser each={ names } position={ p }/>
+<complication-customize>
+</complication-customize>
 
-	function makeName(s) { return { p: s }; }
-	this.names = [ 'Left', 'Bottom', 'Right' ].map(makeName);
-</complication-chooser-list>
+<complication-customize-health>
+</complication-customize-health>
+
+<complication-customize-weather>
+</complication-customize-weather>
 
 <complication-chooser>
 	<div class='item-container-content'>
@@ -45,11 +46,11 @@
 	</script>
 </complication-chooser>
 
-<complication-customize>
-</complication-customize>
+<complication-chooser-list>
+	<div class='item-container-header'>Complications</div>
+	<complication-chooser each={ names } position={ p }/>
 
-<complication-customize-health>
-</complication-customize-health>
+	function makeName(s) { return { p: s }; }
+	this.names = [ 'Left', 'Bottom', 'Right' ].map(makeName);
+</complication-chooser-list>
 
-<complication-customize-weather>
-</complication-customize-weather>
