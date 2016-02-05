@@ -1,0 +1,173 @@
+var keenclient = new Keen({
+	projectId: "56b3b7c3d2eaaa3152913416",
+	writeKey: "190551833b9b0715e11d868e62488f0ef97a8b161ce34b2bd633d79afe38618ca2bd91aeba6bce58b355e5705be3d7f378efddc5bb3e9e72de98f8b1fde5363b969b0f1225339bedb4e2f751c93b660ca4d4701d8de1ed2b458a22608bb8695e",   // String (required for sending data)
+	protocol: "https",            // String (optional: https | http | auto)
+});
+
+capturedLogs = [];
+(function(){
+	var oldLog = console.log;
+	console.log = function (message) {
+	 capturedLogs.push(message);
+	 oldLog.apply(console, arguments);
+	};
+})();
+
+function reportBug(bugType, bugDetails) {
+	console.log("Reporting bug type " + bugType);
+	var keenBug = {
+		analytics_version: 1,
+		logs: capturedLogs,
+		bug_type: bugType,
+		bug_details: bugDetails,
+		user_agent: navigator.userAgent
+	};
+	keenclient.addEvent("error", keenBug, function(err, res) {
+		console.log("Bug reported, (err, res) = ");
+		console.log(err);
+		console.log(res);
+	});
+}
+
+window.onerror = function(msg, url, line, col, error) {
+	console.log("Caught error, reporting!");
+	reportBug("unhandled_error", {
+		message: msg,
+		url: url,
+		line: line,
+		column: col,
+		error: error
+	});
+	var suppressErrorAlert = true;
+	return suppressErrorAlert;
+};
+
+function getConfigMapping() {
+	function cfgElement(name, attrib, defval) {
+		var elem = document.getElementById(name);
+		return {
+			'name': name,
+			'defval': defval,
+			'get': function() { return elem[attrib]; },
+			'set': function(value) { elem[attrib] = value; },
+		};
+	}
+
+	return [
+		cfgElement('disp_second_hand', 'checked', false),
+		cfgElement('disp_no_connection', 'checked', true),
+		cfgElement('vibrate_on_hour', 'checked', true),
+		cfgElement('vibrate_on_disconnect', 'checked', true),
+		cfgElement('left_complication', 'value', 'Battery'),
+		cfgElement('bottom_complication', 'value', 'Weather'),
+		cfgElement('right_complication', 'value', 'Date')
+	];
+}
+
+function getConfigData() {
+	var configMapping = getConfigMapping();
+	var options = {};
+
+	for(var i = 0; i < configMapping.length; i++) {
+		var elem = configMapping[i];
+		options[elem.name] = elem.get();
+	}
+
+	// Save for next launch
+	return options;
+}
+
+function loadConfigData() {
+	var options;
+	if(localStorage["options"]) {
+		options = JSON.parse(localStorage['options']);
+	} else {
+		options = {};
+	}
+	var configMapping = getConfigMapping();
+
+	for(var i = 0; i < configMapping.length; i++) {
+		var elem = configMapping[i];
+		if(elem.name in options) {
+			elem.set(options[elem.name]);
+		} else {
+			elem.set(elem.defval);
+		}
+	}
+}
+
+function getQueryParam(variable, defaultValue) {
+	var query = location.search.substring(1);
+	var vars = query.split('&');
+	for (var i = 0; i < vars.length; i++) {
+		var pair = vars[i].split('=');
+		if (pair[0] === variable) {
+			return decodeURIComponent(pair[1]);
+		}
+	}
+	return defaultValue || false;
+}
+
+// Inflate the complication pickers
+var cTemplate = document.getElementById('complication-dropdown');
+var cContainer = document.getElementById('complication-container');
+var complicationNames = ["Left", "Bottom", "Right"];
+for(var i = 0; i < complicationNames.length; i++) {
+	var name = complicationNames[i];
+	function makeID(name) {
+		return name.toLowerCase() + '_complication';
+	}
+
+	var inflated = cTemplate.content.cloneNode(true);
+	var label = inflated.querySelector('#complication-label');
+	var select = inflated.querySelector('#complication-select');
+	label.textContent = name;
+
+	// Fix the IDs, they can't be the same
+	select.id = makeID(name);
+	label.id = undefined;
+	inflated.id = undefined;
+
+	cContainer.appendChild(inflated);
+}
+
+// Set up the 'submit' button
+var submitButton = document.getElementById('submit_button');
+submitButton.addEventListener('click', function() {
+	console.log('Submit');
+
+	var options = getConfigData();
+	var encodedOptions = JSON.stringify(options);
+	localStorage['options'] = encodedOptions;
+
+	// Set the return URL depending on the runtime environment
+	var return_to = getQueryParam('return_to', 'pebblejs://close#');
+
+	// Submit analytics
+	console.log("Collecting Keen stats...");
+
+	keenStats = {
+		analytics_version: 1,
+		return_to: return_to,
+		selected_prefs: options,
+		acct_token: (typeof Pebble !== 'undefined') ? Pebble.getAccountToken() : null,
+		referrer: document.referrer,
+		logs: capturedLogs
+	};
+
+	// If we don't leave by, say, 7 seconds, there's an issue, send the logs to Keen
+	var delayTimer = window.setTimeout(function() {
+		reportBug("didnt_submit", {});
+	}, 10000);
+
+	keenclient.addEvent("configuration", keenStats, function(err, res) {
+		console.log("Stat collection finished, (err, res) = " + err + " " + res);
+		window.clearTimeout(delayTimer);
+		document.location.href = return_to + encodeURIComponent(encodedOptions);
+	});
+
+	console.log("Started Keen request");
+});
+
+// Load any previously saved configuration, if available
+loadConfigData();
