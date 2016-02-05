@@ -115,7 +115,8 @@
       analytics_version: 1,
       logs: capturedLogs,
       bug_type: bugType,
-      bug_details: bugDetails
+      bug_details: bugDetails,
+      user_agent: navigator.userAgent
     };
     keenclient.addEvent("error", keenBug, function(err, res) {
       console.log("Bug reported, (err, res) = ");
