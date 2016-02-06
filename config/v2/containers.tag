@@ -28,9 +28,10 @@
 	</label>
 
 	<script>
-	// Slate has already run its injection, so we need to ask for it again.
-	// Fortunately (?), they add their functions to the global jQuery object.
-	this.one('mount', function() { $(this.root).find('.item-toggle').itemToggle(); });
+	// Slate has possibly not already run its injection, so we need to ask for
+	// it for those objects that don't have the style.  Fortunately (?), they
+	// add their functions to the global jQuery object.
+	this.one('mount', function() { $(this.root).find('.item-toggle').not('*>.item-styled-toggle').itemToggle(); });
 	</script>
 </configuration-toggle>
 
@@ -43,7 +44,7 @@
 	</label>
 
 	<script>
-	this.one('mount', function() { $(this.root).find('.item-select').itemSelect(); });
+	this.one('mount', function() { $(this.root).find('.item-select').not("*>.select-triangle").itemSelect(); });
 	</script>
 </configuration-dropdown>
 
