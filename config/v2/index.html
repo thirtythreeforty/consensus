@@ -23,6 +23,17 @@
   </head>
 
   <body>
+    <div type="text" id='debug'></div>
+    <script>
+      (function(){
+        var oldLog = console.log;
+        console.log = function (message) {
+          document.getElementById('debug').innerHTML += message + "<br>";
+          oldLog.apply(console, arguments);
+        };
+      })();
+    </script>
+
     <h1 class='title'>Consensus Configuration</h1>
 
     <configure-appearance></configure-appearance>
