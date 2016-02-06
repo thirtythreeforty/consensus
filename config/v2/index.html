@@ -23,6 +23,34 @@
   </head>
 
   <body>
+    <div type="text" id='debug'></div>
+    <script>
+      (function(){
+        var oldLog = console.log;
+        var oldError = console.error;
+        console.log = function (message) {
+          document.getElementById('debug').innerHTML += message + "<br>";
+          oldLog.apply(console, arguments);
+        };
+        console.error = function (message) {
+          document.getElementById('debug').innerHTML += message + "<br>";
+          oldError.apply(console, arguments);
+        };
+      })();
+      riot.util.tmpl.errorHandler = function(e) {
+          console.log('error handler', e)
+      }
+      window.onerror = function(msg, url, line, col, error) {
+        console.log("Caught error");
+        console.log(msg);
+        console.log(url);
+        console.log(error);
+        console.log(line);
+        console.log(col);
+        console.log("End err report");
+      };
+    </script>
+
     <h1 class='title'>Consensus Configuration</h1>
 
     <configure-app id='configureroot'></configure-app>
