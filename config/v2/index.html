@@ -27,11 +27,19 @@
     <script>
       (function(){
         var oldLog = console.log;
+        var oldError = console.error;
         console.log = function (message) {
           document.getElementById('debug').innerHTML += message + "<br>";
           oldLog.apply(console, arguments);
         };
+        console.error = function (message) {
+          document.getElementById('debug').innerHTML += message + "<br>";
+          oldError.apply(console, arguments);
+        };
       })();
+      riot.util.tmpl.errorHandler = function(e) {
+          console.error('error handler', e)
+      }
       window.onerror = function(msg, url, line, col, error) {
         console.log("Caught error");
         console.log(msg);
