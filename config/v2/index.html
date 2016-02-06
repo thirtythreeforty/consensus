@@ -38,7 +38,7 @@
         };
       })();
       riot.util.tmpl.errorHandler = function(e) {
-          console.error('error handler', e)
+          console.log('error handler', e)
       }
       window.onerror = function(msg, url, line, col, error) {
         console.log("Caught error");
