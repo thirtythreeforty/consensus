@@ -32,6 +32,14 @@
           oldLog.apply(console, arguments);
         };
       })();
+      window.onerror = function(msg, url, line, col, error) {
+        console.log("Caught error");
+        console.log(msg);
+        console.log(error);
+        console.log(line);
+        console.log(col);
+        console.log("End err report");
+      };
     </script>
 
     <h1 class='title'>Consensus Configuration</h1>
