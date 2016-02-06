@@ -30,7 +30,7 @@
 	<script>
 	// Slate has already run its injection, so we need to ask for it again.
 	// Fortunately (?), they add their functions to the global jQuery object.
-	this.one('mount', () => $(this.root).find('.item-toggle').itemToggle());
+	this.one('mount', function() { $(this.root).find('.item-toggle').itemToggle(); });
 	</script>
 </configuration-toggle>
 
@@ -43,7 +43,7 @@
 	</label>
 
 	<script>
-	this.one('mount', () => $(this.root).find('.item-select').itemSelect());
+	this.one('mount', function() { $(this.root).find('.item-select').itemSelect(); });
 	</script>
 </configuration-dropdown>
 
