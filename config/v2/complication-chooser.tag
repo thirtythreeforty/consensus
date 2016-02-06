@@ -8,19 +8,17 @@
 </complication-customize-weather>
 
 <complication-chooser>
-	<div class='item-container-content'>
-		<label class="item">
-			<span>{ opts.position }</span>
-			<select dir='rtl' class="item-select" name='typechooser' onchange={ ontypechosen } value={ chosentype }>
-				<option class="item-select-option">None</option>
-				<option class="item-select-option">Battery</option>
-				<option class="item-select-option">Health</option>
-				<option class="item-select-option">Date</option>
-				<option class="item-select-option">Weather</option>
-			</select>
-		</label>
+	<configuration-content name='content'>
+		<configuration-dropdown caption={ parent.opts.position } selectname='typechooser' onchange={ parent.ontypechosen } value={ parent.chosentype }>
+			<option class="item-select-option">None</option>
+			<option class="item-select-option">Battery</option>
+			<option class="item-select-option">Health</option>
+			<option class="item-select-option">Date</option>
+			<option class="item-select-option">Weather</option>
+		</configuration-dropdown>
+
 		<complication-customize name='customizer' />
-	</div>
+	</configuration-content>
 
 	<script>
 	changecustomizer() {
@@ -33,7 +31,7 @@
 		}[this.chosentype] || "complication-customize";
 
 		// Mount it
-		riot.mount(this.tags['customizer'].root, whichComplication, { foo: opts.cname});
+		riot.mount(this.tags['content'].tags['customizer'].root, whichComplication, { foo: opts.cname});
 	}
 
 	ontypechosen(e) {
@@ -50,7 +48,9 @@
 	<div class='item-container-header'>Complications</div>
 	<complication-chooser each={ names } position={ p }/>
 
+	<script>
 	function makeName(s) { return { p: s }; }
 	this.names = [ 'Left', 'Bottom', 'Right' ].map(makeName);
+	</script>
 </complication-chooser-list>
 
