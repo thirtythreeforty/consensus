@@ -53,7 +53,7 @@ var Injection = {
 <configuration-dropdown>
 	<label class="item">
 		{ opts.caption }
-		<select dir='rtl' class='item-select' name={ opts.selectname } onchange={ onchangehandle } value={ opts.attrib.get() }>
+		<select style="text-align:right;" class='item-select' name={ opts.selectname } onchange={ onchangehandle } value={ opts.attrib.get() }>
 			<yield />
 		</select>
 	</label>
