@@ -151,9 +151,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
-		KEY_PREF_LEFT_COMPLICATION: complicationToInt(complications['left_complication']),
-		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(complications['bottom_complication']),
-		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(complications['right_complication'])
+		KEY_PREF_LEFT_COMPLICATION: complicationToInt(complications['Left']['type']),
+		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(complications['Bottom']['type']),
+		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(complications['Right']['type'])
 	};
 
 	// Send to watchapp
