@@ -140,21 +140,46 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	var configData = JSON.parse(configStr);
 
 	function toInt(val) { return val ? 1 : 0; }
-	function complicationToInt(val) {
-		return pebbleComplicationNames[val];
-	}
+	function complicationConfigToInts(dict, position) {
+		var typeKey = {
+			'Left': 'KEY_PREF_LEFT_COMPLICATION',
+			'Bottom': 'KEY_PREF_BOTTOM_COMPLICATION',
+			'Right': 'KEY_PREF_RIGHT_COMPLICATION'
+		}[position];
 
-	var complications = configData["complications"];
+		var cConfig = configData["complications"][position];
+		var cType = cConfig["type"];
+		dict[typeKey] = pebbleComplicationNames[cConfig["type"]];
+
+		var opt1Key = typeKey + "_OPT1";
+		var opt2Key = typeKey + "_OPT2";
+		var opt3Key = typeKey + "_OPT3";
+		var opt4Key = typeKey + "_OPT4";
+
+		switch(cType) {
+		case "None":
+			break;
+		case "Battery":
+			break;
+		case "Date":
+			break;
+		case "Weather":
+			break;
+		case "Health":
+			break;
+		}
+	}
 
 	var dict = {
 		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['show_second_hand']),
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
-		KEY_PREF_LEFT_COMPLICATION: complicationToInt(complications['Left']['type']),
-		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(complications['Bottom']['type']),
-		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(complications['Right']['type'])
 	};
+
+	complicationConfigToInts(dict, 'Left');
+	complicationConfigToInts(dict, 'Bottom');
+	complicationConfigToInts(dict, 'Right');
 
 	// Send to watchapp
 	Pebble.sendAppMessage(dict,
