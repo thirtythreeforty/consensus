@@ -75,6 +75,7 @@
 	from_json(pack) {
 		this.show_second_hand.set(pack['show_second_hand']);
 		this.show_no_connection.set(pack['show_no_connection']);
+		this.update();
 	}
 
 	to_json(pack) {
