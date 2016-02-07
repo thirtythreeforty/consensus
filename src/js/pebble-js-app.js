@@ -128,7 +128,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://thirtythreeforty.github.io/consensus/config/';
+	var url = 'https://thirtythreeforty.github.io/consensus/config/v2/';
 	console.log('Showing configuration page: ' + url);
 
 	Pebble.openURL(url);
@@ -144,14 +144,16 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		return pebbleComplicationNames[val];
 	}
 
+	var complications = configData["complications"];
+
 	var dict = {
-		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['disp_second_hand']),
-		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['disp_no_connection']),
+		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['show_second_hand']),
+		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
-		KEY_PREF_LEFT_COMPLICATION: complicationToInt(configData['left_complication']),
-		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(configData['bottom_complication']),
-		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(configData['right_complication'])
+		KEY_PREF_LEFT_COMPLICATION: complicationToInt(complications['left_complication']),
+		KEY_PREF_BOTTOM_COMPLICATION: complicationToInt(complications['bottom_complication']),
+		KEY_PREF_RIGHT_COMPLICATION: complicationToInt(complications['right_complication'])
 	};
 
 	// Send to watchapp
