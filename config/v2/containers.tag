@@ -1,3 +1,19 @@
+var Injection = {
+	injectOnce: function(toFind, toExclude, func) {
+		// Close over 'readied'
+		var readied = false;
+		this.one('mount', function() {
+			if(!readied) {
+				func.call($(this.root).find(toFind).not('*>'+toExclude));
+				console.log("annotated!");
+			} else {
+				console.log("ready already fired, not re-annotating");
+			}
+		});
+		//$(function() { readied = true; console.log("ready called"); });
+	}
+}
+
 <configuration-container>
 	<div class='item-container'>
 		<div class='item-container-header'>
@@ -24,14 +40,16 @@
 	<label class='item'>
 		<yield />
 		<!-- TODO inputid is not going to work -->
-		<input id={ inputid } type='checkbox' class='item-toggle'></input>
+		<input type='checkbox' class='item-toggle' checked={ opts.check } onclick={ onclickchange }></input>
 	</label>
 
 	<script>
-	// Slate has possibly not already run its injection, so we need to ask for
-	// it for those objects that don't have the style.  Fortunately (?), they
-	// add their functions to the global jQuery object.
-	this.one('mount', function() { $(this.root).find('.item-toggle').not('*>.item-styled-toggle').itemToggle(); });
+	this.mixin(Injection);
+	this.injectOnce('.item-toggle', '.item-style-toggle', $.fn.itemToggle);
+
+	onclickchange(e) {
+		opts.check = e.target.checked;
+	}
 	</script>
 </configuration-toggle>
 
@@ -44,7 +62,8 @@
 	</label>
 
 	<script>
-	this.one('mount', function() { $(this.root).find('.item-select').not("*>.select-triangle").itemSelect(); });
+	this.mixin(Injection);
+	this.injectOnce('.item-select', '.select-triangle', $.fn.itemSelect);
 	</script>
 </configuration-dropdown>
 

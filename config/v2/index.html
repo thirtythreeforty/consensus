@@ -25,27 +25,12 @@
   <body>
     <h1 class='title'>Consensus Configuration</h1>
 
-    <configure-appearance></configure-appearance>
-
-    <configure-notifications></configure-notifications>
+    <configure-app id='configureroot'></configure-app>
 
     <script src="containers.tag" type="riot/tag"></script>
     <script src="configuration.tag" type="riot/tag"></script>
     <script src="complication-chooser.tag" type="riot/tag"></script>
 
-    <div class='item-container'>
-      <complication-chooser-list/>
-    </div>
-
-    <div class='item-container'>
-      <div class='button-container'>
-        <input id='submit_button' type='button' class='item-button' value='SAVE'>
-      </div>
-    </div>
-
-    <script>
-      riot.mount('*');
-    </script>
+    <script src='js/configuration.js'></script>
   </body>
-  <script src='js/configuration.js'></script>
 </html>

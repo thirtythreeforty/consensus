@@ -1,48 +1,61 @@
+(function() {
+
 var keenclient = new Keen({
 	projectId: "56b3b7c3d2eaaa3152913416",
 	writeKey: "190551833b9b0715e11d868e62488f0ef97a8b161ce34b2bd633d79afe38618ca2bd91aeba6bce58b355e5705be3d7f378efddc5bb3e9e72de98f8b1fde5363b969b0f1225339bedb4e2f751c93b660ca4d4701d8de1ed2b458a22608bb8695e",   // String (required for sending data)
 	protocol: "https",            // String (optional: https | http | auto)
 });
 
-capturedLogs = [];
-(function(){
-	var oldLog = console.log;
-	console.log = function (message) {
-	 capturedLogs.push(message);
-	 oldLog.apply(console, arguments);
+var reportBug;
+(function() {
+	var capturedLogs = [];
+	(function(){
+		var oldLog = console.log;
+		console.log = function (message) {
+		 capturedLogs.push(message);
+		 oldLog.apply(console, arguments);
+		};
+	})();
+
+	reportBug = function(bugType, bugDetails) {
+		console.log("Reporting bug type " + bugType);
+		var keenBug = {
+			analytics_version: 1,
+			logs: capturedLogs,
+			bug_type: bugType,
+			bug_details: bugDetails,
+			user_agent: navigator.userAgent
+		};
+		keenclient.addEvent("error", keenBug, function(err, res) {
+			console.log("Bug reported, (err, res) = ");
+			console.log(err);
+			console.log(res);
+		});
+	}
+
+	/*
+	window.onerror = function(msg, url, line, col, error) {
+		console.log("Caught error, reporting!");
+		reportBug("unhandled_error", {
+			message: msg,
+			url: url,
+			line: line,
+			column: col,
+			error: error
+		});
+		var suppressErrorAlert = true;
+		return suppressErrorAlert;
 	};
+	*/
 })();
 
-function reportBug(bugType, bugDetails) {
-	console.log("Reporting bug type " + bugType);
-	var keenBug = {
-		analytics_version: 1,
-		logs: capturedLogs,
-		bug_type: bugType,
-		bug_details: bugDetails,
-		user_agent: navigator.userAgent
-	};
-	keenclient.addEvent("error", keenBug, function(err, res) {
-		console.log("Bug reported, (err, res) = ");
-		console.log(err);
-		console.log(res);
-	});
-}
+var configureApp;
+riot.compile(function() {
+  // here tags are compiled and riot.mount works synchronously
+  configureApp = riot.mount('#configureroot');
 
-/*
-window.onerror = function(msg, url, line, col, error) {
-	console.log("Caught error, reporting!");
-	reportBug("unhandled_error", {
-		message: msg,
-		url: url,
-		line: line,
-		column: col,
-		error: error
-	});
-	var suppressErrorAlert = true;
-	return suppressErrorAlert;
-};
-*/
+  configureApp[0].on('save', onSave);
+});
 
 function getConfigMapping() {
 	function cfgElement(name, attrib, defval) {
@@ -66,19 +79,6 @@ function getConfigMapping() {
 	];
 }
 
-function getConfigData() {
-	var configMapping = getConfigMapping();
-	var options = {};
-
-	for(var i = 0; i < configMapping.length; i++) {
-		var elem = configMapping[i];
-		options[elem.name] = elem.get();
-	}
-
-	// Save for next launch
-	return options;
-}
-
 function loadConfigData() {
 	var options;
 	if(localStorage["options"]) {
@@ -87,15 +87,6 @@ function loadConfigData() {
 		options = {};
 	}
 	var configMapping = getConfigMapping();
-
-	for(var i = 0; i < configMapping.length; i++) {
-		var elem = configMapping[i];
-		if(elem.name in options) {
-			elem.set(options[elem.name]);
-		} else {
-			elem.set(elem.defval);
-		}
-	}
 }
 
 function getQueryParam(variable, defaultValue) {
@@ -111,8 +102,7 @@ function getQueryParam(variable, defaultValue) {
 }
 
 // Set up the 'submit' button
-var submitButton = document.getElementById('submit_button');
-submitButton.addEventListener('click', function() {
+function onSave(pack) {
 	console.log('Submit');
 
 	var options = getConfigData();
@@ -146,7 +136,9 @@ submitButton.addEventListener('click', function() {
 	});
 
 	console.log("Started Keen request");
-});
+}
 
 // Load any previously saved configuration, if available
 loadConfigData();
+
+})();
