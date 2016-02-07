@@ -193,8 +193,10 @@ static void reinit_complications()
 		c.weather_changed(wdata);
 	});
 
-	complication_do<DateComplication>([](auto& c) {
-		animation_schedule(c.animate_in());
+	time_t time_s = time(nullptr);
+	struct tm *time_struct = localtime(&time_s);
+	complication_do<DateComplication>([=](auto& c) {
+		c.time_changed(time_struct);
 	});
 }
 

@@ -5,6 +5,8 @@ extern "C" {
 #include <pebble.h>
 }
 
+#include "ScrambledNumber.h"
+
 typedef struct {
 	bool valid;
 
@@ -88,29 +90,13 @@ private:
 
 class DateComplication: public Complication
 {
-	bool animating;
-	uint8_t anim_frames_skipped;
-
-	uint8_t requested_date;
-
-	Boulder::TextLayer date_layer;
-	std::array<char, 3> date_layer_text;
+	ScrambledNumber date;
 
 public:
 	DateComplication(GRect frame);
 	~DateComplication() = default;
 
-	Animation* animate_in();
-
 	void time_changed(struct tm *time);
-
-private:
-	GRect calculate_date_frame();
-	void set_displayed(uint8_t mday);
-
-	static void spin_animation_started(Animation *animation, void *context);
-	static void spin_animation_stopped(Animation *animation, bool finished, void *context);
-	static void spin_animation_update(Animation* anim, AnimationProgress progress);
 };
 
 class WeatherComplication: public HighlightComplication2
