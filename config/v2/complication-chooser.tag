@@ -2,7 +2,6 @@
 </complication-customize>
 
 <complication-customize-health>
-	<div> foo </div>
 </complication-customize-health>
 
 <complication-customize-weather>
