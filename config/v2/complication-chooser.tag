@@ -45,7 +45,6 @@
 </complication-chooser>
 
 <complication-chooser-list>
-	<div class='item-container-header'>Complications</div>
 	<complication-chooser each={ names } position={ p }/>
 
 	<script>

@@ -10,7 +10,7 @@ var Injection = {
 				console.log("ready already fired, not re-annotating");
 			}
 		});
-		$(function() { readied = true; console.log("ready called"); });
+		//$(function() { readied = true; console.log("ready called"); });
 	}
 }
 
@@ -40,12 +40,16 @@ var Injection = {
 	<label class='item'>
 		<yield />
 		<!-- TODO inputid is not going to work -->
-		<input id={ inputid } type='checkbox' class='item-toggle'></input>
+		<input type='checkbox' class='item-toggle' checked={ opts.check } onclick={ onclickchange }></input>
 	</label>
 
 	<script>
 	this.mixin(Injection);
 	this.injectOnce('.item-toggle', '.item-style-toggle', $.fn.itemToggle);
+
+	onclickchange(e) {
+		opts.check = e.target.checked;
+	}
 	</script>
 </configuration-toggle>
 
