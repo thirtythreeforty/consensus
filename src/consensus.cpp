@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <array>
 #include <memory>
 
@@ -36,12 +35,12 @@ using std::end;
 template<typename C, typename F>
 void complication_do(const F& f)
 {
-	std::for_each(begin(complications), end(complications), [&](auto& c) {
+	for(auto& c: complications) {
 		auto downcast_complication = c.template downcast<C>();
 		if(downcast_complication) {
 			f(*downcast_complication);
 		}
-	});
+	};
 }
 
 static void update_health_complications(HealthEventType event, void*)
