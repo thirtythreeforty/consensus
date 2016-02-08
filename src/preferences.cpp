@@ -42,7 +42,7 @@ complication_config left_complication_type()
 complication_config bottom_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION,
-	                                            complication_type_map<BatteryComplication>),
+	                                            complication_type_map<WeatherComplication>),
 	        {
 	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT1),
 	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT2),
@@ -54,7 +54,7 @@ complication_config bottom_complication_type()
 complication_config right_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION,
-	                                            complication_type_map<BatteryComplication>),
+	                                            complication_type_map<DateComplication>),
 	        {
 	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT1),
 	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT2),
