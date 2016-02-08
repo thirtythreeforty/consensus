@@ -14,26 +14,42 @@
 	</div>
 
 	<script>
+	// complication-chooser-list is a sub-tag, so make a list of all the savables
+	this.modules = $.extend({}, this.tags);
+
+	delete this.modules["configuration-container"];
+	this.modules["complication-chooser-list"] = this.tags["configuration-container"].tags["complication-chooser-list"];
 	emitsave() {
 		var pack = {};
-		for(tagName in this.tags) {
-			var tag = this.tags[tagName];
-			if(tag.to_json) {
+		for (tagName in this.modules) {
+			var tag = this.modules[tagName];
+			if (tag.to_json) {
 				tag.to_json(pack);
 			} else {
 				console.log(tag, "contains no to_json!");
 			}
 		}
-		console.log('done getting pack:', pack);
-		this.trigger('save');
+		this.trigger('save', pack);
 	}
+
+	from_json(pack) {
+		for (tagName in this.modules) {
+			var tag = this.modules[tagName];
+			if (tag.from_json) {
+				tag.from_json(pack);
+			} else {
+				console.log(tag, "contains no from_json!");
+			}
+		}
+	}
+	this.on('load', this.from_json);
 	</script>
 </configure-app>
 
 <configure-appearance>
 	<configuration-container title="Appearance">
 		<configuration-content>
-			<configuration-toggle check={ parent.parent.show_second_hand }>
+			<configuration-toggle attrib={ parent.parent.show_second_hand }>
 				Second hand
 			</configuration-toggle>
 		</configuration-content>
@@ -41,7 +57,7 @@
 			Display the second hand.  Note that this may increase battery consumption.
 		</configuration-footer>
 		<configuration-content>
-			<configuration-toggle check={ parent.parent.show_no_connection }>
+			<configuration-toggle attrib={ parent.parent.show_no_connection }>
 				"No connection" icon
 			</configuration-toggle>
 		</configuration-content>
@@ -51,17 +67,20 @@
 	</configuration-container>
 
 	<script>
-	this.show_second_hand = false;
-	this.show_no_connection = true;
+	this.mixin(Attribute);
+
+	this.show_second_hand = new this.Attribute(false);
+	this.show_no_connection = new this.Attribute(true);
 
 	from_json(pack) {
-		this.show_second_hand = pack['show_second_hand'];
-		this.show_no_connection = pack['show_no_connection'];
+		this.show_second_hand.set(pack['show_second_hand']);
+		this.show_no_connection.set(pack['show_no_connection']);
+		this.update();
 	}
 
 	to_json(pack) {
-		pack['show_second_hand'] = this.show_second_hand;
-		pack['show_no_connection'] = this.show_no_connection;
+		pack['show_second_hand'] = this.show_second_hand.get();
+		pack['show_no_connection'] = this.show_no_connection.get();
 	}
 	</script>
 </configure-appearance>
@@ -69,7 +88,7 @@
 <configure-notifications>
 	<configuration-container title='Notifications'>
 		<configuration-content>
-			<configuration-toggle check={ parent.parent.vibrate_on_hour }>
+			<configuration-toggle attrib={ parent.parent.vibrate_on_hour }>
 				Vibrate on the hour
 			</configuration-toggle>
 		</configuration-content>
@@ -77,7 +96,7 @@
 			Briefly vibrate once at the top of every hour, and twice at noon and midnight.
 		</configuration-footer>
 		<configuration-content>
-			<configuration-toggle check={ parent.parent.vibrate_on_disconnect }>
+			<configuration-toggle attrib={ parent.parent.vibrate_on_disconnect }>
 				Vibrate on disconnect
 			</configuration-toggle>
 		</configuration-content>
@@ -87,17 +106,20 @@
 	</configuration-container>
 
 	<script>
-	this.vibrate_on_hour = false;
-	this.vibrate_on_disconnect = false;
+	this.mixin(Attribute);
+
+	this.vibrate_on_hour = new this.Attribute(false);
+	this.vibrate_on_disconnect = new this.Attribute(false);
 
 	from_json(pack) {
-		this.vibrate_on_hour = pack["vibrate_on_hour"];
-		this.vibrate_on_disconnect = pack["vibrate_on_disconnect"];
+		this.vibrate_on_hour.set(pack["vibrate_on_hour"]);
+		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
+		this.update();
 	}
 
 	to_json(pack) {
-		pack['vibrate_on_hour'] = this.vibrate_on_hour;
-		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect;
+		pack['vibrate_on_hour'] = this.vibrate_on_hour.get();
+		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
 	}
 	</script>
 </configure-notifications>
