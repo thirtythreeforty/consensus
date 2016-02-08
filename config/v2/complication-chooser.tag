@@ -6,7 +6,7 @@
 
 <complication-customize-weather>
 	<configuration-content>
-		<configuration-dropdown caption='Gadget' attrib={ parent.middle }>
+		<configuration-dropdown caption='Gadget' attrib={ parent.gadget }>
 			<option class="item-select-option" value='icon'>Conditions (icon)</configuration-option>
 			<option class="item-select-option" value='degF'>Temperature (&deg;F)</configuration-option>
 			<option class="item-select-option" value='degC'>Temperature (&deg;C)</configuration-option>
