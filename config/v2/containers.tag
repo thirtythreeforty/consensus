@@ -73,3 +73,19 @@ var Injection = {
 		<yield />
 	</option>
 </configuration-option>
+
+<configuration-radiobutton>
+	<label class='item'>
+		<yield />
+		<input type='radio' class='item-radio' name={ opts.group } value={ opts.val } oncheck={ onchangehandle } checked={ opts.attrib.get() }>
+	</label>
+
+	<script>
+	this.mixin(Injection);
+	this.injectOnce('.item-radio', '.item-styled-radio', $.fn.itemRadio);
+
+	onchangehandle(e) {
+		opts.attrib.set(e.target.value);
+	}
+	</script>
+</configuration-radiobutton>

@@ -41,6 +41,15 @@ void ScrambledNumber::set(int32_t number)
 	}
 }
 
+void ScrambledNumber::set_format(const char *fmt, int32_t number)
+{
+	if(state != ANIMATING) {
+		state = INIT;
+	}
+	format_string = fmt;
+	set(number);
+}
+
 void ScrambledNumber::format(int32_t display_number)
 {
 	snprintf(text_layer_text.data(), text_layer_text.size(), format_string, display_number);

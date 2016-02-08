@@ -160,7 +160,7 @@ static void reinit_complications()
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
 
-	const std::array<std::pair<const GRect&, unsigned int>, 3> complication_params = {{
+	const std::array<std::pair<const GRect&, complication_config>, 3> complication_params = {{
 		{ left_complication_position, left_complication_type() },
 		{ bottom_complication_position, bottom_complication_type() },
 		{ right_complication_position, right_complication_type() },
@@ -172,11 +172,15 @@ static void reinit_complications()
 
 	for(size_t i = 0; i < complication_params.size(); ++i) {
 		using std::get;
-		if(complications[i].change_type(get<1>(complication_params[i]),
-		                                get<0>(complication_params[i])))
-		{
+		bool type_changed = complications[i].change_type(get<0>(get<1>(complication_params[i])),
+		                                                 get<0>(complication_params[i]));
+
+		Complication& new_complication = complications[i];
+		new_complication.configure(get<1>(get<1>(complication_params[i])));
+
+		if(type_changed) {
 			// Type was changed, add the child
-			complications_layer->add_child(static_cast<Complication&>(complications[i]));
+			complications_layer->add_child(new_complication);
 		}
 	}
 

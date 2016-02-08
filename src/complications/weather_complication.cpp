@@ -3,6 +3,10 @@
 #include "common.h"
 #include "constants.h"
 
+const char* WeatherComplication::deg_format = "%i\u00B0";
+const char* WeatherComplication::relhum_format = "%i";
+const char* WeatherComplication::empty_format = "";
+
 void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 {
 	Tuple *temp_tuple = dict_find(iterator, KEY_WEATHER_TEMP_C);
@@ -141,7 +145,10 @@ void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 
 WeatherComplication::WeatherComplication(GRect frame)
 	: HighlightComplication2(frame)
-{}
+	, number(get_bounds(), empty_format)
+{
+	add_child(number.get_text_layer());
+}
 
 void WeatherComplication::weather_changed(const WeatherData &new_weather)
 {
@@ -149,48 +156,67 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	set_angle(angles.humidity_angle);
 	set_angle2(angles.temp_angle);
 
-	// Set the new icon
 	icon.reset();
 
-	if(new_weather.valid) {
-		static const std::array<uint32_t, 9> weather_icons = {
-			RESOURCE_ID_WEATHER_GENERIC,
-			RESOURCE_ID_WEATHER_SUNNY,
-			RESOURCE_ID_WEATHER_CLOUDY,
-			RESOURCE_ID_WEATHER_PARTLY_CLOUDY,
-			RESOURCE_ID_WEATHER_RAIN_LIGHT,
-			RESOURCE_ID_WEATHER_RAIN_HEAVY,
-			RESOURCE_ID_WEATHER_RAIN_AND_SNOW,
-			RESOURCE_ID_WEATHER_SNOW_LIGHT,
-			RESOURCE_ID_WEATHER_SNOW_HEAVY,
-		};
-
-		// Be sure and clamp the index so we're not accessing arbitrary memory.
-		if(new_weather.icon <= weather_icons.size()) {
-			const uint32_t resource = weather_icons[new_weather.icon];
-
-			icon.reset(resource);
-
-			// Change the icon color
-			icon.iterate([](GDrawCommand *command, uint32_t) {
-				gdraw_command_set_fill_color(command, GColorClear);
-				gdraw_command_set_stroke_color(command, GColorDarkGray);
-				return true;
-			});
-
-			// Need to shift it over to account for its size.
-			const GSize icon_size = icon.get_bounds_size();
-			const GRect bounds = this->get_bounds();
-			icon_shift = {
-				.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
-				.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
+	switch(gadget_type) {
+	case ICON:
+		// Set the new icon
+		if(new_weather.valid) {
+			static const std::array<uint32_t, 9> weather_icons = {
+				RESOURCE_ID_WEATHER_GENERIC,
+				RESOURCE_ID_WEATHER_SUNNY,
+				RESOURCE_ID_WEATHER_CLOUDY,
+				RESOURCE_ID_WEATHER_PARTLY_CLOUDY,
+				RESOURCE_ID_WEATHER_RAIN_LIGHT,
+				RESOURCE_ID_WEATHER_RAIN_HEAVY,
+				RESOURCE_ID_WEATHER_RAIN_AND_SNOW,
+				RESOURCE_ID_WEATHER_SNOW_LIGHT,
+				RESOURCE_ID_WEATHER_SNOW_HEAVY,
 			};
+
+			// Be sure and clamp the index so we're not accessing arbitrary memory.
+			if(new_weather.icon <= weather_icons.size()) {
+				const uint32_t resource = weather_icons[new_weather.icon];
+
+				icon.reset(resource);
+
+				// Change the icon color
+				icon.iterate([](GDrawCommand *command, uint32_t) {
+					gdraw_command_set_fill_color(command, GColorClear);
+					gdraw_command_set_stroke_color(command, GColorDarkGray);
+					return true;
+				});
+
+				// Need to shift it over to account for its size.
+				const GSize icon_size = icon.get_bounds_size();
+				const GRect bounds = this->get_bounds();
+				icon_shift = {
+					.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
+					.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
+				};
+			}
 		}
+		number.set_format(empty_format, 0);
+		break;
+	case TEMP_F:
+		number.set_format(deg_format, (new_weather.temp_c * 18 + 320) / 10);
+		break;
+	case TEMP_C:
+		number.set_format(deg_format, new_weather.temp_c);
+		break;
+	case RELHUM:
+		number.set_format(relhum_format, new_weather.humidity);
+		break;
 	}
 
 	schedule_refresh(new_weather.time_updated);
 
 	mark_dirty();
+}
+
+void WeatherComplication::configure(const std::array<unsigned int, 4>& config)
+{
+	gadget_type = static_cast<GadgetType>(std::get<0>(config));
 }
 
 GColor WeatherComplication::highlight_color() const

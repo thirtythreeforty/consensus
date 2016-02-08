@@ -40,6 +40,9 @@ void Complication::update(GContext* ctx)
 	draw_arc(ctx, bounds, GColorClear, 0, 0, TRIG_MAX_ANGLE);
 }
 
+void Complication::configure(const std::array<unsigned int, 4>& config)
+{}
+
 void HighlightComplication::update(GContext* ctx)
 {
 	GRect bounds = this->get_bounds();

@@ -149,7 +149,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 		var cConfig = configData["complications"][position];
 		var cType = cConfig["type"];
-		dict[typeKey] = pebbleComplicationNames[cConfig["type"]];
+		var cOptions = cConfig["options"];
+		dict[typeKey] = pebbleComplicationNames[cType];
 
 		var opt1Key = typeKey + "_OPT1";
 		var opt2Key = typeKey + "_OPT2";
@@ -164,6 +165,12 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		case "Date":
 			break;
 		case "Weather":
+			dict[opt1Key] = {
+				"icon": 0,
+				"degC": 1,
+				"degF": 2,
+				"relhum": 3
+			}[cOptions["gadget"]];
 			break;
 		case "Health":
 			break;

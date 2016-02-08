@@ -30,6 +30,8 @@ class Complication: public Boulder::Layer
 public:
 	~Complication() = default;
 
+	virtual void configure(const std::array<unsigned int, 4>& config);
+
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
 
@@ -106,8 +108,18 @@ class WeatherComplication: public HighlightComplication2
 		int32_t humidity_angle;
 	};
 
+	enum GadgetType {
+		ICON = 0,
+		TEMP_C,
+		TEMP_F,
+		RELHUM,
+	};
+	GadgetType gadget_type;
+
 	LazyIcon icon;
 	GPoint icon_shift;
+
+	ScrambledNumber number;
 
 	std::experimental::optional<Boulder::AppTimer> refresh_timer;
 
@@ -116,6 +128,8 @@ public:
 	~WeatherComplication() = default;
 
 	void weather_changed(const WeatherData &new_weather);
+
+	virtual void configure(const std::array<unsigned int, 4>& config) override;
 
 protected:
 	void update(GContext *ctx) override;
@@ -127,6 +141,10 @@ private:
 
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 	static void request_refresh(void*);
+
+	static const char* deg_format;
+	static const char* relhum_format;
+	static const char* empty_format;
 };
 
 class BatteryComplication: public HighlightComplication

@@ -27,22 +27,40 @@ bool should_show_second()
 	return persist::load_default<bool>(PERSIST_PREF_SHOW_SECOND_HAND, false);
 }
 
-unsigned int left_complication_type()
+complication_config left_complication_type()
 {
-	return persist::load_default<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION,
-	                                           complication_type_map<BatteryComplication>);
+	return {persist::load_default<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION,
+	                                            complication_type_map<BatteryComplication>),
+	        {
+	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT1),
+	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT2),
+	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT3),
+	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT4)
+	        }};
 }
 
-unsigned int bottom_complication_type()
+complication_config bottom_complication_type()
 {
-	return persist::load_default<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION,
-	                                           complication_type_map<WeatherComplication>);
+	return {persist::load_default<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION,
+	                                            complication_type_map<BatteryComplication>),
+	        {
+	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT1),
+	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT2),
+	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT3),
+	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT4)
+	        }};
 }
 
-unsigned int right_complication_type()
+complication_config right_complication_type()
 {
-	return persist::load_default<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION,
-	                                           complication_type_map<DateComplication>);
+	return {persist::load_default<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION,
+	                                            complication_type_map<BatteryComplication>),
+	        {
+	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT1),
+	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT2),
+	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT3),
+	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT4)
+	        }};
 }
 
 template<typename T>
@@ -72,4 +90,31 @@ void parse_preferences(DictionaryIterator *iterator)
 	                                          PERSIST_PREF_BOTTOM_COMPLICATION);
 	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION,
 	                                          PERSIST_PREF_RIGHT_COMPLICATION);
+
+	update_preference<unsigned int>(iterator, KEY_PREF_LEFT_COMPLICATION_OPT1,
+	                                          PERSIST_PREF_LEFT_COMPLICATION_OPT1);
+	update_preference<unsigned int>(iterator, KEY_PREF_LEFT_COMPLICATION_OPT2,
+	                                          PERSIST_PREF_LEFT_COMPLICATION_OPT2);
+	update_preference<unsigned int>(iterator, KEY_PREF_LEFT_COMPLICATION_OPT3,
+	                                          PERSIST_PREF_LEFT_COMPLICATION_OPT3);
+	update_preference<unsigned int>(iterator, KEY_PREF_LEFT_COMPLICATION_OPT4,
+	                                          PERSIST_PREF_LEFT_COMPLICATION_OPT4);
+
+	update_preference<unsigned int>(iterator, KEY_PREF_BOTTOM_COMPLICATION_OPT1,
+	                                          PERSIST_PREF_BOTTOM_COMPLICATION_OPT1);
+	update_preference<unsigned int>(iterator, KEY_PREF_BOTTOM_COMPLICATION_OPT2,
+	                                          PERSIST_PREF_BOTTOM_COMPLICATION_OPT2);
+	update_preference<unsigned int>(iterator, KEY_PREF_BOTTOM_COMPLICATION_OPT3,
+	                                          PERSIST_PREF_BOTTOM_COMPLICATION_OPT3);
+	update_preference<unsigned int>(iterator, KEY_PREF_BOTTOM_COMPLICATION_OPT4,
+	                                          PERSIST_PREF_BOTTOM_COMPLICATION_OPT4);
+
+	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT1,
+	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT1);
+	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT2,
+	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT2);
+	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT3,
+	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT3);
+	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT4,
+	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT4);
 }
