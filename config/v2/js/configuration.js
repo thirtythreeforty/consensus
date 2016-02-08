@@ -70,6 +70,27 @@ riot.compile(function() {
   loadConfigData();
 });
 
+function convertFrom1(v1options) {
+	function complicationType(type) {
+		return {
+			"type": type,
+			options: {}
+		}
+	}
+	return {
+		"version": 2,
+		"show_second_hand": v1options["disp_second_hand"],
+		"show_no_connection": v1options["disp_no_connection"],
+		"vibrate_on_hour": v1options["vibrate_on_hour"],
+		"vibrate_on_disconnect": v1options["vibrate_on_disconnect"],
+		"complications": {
+			"Left": complicationType(v1options["left_complication"]),
+			"Bottom": complicationType(v1options["bottom_complication"]),
+			"Right": complicationType(v1options["right_complication"])
+		}
+	}
+}
+
 var currentVersion = 2;
 function loadConfigData() {
 	var options;
