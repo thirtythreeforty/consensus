@@ -176,7 +176,9 @@ static void reinit_complications()
 		                                                 get<0>(complication_params[i]));
 
 		Complication& new_complication = complications[i];
-		new_complication.configure(get<1>(get<1>(complication_params[i])));
+		if(complications[i].valid()) {
+			new_complication.configure(get<1>(get<1>(complication_params[i])));
+		}
 
 		if(type_changed) {
 			// Type was changed, add the child

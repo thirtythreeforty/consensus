@@ -246,7 +246,7 @@ public:
 		}
 		destroy();
 		*this = create(type, frame);
-		return true;
+		return valid();
 	}
 
 	void destroy() {
