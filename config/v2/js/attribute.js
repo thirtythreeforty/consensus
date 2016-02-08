@@ -6,9 +6,12 @@ var Attribute = {
 
 Attribute.Attribute.prototype = {
 	set: function (val) {
-		this.var = val;
-		if(this.onSet) {
-			this.onSet(val);
+		// "undefined" is not a valid value for any attribute I'm tracking
+		if(val !== undefined) {
+			this.var = val;
+			if(this.onSet) {
+				this.onSet(val);
+			}
 		}
 	},
 
