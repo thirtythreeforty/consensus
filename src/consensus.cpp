@@ -46,17 +46,14 @@ void complication_do(const F& f)
 
 static void update_health_complications(HealthEventType event, void*)
 {
-	for(unsigned int i = 0; i < NELEM(complications); ++i) {
-		auto health_complication = complications[i].downcast<HealthComplication>();
-		if(health_complication) {
-			if(event == HealthEventSignificantUpdate) {
-				health_complication->on_significant_update();
-			}
-			else if(event == HealthEventMovementUpdate) {
-				health_complication->on_movement_update();
-			}
+	complication_do<HealthComplication>([&](auto& c) {
+		if(event == HealthEventSignificantUpdate) {
+			c.on_significant_update();
 		}
-	}
+		else if(event == HealthEventMovementUpdate) {
+			c.on_movement_update();
+		}
+	});
 }
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
