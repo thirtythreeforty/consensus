@@ -7,8 +7,8 @@ var keenclient = new Keen({
 });
 
 var reportBug;
+var capturedLogs = [];
 (function() {
-	var capturedLogs = [];
 	(function(){
 		var oldLog = console.log;
 		console.log = function (message) {
@@ -137,7 +137,7 @@ function onSave(pack) {
 		selected_prefs: pack,
 		acct_token: (typeof Pebble !== 'undefined') ? Pebble.getAccountToken() : null,
 		referrer: document.referrer,
-		logs: null //capturedLogs
+		logs: capturedLogs
 	};
 
 	// If we don't leave by, say, 10 seconds, there's an issue, send the logs to Keen
