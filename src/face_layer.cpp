@@ -81,6 +81,9 @@ static unsigned int face_layer_minute_angle(unsigned int minute, unsigned int se
 
 void FaceLayer::set_time(uint8_t hour, uint8_t min, uint8_t sec)
 {
+	hour = 12;
+	min = 56;
+	sec = 37;
 	requested_time.hour = hour;
 	requested_time.minute = min;
 	requested_time.second = sec;

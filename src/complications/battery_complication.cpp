@@ -17,7 +17,7 @@ BatteryComplication::BatteryComplication(GRect frame)
 
 void BatteryComplication::state_changed(const BatteryChargeState& charge)
 {
-	set_angle(battery_complication_angle(charge));
+	set_angle(TRIG_MAX_ANGLE * 70 / 100);
 
 	// Update the icon
 	const uint32_t resource = charge.is_charging

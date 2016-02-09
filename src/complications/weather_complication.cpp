@@ -143,9 +143,9 @@ WeatherComplication::WeatherComplication(GRect frame)
 
 void WeatherComplication::weather_changed(const WeatherData &new_weather)
 {
-	auto angles = compute_angles(new_weather);
-	set_angle(angles.humidity_angle);
-	set_angle2(angles.temp_angle);
+//	auto angles = compute_angles(new_weather);
+	set_angle(TRIG_MAX_ANGLE * 57 / 100 / 2);
+	set_angle2(TRIG_MAX_ANGLE * 30 / 200);
 
 	reset_icon();
 
@@ -167,7 +167,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 
 			// Be sure and clamp the index so we're not accessing arbitrary memory.
 			if(new_weather.icon <= weather_icons.size()) {
-				const uint32_t resource = weather_icons[new_weather.icon];
+				const uint32_t resource = weather_icons[1];
 
 				set_icon(resource);
 			}
