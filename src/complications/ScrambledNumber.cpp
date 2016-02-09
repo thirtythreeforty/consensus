@@ -6,7 +6,7 @@ ScrambledNumber::ScrambledNumber(GRect frame, const char* format_string)
 	, format_string(format_string)
 	, state(INIT)
 {
-	text_layer.set_text_color(GColorDarkGray);
+	text_layer.set_text_color(GColorLightGray);
 	text_layer.set_background_color(GColorClear);
 	text_layer.set_text(text_layer_text.data());
 	text_layer.set_text_alignment(GTextAlignmentCenter);

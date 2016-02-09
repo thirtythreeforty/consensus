@@ -183,7 +183,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 				// Change the icon color
 				icon.iterate([](GDrawCommand *command, uint32_t) {
 					gdraw_command_set_fill_color(command, GColorClear);
-					gdraw_command_set_stroke_color(command, GColorDarkGray);
+					gdraw_command_set_stroke_color(command, GColorLightGray);
 					return true;
 				});
 

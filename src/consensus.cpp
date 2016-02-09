@@ -275,7 +275,7 @@ static void init_layers(void)
 	reinit_complications();
 
 	face_layer = new FaceLayer(size);
-	face_layer->set_colors(GColorVeryLightBlue, GColorPictonBlue, GColorRed);
+	face_layer->set_colors(GColorVividCerulean, GColorWhite, GColorFolly);
 	face_layer->set_show_second(should_show_second());
 	layer_add_child(window_get_root_layer(window), *face_layer);
 	animation_schedule(face_layer->animate_in(true, true));

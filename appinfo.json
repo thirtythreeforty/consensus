@@ -56,7 +56,7 @@
       {
         "type": "raw",
         "name": "TICKS",
-        "file": "ticks.pdc"
+        "file": "ticks-white.pdc"
       },
       {
         "type": "bitmap",

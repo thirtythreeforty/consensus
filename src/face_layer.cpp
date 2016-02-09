@@ -4,16 +4,16 @@
 
 void FaceLayer::update(GContext *ctx)
 {
-	graphics_context_set_stroke_width(ctx, 7);
+	graphics_context_set_stroke_width(ctx, 9);
 	graphics_context_set_stroke_color(ctx, hour_color);
 	gpath_draw_outline(ctx, hour_path);
 
-	graphics_context_set_stroke_width(ctx, 5);
+	graphics_context_set_stroke_width(ctx, 7);
 	graphics_context_set_stroke_color(ctx, minute_color);
 	gpath_draw_outline(ctx, minute_path);
 
 	if(show_second) {
-		graphics_context_set_stroke_width(ctx, 1);
+		graphics_context_set_stroke_width(ctx, 3);
 		graphics_context_set_stroke_color(ctx, second_color);
 		gpath_draw_outline_open(ctx, second_path);
 	}
@@ -24,7 +24,7 @@ void FaceLayer::update(GContext *ctx)
 
 	graphics_context_set_stroke_width(ctx, 1);
 	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_circle(ctx, center, 1);
+	graphics_fill_circle(ctx, center, 2);
 }
 
 FaceLayer::FaceLayer(GRect frame)

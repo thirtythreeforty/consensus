@@ -20,7 +20,7 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 {
 	angle = clamp((long int)0, angle, max_angle - min_angle);
 	if(angle > 0) {
-		graphics_context_set_stroke_width(ctx, complication_line_size);
+		graphics_context_set_stroke_width(ctx, 3);
 		graphics_context_set_stroke_color(ctx, color);
 		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle, min_angle + angle);
 	}
