@@ -33,7 +33,6 @@ var reportBug;
 		});
 	}
 
-	/*
 	window.onerror = function(msg, url, line, col, error) {
 		console.log("Caught error, reporting!");
 		reportBug("unhandled_error", {
@@ -46,7 +45,6 @@ var reportBug;
 		var suppressErrorAlert = true;
 		return suppressErrorAlert;
 	};
-	*/
 })();
 
 function getQueryParam(variable, defaultValue) {
