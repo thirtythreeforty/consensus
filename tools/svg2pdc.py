@@ -367,7 +367,7 @@ group_stroke = None
 group_stroke_opacity = None
 group_stroke_width = None
 
-def create_command(translate, element, precise=False, raise_error=False, truncate_color=True):
+def create_command(translate, element, precise=False, raise_error=False, truncate_color=True, force_stroke_color=None, force_fill_color=None):
     style = element.get('style')
     attributes = element
     if style:
@@ -385,6 +385,12 @@ def create_command(translate, element, precise=False, raise_error=False, truncat
     stroke_opacity = stroke_opacity if stroke_opacity else group_stroke_opacity
     fill = fill if fill else group_fill
     fill_opacity = fill_opacity if fill_opacity else group_fill_opacity
+
+    # override if force_* is set
+    if force_stroke_color is not None:
+        stroke = force_stroke_color
+    if force_fill_color is not None:
+        fill = force_fill_color
 
     stroke_color = parse_color(stroke, calc_opacity(stroke_opacity, opacity), truncate_color)
     fill_color = parse_color(fill, calc_opacity(fill_opacity, opacity), truncate_color)
@@ -420,7 +426,7 @@ def create_command(translate, element, precise=False, raise_error=False, truncat
     return None
 
 
-def get_commands(translate, group, precise=False, raise_error=False, truncate_color=True):
+def get_commands(translate, group, precise=False, raise_error=False, truncate_color=True, stroke_color=None, fill_color=None):
     global group_opacity
     global group_fill
     global group_fill_opacity
@@ -461,7 +467,7 @@ def get_commands(translate, group, precise=False, raise_error=False, truncate_co
                 translate = (translate[0] + float(translate_strs[0]), translate[1] + float(translate_strs[1]))
             child_translate = get_translate(child)
             translate = (translate[0] + child_translate[0], translate[1] + child_translate[1])
-            cmd_list, err = get_commands(translate, child, precise, raise_error, truncate_color)
+            cmd_list, err = get_commands(translate, child, precise, raise_error, truncate_color, stroke_color, fill_color)
             commands += cmd_list
             if err:
                 error = True
@@ -473,7 +479,7 @@ def get_commands(translate, group, precise=False, raise_error=False, truncate_co
                 if transform is not None and 'translate' in transform:
                     translate_strs = re.search(r'(?:translate\()(.*),(.*)\)',transform).group(1,2)
                     child_translate = (translate[0] + float(translate_strs[0]), translate[1] + float(translate_strs[1]))
-                c = create_command(child_translate, child, precise, raise_error, truncate_color)
+                c = create_command(child_translate, child, precise, raise_error, truncate_color, stroke_color, fill_color)
                 if c is not None:
                     commands.append(c)
             except InvalidPointException:
@@ -544,14 +550,14 @@ def get_info(xml):
     return translate, viewbox[1]
 
 
-def parse_svg_image(filename, precise=False, raise_error=False):
+def parse_svg_image(filename, precise=False, raise_error=False, stroke_color=None, fill_color=None):
     root = get_xml(filename)
     translate, size = get_info(root)
-    cmd_list, error = get_commands(translate, root, precise, raise_error)
+    cmd_list, error = get_commands(translate, root, precise, raise_error, False, stroke_color, fill_color)
     return size, cmd_list, error
 
 
-def parse_svg_sequence(dir_name, precise=False, raise_error=False):
+def parse_svg_sequence(dir_name, precise=False, raise_error=False, stroke_color=None, fill_color=None):
     frames = []
     error_files = []
     file_list = sorted(glob.glob(dir_name + "/*.svg"))
@@ -559,7 +565,7 @@ def parse_svg_sequence(dir_name, precise=False, raise_error=False):
         return
     translate, size = get_info(get_xml(file_list[0]))  # get the viewbox from the first file
     for filename in file_list:
-        cmd_list, error = get_commands(translate, get_xml(filename), precise, raise_error)
+        cmd_list, error = get_commands(translate, get_xml(filename), precise, raise_error, False, stroke_color, fill_color)
         if cmd_list is not None:
             frames.append(cmd_list)
         if error:
@@ -567,7 +573,7 @@ def parse_svg_sequence(dir_name, precise=False, raise_error=False):
     return size, frames, error_files
 
 
-def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count, precise=False, raise_error=False):
+def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count, precise=False, raise_error=False, stroke_color=None, fill_color=None):
     dir_name = path
     output = ''
     error_files = []
@@ -580,14 +586,14 @@ def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count
         commands = []
         if sequence:
             # get all .svg files in directory
-            result = parse_svg_sequence(dir_name, precise, raise_error)
+            result = parse_svg_sequence(dir_name, precise, raise_error, stroke_color, fill_color)
             if result:
                 frames = result[1]
                 size = result[0]
                 error_files += result[2]
-                output = serialize_sequence(frames, size, duration, play_count)
+                output = serialize_sequence(frames, size, duration, play_count, stroke_color, fill_color)
         elif os.path.isfile(path):
-            size, commands, error = parse_svg_image(path, precise, raise_error)
+            size, commands, error = parse_svg_image(path, precise, raise_error, stroke_color, fill_color)
             if commands:
                 output = serialize_image(commands, size)
             if error:
@@ -619,7 +625,7 @@ def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count
 def main(args):
     path = os.path.abspath(args.path)
     error_files = create_pdc_from_path(path, args.sequence, args.output, args.verbose, args.duration, args.play_count,
-                                       args.precise)
+                                       args.precise, False, args.stroke_color, args.fill_color)
     if error_files:
         print "Errors in the following files:"
         for ef in error_files:
@@ -643,6 +649,10 @@ if __name__ == '__main__':
                         help="Number of times the sequence should play - default = 1")
     parser.add_argument('-p', '--precise', action='store_true',
                         help="Use sub-pixel precision for paths")
+    parser.add_argument('-S', '--stroke-color', type=str, default=None,
+                        help="Use the specified stroke color for all elements")
+    parser.add_argument('-F', '--fill-color', type=str, default=None,
+                        help="Use the specified fill color for all elements")
     args = parser.parse_args()
     main(args)
 
