@@ -231,7 +231,7 @@ const GPathInfo FaceLayer::hour_hand_path = {
 	.num_points = NELEM(hour_hand_path_points),
 	.points = (GPoint*)hour_hand_path_points
 };
-const GPoint FaceLayer::minute_hand_path_points[] = {{0, 0}, {0, -55}};
+const GPoint FaceLayer::minute_hand_path_points[] = {{0, 0}, {0, -60}};
 const GPathInfo FaceLayer::minute_hand_path = {
 	.num_points = NELEM(minute_hand_path_points),
 	.points = (GPoint*)minute_hand_path_points
@@ -240,7 +240,7 @@ const GPathInfo FaceLayer::minute_hand_path = {
 // The extra {0, 0} point keeps the second hand always going through the
 // center, even if the rotation makes the hand imperceptibly bent due to
 // imperfect rotation.
-const GPoint FaceLayer::second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -57}};
+const GPoint FaceLayer::second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -60}};
 const GPathInfo FaceLayer::second_hand_path = {
 	.num_points = NELEM(second_hand_path_points),
 	.points = (GPoint*)second_hand_path_points
