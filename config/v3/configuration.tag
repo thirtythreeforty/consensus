@@ -113,8 +113,8 @@
 	<script>
 	this.mixin(Attribute);
 
-	this.vibrate_on_hour = new this.Attribute(false);
-	this.vibrate_on_disconnect = new this.Attribute(false);
+	this.vibrate_on_hour = new this.Attribute(true);
+	this.vibrate_on_disconnect = new this.Attribute(true);
 	this.vibrate_on_connect = new this.Attribute(false);
 
 	from_json(pack) {
