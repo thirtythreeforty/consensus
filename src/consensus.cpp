@@ -98,9 +98,20 @@ void on_connection_change(bool connected)
 	                 connected || should_hide_no_bluetooth());
 
 	const bool became_disconnected = was_connected == WAS_CONNECTED_TRUE && !connected;
+	const bool became_connected = was_connected == WAS_CONNECTED_FALSE && connected;
 
 	if(became_disconnected && should_vibrate_on_disconnect()) {
 		static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
+		static const VibePattern vibe = {
+			.durations = vibe_pattern,
+			.num_segments = NELEM(vibe_pattern)
+		};
+
+		vibes_enqueue_custom_pattern(vibe);
+	}
+
+	if(became_connected && should_vibrate_on_connect()) {
+		static const uint32_t vibe_pattern[] = {150, 100, 150};
 		static const VibePattern vibe = {
 			.durations = vibe_pattern,
 			.num_segments = NELEM(vibe_pattern)

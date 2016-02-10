@@ -100,8 +100,13 @@
 				Vibrate on disconnect
 			</configuration-toggle>
 		</configuration-content>
+		<configuration-content>
+			<configuration-toggle attrib={ parent.parent.vibrate_on_connect }>
+				Vibrate on connect
+			</configuration-toggle>
+		</configuration-content>
 		<configuration-footer>
-			Vibrate when the watch loses its Bluetooth connection to the phone.
+			Vibrate when the watch gains or loses its Bluetooth connection to the phone.
 		</configuration-footer>
 	</configuration-container>
 
@@ -110,16 +115,19 @@
 
 	this.vibrate_on_hour = new this.Attribute(false);
 	this.vibrate_on_disconnect = new this.Attribute(false);
+	this.vibrate_on_connect = new this.Attribute(false);
 
 	from_json(pack) {
 		this.vibrate_on_hour.set(pack["vibrate_on_hour"]);
 		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
+		this.vibrate_on_connect.set(pack["vibrate_on_connect"]);
 		this.update();
 	}
 
 	to_json(pack) {
 		pack['vibrate_on_hour'] = this.vibrate_on_hour.get();
 		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
+		pack['vibrate_on_connect'] = this.vibrate_on_connect.get();
 	}
 	</script>
 </configure-notifications>
