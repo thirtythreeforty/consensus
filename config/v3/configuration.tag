@@ -49,6 +49,12 @@
 <configure-appearance>
 	<configuration-container title="Appearance">
 		<configuration-content>
+			<configuration-dropdown caption='Theme' attrib={ parent.parent.theme }>
+				<option class="item-select-option" value='bold-dark'>Bold Dark</configuration-option>
+				<option class="item-select-option" value='thin'>Thin</configuration-option>
+			</configuration-dropdown>
+		</configuration-content>
+		<configuration-content>
 			<configuration-toggle attrib={ parent.parent.show_second_hand }>
 				Second hand
 			</configuration-toggle>
@@ -69,16 +75,19 @@
 	<script>
 	this.mixin(Attribute);
 
+	this.theme = new this.Attribute('bold-dark');
 	this.show_second_hand = new this.Attribute(false);
 	this.show_no_connection = new this.Attribute(true);
 
 	from_json(pack) {
+		this.theme.set(pack["theme"]);
 		this.show_second_hand.set(pack['show_second_hand']);
 		this.show_no_connection.set(pack['show_no_connection']);
 		this.update();
 	}
 
 	to_json(pack) {
+		pack['theme'] = this.theme.get();
 		pack['show_second_hand'] = this.show_second_hand.get();
 		pack['show_no_connection'] = this.show_no_connection.get();
 	}

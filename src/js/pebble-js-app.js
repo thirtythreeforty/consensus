@@ -140,6 +140,12 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	var configData = JSON.parse(configStr);
 
 	function toInt(val) { return val ? 1 : 0; }
+	function themeToInt(val) {
+		return {
+			"bold-dark": 0,
+			"thin": 1
+		}[val];
+	}
 	function complicationConfigToInts(dict, position) {
 		var typeKey = {
 			'Left': 'KEY_PREF_LEFT_COMPLICATION',
@@ -178,6 +184,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	}
 
 	var dict = {
+		KEY_PREF_THEME: themeToInt(configData['theme']),
 		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['show_second_hand']),
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
