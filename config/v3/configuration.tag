@@ -49,7 +49,7 @@
 <configure-appearance>
 	<configuration-container title="Appearance">
 		<configuration-content>
-			<configuration-dropdown caption='theme' attrib={ parent.parent.theme }>
+			<configuration-dropdown caption='Theme' attrib={ parent.parent.theme }>
 				<option class="item-select-option" value='bold-dark'>Bold Dark</configuration-option>
 				<option class="item-select-option" value='thin'>Thin</configuration-option>
 			</configuration-dropdown>
