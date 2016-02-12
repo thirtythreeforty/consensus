@@ -12,8 +12,8 @@ static void base_complication_appropriate_bounds(GRect& bounds)
 	// subtract a couple pixels to make sure the line doesn't clip the layer edge.
 	bounds.size.h -= 5;
 	bounds.size.w -= 5;
-	bounds.origin.x += 3;
-	bounds.origin.y += 3;
+	bounds.origin.x += 2;
+	bounds.origin.y += 2;
 }
 
 static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
