@@ -49,7 +49,7 @@
 <configure-appearance>
 	<configuration-container title="Appearance">
 		<configuration-content>
-			<configuration-dropdown caption='Theme' attrib={ parent.parent.parent.theme }>
+			<configuration-dropdown caption='Theme' attrib={ parent.parent.theme }>
 				<option class="item-select-option" value='bold-dark'>Bold Dark</configuration-option>
 				<option class="item-select-option" value='thin'>Thin</configuration-option>
 			</configuration-dropdown>
@@ -75,16 +75,19 @@
 	<script>
 	this.mixin(Attribute);
 
+	this.theme = new this.Attribute('bold-dark');
 	this.show_second_hand = new this.Attribute(false);
 	this.show_no_connection = new this.Attribute(true);
 
 	from_json(pack) {
+		this.theme.set(pack["theme"]);
 		this.show_second_hand.set(pack['show_second_hand']);
 		this.show_no_connection.set(pack['show_no_connection']);
 		this.update();
 	}
 
 	to_json(pack) {
+		pack['theme'] = this.theme.get();
 		pack['show_second_hand'] = this.show_second_hand.get();
 		pack['show_no_connection'] = this.show_no_connection.get();
 	}
@@ -119,13 +122,11 @@
 	<script>
 	this.mixin(Attribute);
 
-	this.theme = new this.Attribute('bold-dark');
 	this.vibrate_on_hour = new this.Attribute(true);
 	this.vibrate_on_disconnect = new this.Attribute(true);
 	this.vibrate_on_connect = new this.Attribute(false);
 
 	from_json(pack) {
-		this.theme.set(pack["theme"]);
 		this.vibrate_on_hour.set(pack["vibrate_on_hour"]);
 		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
 		this.vibrate_on_connect.set(pack["vibrate_on_connect"]);
@@ -133,7 +134,6 @@
 	}
 
 	to_json(pack) {
-		pack['theme'] = this.theme.get();
 		pack['vibrate_on_hour'] = this.vibrate_on_hour.get();
 		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
 		pack['vibrate_on_connect'] = this.vibrate_on_connect.get();
