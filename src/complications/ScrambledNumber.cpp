@@ -1,12 +1,14 @@
 #include "ScrambledNumber.h"
 
+#include "themes.h"
+
 ScrambledNumber::ScrambledNumber(GRect frame, const char* format_string)
 	: text_layer(calculate_text_frame(frame))
 	, text_layer_text({0})
 	, format_string(format_string)
 	, state(INIT)
 {
-	text_layer.set_text_color(GColorLightGray);
+	text_layer.set_text_color(theme().complication_text_color);
 	text_layer.set_background_color(GColorClear);
 	text_layer.set_text(text_layer_text.data());
 	text_layer.set_text_alignment(GTextAlignmentCenter);

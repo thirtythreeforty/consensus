@@ -9,6 +9,7 @@ extern "C" {
 #include "constants.h"
 
 #include "preferences.h"
+#include "themes.h"
 
 #include "complications/complication.h"
 #include "face_layer.h"
@@ -237,7 +238,7 @@ void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 static void update_background(Layer *layer, GContext *ctx)
 {
 	GRect rect = layer_get_bounds(layer);
-	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_context_set_fill_color(ctx, theme().background_color);
 	graphics_fill_rect(ctx, rect, 0, GCornerNone);
 
 	gdraw_command_image_draw(ctx, ticks_image, GPointZero);
@@ -275,7 +276,9 @@ static void init_layers(void)
 	reinit_complications();
 
 	face_layer = new FaceLayer(size);
-	face_layer->set_colors(GColorVividCerulean, GColorWhite, GColorFolly);
+	face_layer->set_colors(theme().hour_hand_color,
+	                       theme().minute_hand_color,
+	                       theme().second_hand_color);
 	face_layer->set_show_second(should_show_second());
 	layer_add_child(window_get_root_layer(window), *face_layer);
 	animation_schedule(face_layer->animate_in(true, true));
@@ -306,6 +309,8 @@ void main_window_unload(Window *window)
 
 static void init(void)
 {
+	setTheme();
+
 	window = window_create();
 	static const WindowHandlers h = {
 		main_window_load,

@@ -63,6 +63,11 @@ complication_config right_complication_type()
 	        }};
 }
 
+uint8_t current_theme()
+{
+	return persist::load_default<unsigned int>(PERSIST_PREF_THEME, 0);
+}
+
 template<typename T>
 void update_preference(DictionaryIterator *iter, uint32_t dict_key, uint32_t persist_key)
 {
@@ -117,4 +122,7 @@ void parse_preferences(DictionaryIterator *iterator)
 	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT3);
 	update_preference<unsigned int>(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT4,
 	                                          PERSIST_PREF_RIGHT_COMPLICATION_OPT4);
+
+	update_preference<unsigned int>(iterator, KEY_PREF_THEME,
+	                                          PERSIST_PREF_THEME);
 }

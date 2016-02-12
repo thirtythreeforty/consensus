@@ -1,6 +1,7 @@
 #include "complication.h"
 
 #include "common.h"
+#include "themes.h"
 
 const unsigned int complication_line_size = 2;
 const unsigned int complication_background_line_size = 1;
@@ -9,10 +10,10 @@ static void base_complication_appropriate_bounds(GRect& bounds)
 {
 	// Pebble's graphics code does not draw entirely in the specified box, so
 	// subtract a couple pixels to make sure the line doesn't clip the layer edge.
-	bounds.size.h -= (complication_line_size + 3);
-	bounds.size.w -= (complication_line_size + 3);
-	bounds.origin.x += (complication_line_size / 2 + 1);
-	bounds.origin.y += (complication_line_size / 2 + 1);
+	bounds.size.h -= 5;
+	bounds.size.w -= 5;
+	bounds.origin.x += 3;
+	bounds.origin.y += 3;
 }
 
 static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
@@ -27,7 +28,7 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 
 	if(angle < max_angle) {
 		graphics_context_set_stroke_width(ctx, complication_background_line_size);
-		graphics_context_set_stroke_color(ctx, GColorDarkGray);
+		graphics_context_set_stroke_color(ctx, theme().complication_ring_background_color);
 		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle + angle, max_angle);
 	}
 }

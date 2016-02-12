@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "constants.h"
+#include "themes.h"
 
 const char* WeatherComplication::deg_format = "%i\u00B0";
 const char* WeatherComplication::relhum_format = "%i";
@@ -183,7 +184,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 				// Change the icon color
 				icon.iterate([](GDrawCommand *command, uint32_t) {
 					gdraw_command_set_fill_color(command, GColorClear);
-					gdraw_command_set_stroke_color(command, GColorLightGray);
+					gdraw_command_set_stroke_color(command, theme().complication_icon_color);
 					return true;
 				});
 
