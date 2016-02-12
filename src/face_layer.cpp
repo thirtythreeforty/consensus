@@ -1,20 +1,22 @@
 #include "face_layer.h"
 
 #include "common.h"
+#include "themes.h"
 
 void FaceLayer::update(GContext *ctx)
 {
-	graphics_context_set_stroke_width(ctx, 9);
-	graphics_context_set_stroke_color(ctx, hour_color);
+	uint8_t base_width = theme().minute_hand_width;
+	graphics_context_set_stroke_width(ctx, base_width + 2);
+	graphics_context_set_stroke_color(ctx, theme().hour_hand_color);
 	gpath_draw_outline(ctx, hour_path);
 
-	graphics_context_set_stroke_width(ctx, 7);
-	graphics_context_set_stroke_color(ctx, minute_color);
+	graphics_context_set_stroke_width(ctx, base_width);
+	graphics_context_set_stroke_color(ctx, theme().minute_hand_color);
 	gpath_draw_outline(ctx, minute_path);
 
 	if(show_second) {
-		graphics_context_set_stroke_width(ctx, 3);
-		graphics_context_set_stroke_color(ctx, second_color);
+		graphics_context_set_stroke_width(ctx, base_width - 4);
+		graphics_context_set_stroke_color(ctx, theme().second_hand_color);
 		gpath_draw_outline_open(ctx, second_path);
 	}
 
@@ -24,7 +26,8 @@ void FaceLayer::update(GContext *ctx)
 
 	graphics_context_set_stroke_width(ctx, 1);
 	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_circle(ctx, center, 2);
+	// Yes this is a little hacky, but it works fine
+	graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
 }
 
 FaceLayer::FaceLayer(GRect frame)
@@ -74,15 +77,6 @@ void FaceLayer::set_time(uint8_t hour, uint8_t min, uint8_t sec)
 
 		mark_dirty();
 	}
-}
-
-void FaceLayer::set_colors(GColor hour, GColor minute, GColor second)
-{
-	hour_color = hour;
-	minute_color = minute;
-	second_color = second;
-
-	mark_dirty();
 }
 
 /** Helper function to automate tedious setup in face_layer_animate_in */

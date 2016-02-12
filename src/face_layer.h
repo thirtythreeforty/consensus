@@ -28,17 +28,12 @@ class FaceLayer: public Boulder::Layer
 
 	bool show_second;
 
-	GColor hour_color;
-	GColor minute_color;
-	GColor second_color;
-
 public:
 	FaceLayer(GRect frame);
 	~FaceLayer() = default;
 
 	void set_show_second(bool show);
 	void set_time(uint8_t hour, uint8_t min, uint8_t sec);
-	void set_colors(GColor hour, GColor min, GColor sec);
 	Animation* animate_in(bool zoom, bool roll);
 
 protected:

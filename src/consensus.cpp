@@ -276,9 +276,6 @@ static void init_layers(void)
 	reinit_complications();
 
 	face_layer = new FaceLayer(size);
-	face_layer->set_colors(theme().hour_hand_color,
-	                       theme().minute_hand_color,
-	                       theme().second_hand_color);
 	face_layer->set_show_second(should_show_second());
 	layer_add_child(window_get_root_layer(window), *face_layer);
 	animation_schedule(face_layer->animate_in(true, true));

@@ -13,6 +13,7 @@ namespace {
 			.complication_icon_color = GColorLightGray,
 			.complication_ring_background_color = GColorDarkGray,
 			.complication_ring_thickness = 3,
+			.minute_hand_width = 7,
 		},
 		{ // "Thin"
 			.background_color = GColorBlack,
@@ -23,6 +24,7 @@ namespace {
 			.complication_icon_color = GColorDarkGray,
 			.complication_ring_background_color = GColorDarkGray,
 			.complication_ring_thickness = 2,
+			.minute_hand_width = 5,
 		},
 		{ // "White"
 			.background_color = GColorWhite,
@@ -33,6 +35,7 @@ namespace {
 			.complication_icon_color = GColorDarkGray,
 			.complication_ring_background_color = GColorLightGray,
 			.complication_ring_thickness = 3,
+			.minute_hand_width = 7,
 		},
 	};
 	const Theme* _theme; // "Bold" default theme

@@ -15,6 +15,7 @@ struct Theme
 	GColor complication_icon_color;
 	GColor complication_ring_background_color;
 	uint8_t complication_ring_thickness;
+	uint8_t minute_hand_width;
 };
 
 const Theme& theme();
