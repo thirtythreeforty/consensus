@@ -45,7 +45,9 @@
     "KEY_PREF_RIGHT_COMPLICATION_OPT3": 23,
     "KEY_PREF_RIGHT_COMPLICATION_OPT4": 24,
 
-    "KEY_PREF_THEME": 25
+    "KEY_PREF_VIBRATE_ON_CONNECT": 25,
+
+    "KEY_PREF_THEME": 26
   },
   "resources": {
     "media": [

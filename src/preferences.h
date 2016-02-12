@@ -10,6 +10,7 @@ extern "C" {
 
 bool should_vibrate_on_hour();
 bool should_vibrate_on_disconnect();
+bool should_vibrate_on_connect();
 bool should_hide_no_bluetooth();
 bool should_show_second();
 

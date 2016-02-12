@@ -17,6 +17,11 @@ bool should_vibrate_on_disconnect()
 	return persist::load_default<bool>(PERSIST_PREF_VIBRATE_ON_DISCONNECT, true);
 }
 
+bool should_vibrate_on_connect()
+{
+	return persist::load_default<bool>(PERSIST_PREF_VIBRATE_ON_CONNECT, false);
+}
+
 bool should_hide_no_bluetooth()
 {
 	return !persist::load_default<bool>(PERSIST_PREF_SHOW_NO_CONNECTION, true);

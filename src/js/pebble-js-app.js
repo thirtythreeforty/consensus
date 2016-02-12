@@ -128,7 +128,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://thirtythreeforty.github.io/consensus/config/v2/';
+	var url = 'https://thirtythreeforty.github.io/consensus/config/v3/';
 	console.log('Showing configuration page: ' + url);
 
 	Pebble.openURL(url);
@@ -182,6 +182,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
+		KEY_PREF_VIBRATE_ON_CONNECT: toInt(configData['vibrate_on_connect']),
 	};
 
 	complicationConfigToInts(dict, 'Left');
