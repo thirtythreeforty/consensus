@@ -45,11 +45,13 @@ void ScrambledNumber::set(int32_t number)
 
 void ScrambledNumber::set_format(const char *fmt, int32_t number)
 {
-	if(state != ANIMATING) {
-		state = INIT;
+	if(this->format_string != fmt || this->requested_number != number) {
+		if(state != ANIMATING) {
+			state = INIT;
+		}
+		format_string = fmt;
+		set(number);
 	}
-	format_string = fmt;
-	set(number);
 }
 
 void ScrambledNumber::format(int32_t display_number)
