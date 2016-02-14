@@ -46,7 +46,7 @@ const Theme& theme()
 	return *_theme;
 }
 
-void setTheme()
+void set_theme()
 {
 	_theme = &themes[current_theme()];
 }

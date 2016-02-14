@@ -8,11 +8,11 @@ ScrambledNumber::ScrambledNumber(GRect frame, const char* format_string)
 	, format_string(format_string)
 	, state(INIT)
 {
-	text_layer.set_text_color(theme().complication_text_color);
 	text_layer.set_background_color(GColorClear);
 	text_layer.set_text(text_layer_text.data());
 	text_layer.set_text_alignment(GTextAlignmentCenter);
 	text_layer.set_font(fonts_get_system_font(FONT_KEY_LECO_20_BOLD_NUMBERS));
+	reconfigure_color();
 }
 
 GRect ScrambledNumber::calculate_text_frame(const GRect& our_frame)
@@ -27,6 +27,11 @@ GRect ScrambledNumber::calculate_text_frame(const GRect& our_frame)
 	text_frame.size.h = text_layer_height;
 
 	return text_frame;
+}
+
+void ScrambledNumber::reconfigure_color()
+{
+	text_layer.set_text_color(theme().complication_text_color);
 }
 
 void ScrambledNumber::set(int32_t number)

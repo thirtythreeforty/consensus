@@ -19,6 +19,6 @@ struct Theme
 };
 
 const Theme& theme();
-void setTheme();
+void set_theme();
 
 #endif

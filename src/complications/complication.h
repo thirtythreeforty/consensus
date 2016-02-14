@@ -98,6 +98,8 @@ public:
 	DateComplication(GRect frame);
 	~DateComplication() = default;
 
+	virtual void configure(const std::array<unsigned int, 4>&) override;
+
 	void time_changed(struct tm *time);
 };
 

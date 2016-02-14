@@ -29,6 +29,8 @@ public:
 
 	Boulder::TextLayer& get_text_layer() { return text_layer; }
 
+	void reconfigure_color();
+
 	void set(int32_t number);
 	void set_format(const char* fmt, int32_t number);
 

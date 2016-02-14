@@ -217,6 +217,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 
 void WeatherComplication::configure(const std::array<unsigned int, 4>& config)
 {
+	number.reconfigure_color();
 	gadget_type = static_cast<GadgetType>(std::get<0>(config));
 }
 

@@ -217,6 +217,7 @@ static void reinit_complications()
 static void on_preferences_in(DictionaryIterator *iterator)
 {
 	parse_preferences(iterator);
+	set_theme();
 
 	const bool show_second = should_show_second();
 	const TimeUnits units = update_time_interval(show_second);
@@ -227,6 +228,7 @@ static void on_preferences_in(DictionaryIterator *iterator)
 	update_connection_now();
 
 	reinit_complications();
+	layer_mark_dirty(window_get_root_layer(window));
 }
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
@@ -317,7 +319,7 @@ void main_window_unload(Window *window)
 
 static void init(void)
 {
-	setTheme();
+	set_theme();
 
 	window = window_create();
 	static const WindowHandlers h = {
