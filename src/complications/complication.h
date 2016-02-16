@@ -39,7 +39,27 @@ protected:
 	void base_setup_animation(Animation *anim, const AnimationHandlers &handlers);
 };
 
-class HighlightComplication: public Complication
+class IconTextComplication: public Complication
+{
+	ScrambledNumber number;
+	LazyIcon icon;
+
+public:
+	virtual void configure(const std::array<unsigned int, 4>& config) override;
+
+protected:
+	IconTextComplication(GRect frame);
+
+	virtual void update(GContext* ctx) override;
+
+	void set_icon(uint32_t resource_id);
+	void reset_icon();
+
+	void set_number(int32_t n);
+	void set_number_format(const char* fmt, int32_t n);
+};
+
+class HighlightComplication: public IconTextComplication
 {
 	friend class HighlightComplication2;
 	using angle_t = int32_t;
@@ -48,7 +68,7 @@ class HighlightComplication: public Complication
 	angle_t requested_angle = 0, angle = 0;
 
 protected:
-	using Complication::Complication;
+	using IconTextComplication::IconTextComplication;
 
 	virtual void update(GContext* ctx) override;
 
@@ -117,11 +137,6 @@ class WeatherComplication: public HighlightComplication2
 	};
 	GadgetType gadget_type;
 
-	LazyIcon icon;
-	GPoint icon_shift;
-
-	ScrambledNumber number;
-
 	std::experimental::optional<Boulder::AppTimer> refresh_timer;
 
 public:
@@ -133,7 +148,6 @@ public:
 	virtual void configure(const std::array<unsigned int, 4>& config) override;
 
 protected:
-	void update(GContext *ctx) override;
 	virtual GColor highlight_color() const override;
 	virtual GColor highlight_color2() const override;
 
@@ -150,25 +164,18 @@ private:
 
 class BatteryComplication: public HighlightComplication
 {
-	LazyIcon icon;
-
 public:
 	explicit BatteryComplication(GRect frame);
 
 	void state_changed(const BatteryChargeState *state);
 
 protected:
-	void update(GContext *ctx) override;
 	GColor highlight_color() const override;
-	virtual void configure(const std::array<unsigned int, 4>& config) override;
 };
 
 class HealthComplication: public HighlightComplication
 {
 	std::experimental::optional<uint32_t> average_steps;
-
-	LazyIcon icon;
-	GPoint icon_shift;
 
 public:
 	explicit HealthComplication(GRect frame);
@@ -178,9 +185,7 @@ public:
 	void on_significant_update();
 
 protected:
-	void update(GContext* ctx) override;
 	virtual GColor highlight_color() const override;
-	virtual void configure(const std::array<unsigned int, 4>& config) override;
 
 private:
 	void recalculate_average_steps();

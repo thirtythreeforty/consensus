@@ -59,31 +59,18 @@ void HealthComplication::on_movement_update()
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
 
 		set_angle(TRIG_MAX_ANGLE * today_steps / *average_steps);
-		icon.reset(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH, get_bounds());
+		set_icon(today_steps > *average_steps ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 	}
 	else {
-		icon.reset(RESOURCE_ID_HEALTH_ERROR, get_bounds());
+		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	}
 
 	mark_dirty();
-}
-
-void HealthComplication::update(GContext *ctx)
-{
-	HighlightComplication::update(ctx);
-
-	icon.draw(ctx);
 }
 
 GColor HealthComplication::highlight_color() const
 {
 	return GColorGreen;
-}
-
-void HealthComplication::configure(const std::array<unsigned int, 4>& config)
-{
-	icon.recolor();
-	mark_dirty();
 }
 
 void HealthComplication::recalculate_average_steps()

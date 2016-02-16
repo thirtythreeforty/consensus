@@ -33,6 +33,9 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 	}
 }
 
+void Complication::configure(const std::array<unsigned int, 4>& config)
+{}
+
 void Complication::update(GContext* ctx)
 {
 	GRect bounds = this->get_bounds();
@@ -41,11 +44,56 @@ void Complication::update(GContext* ctx)
 	draw_arc(ctx, bounds, GColorClear, 0, 0, TRIG_MAX_ANGLE);
 }
 
-void Complication::configure(const std::array<unsigned int, 4>& config)
-{}
+IconTextComplication::IconTextComplication(GRect frame)
+	: Complication(frame)
+	, number(get_bounds(), "")
+	, icon()
+{
+	add_child(number.get_text_layer());
+}
+
+void IconTextComplication::configure(const std::array<unsigned int, 4>& config)
+{
+	Complication::configure(config);
+
+	icon.recolor();
+	number.reconfigure_color();
+	mark_dirty();
+}
+
+void IconTextComplication::update(GContext *ctx)
+{
+	// This may not be the best architecture, because this is currently called
+	// as a "helper" function from HighlightComplication's update function.
+	// But (at some point) we will have IconTextComplications that are not
+	// HighlightComplication, like the proposed compass complication.
+
+	icon.draw(ctx);
+	// text will draw itself; it's a sublayer
+}
+
+void IconTextComplication::set_icon(uint32_t resource_id) {
+	icon.reset(resource_id, get_bounds());
+	mark_dirty();
+}
+
+void IconTextComplication::reset_icon() {
+	icon.reset();
+	mark_dirty();
+}
+
+void IconTextComplication::set_number(int32_t n) {
+	number.set(n);
+}
+
+void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
+	number.set_format(fmt, n);
+}
 
 void HighlightComplication::update(GContext* ctx)
 {
+	IconTextComplication::update(ctx);
+
 	GRect bounds = this->get_bounds();
 	base_complication_appropriate_bounds(bounds);
 
@@ -54,6 +102,8 @@ void HighlightComplication::update(GContext* ctx)
 
 void HighlightComplication2::update(GContext *ctx)
 {
+	IconTextComplication::update(ctx);
+
 	GRect bounds = this->get_bounds();
 	base_complication_appropriate_bounds(bounds);
 

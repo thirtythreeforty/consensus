@@ -112,14 +112,6 @@ auto WeatherComplication::compute_angles(const WeatherData &wdata) -> WeatherAng
 	}
 }
 
-void WeatherComplication::update(GContext *ctx)
-{
-	HighlightComplication2::update(ctx);
-
-	// Draw icon (loaded in weather_complication_weather_changed).
-	icon.draw(ctx);
-}
-
 void WeatherComplication::request_refresh(void*)
 {
 	DictionaryIterator *iter;
@@ -146,10 +138,7 @@ void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 
 WeatherComplication::WeatherComplication(GRect frame)
 	: HighlightComplication2(frame)
-	, number(get_bounds(), empty_format)
-{
-	add_child(number.get_text_layer());
-}
+{}
 
 void WeatherComplication::weather_changed(const WeatherData &new_weather)
 {
@@ -157,7 +146,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	set_angle(angles.humidity_angle);
 	set_angle2(angles.temp_angle);
 
-	icon.reset();
+	reset_icon();
 
 	switch(gadget_type) {
 	case ICON:
@@ -179,19 +168,19 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 			if(new_weather.icon <= weather_icons.size()) {
 				const uint32_t resource = weather_icons[new_weather.icon];
 
-				icon.reset(resource, get_bounds());
+				set_icon(resource);
 			}
 		}
-		number.set_format(empty_format, 0);
+		set_number_format(empty_format, 0);
 		break;
 	case TEMP_F:
-		number.set_format(deg_format, (new_weather.temp_c * 18 + 320) / 10);
+		set_number_format(deg_format, (new_weather.temp_c * 18 + 320) / 10);
 		break;
 	case TEMP_C:
-		number.set_format(deg_format, new_weather.temp_c);
+		set_number_format(deg_format, new_weather.temp_c);
 		break;
 	case RELHUM:
-		number.set_format(relhum_format, new_weather.humidity);
+		set_number_format(relhum_format, new_weather.humidity);
 		break;
 	}
 
@@ -202,8 +191,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 
 void WeatherComplication::configure(const std::array<unsigned int, 4>& config)
 {
-	number.reconfigure_color();
-	icon.recolor();
+	HighlightComplication2::configure(config);
 
 	gadget_type = static_cast<GadgetType>(std::get<0>(config));
 	mark_dirty();

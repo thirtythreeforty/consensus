@@ -15,15 +15,6 @@ BatteryComplication::BatteryComplication(GRect frame)
 	: HighlightComplication(frame)
 {}
 
-void BatteryComplication::update(GContext *ctx)
-{
-	HighlightComplication::update(ctx);
-
-	// Draw the icon based on the charging state (icon is loaded/unloaded
-	// in battery_complication_state_changed)
-	icon.draw(ctx);
-}
-
 void BatteryComplication::state_changed(const BatteryChargeState *charge)
 {
 	set_angle(battery_complication_angle(charge));
@@ -31,17 +22,11 @@ void BatteryComplication::state_changed(const BatteryChargeState *charge)
 	// Update the icon
 	const uint32_t resource = charge->is_charging
 		? RESOURCE_ID_BATTERY_CHARGING : RESOURCE_ID_BATTERY;
-	icon.reset(resource, get_bounds());
+	set_icon(resource);
 
 	mark_dirty();
 }
 
 GColor BatteryComplication::highlight_color() const {
 	return GColorYellow;
-}
-
-void BatteryComplication::configure(const std::array<unsigned int, 4>& config)
-{
-	icon.recolor();
-	mark_dirty();
 }
