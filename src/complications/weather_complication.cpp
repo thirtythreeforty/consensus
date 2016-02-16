@@ -117,7 +117,7 @@ void WeatherComplication::update(GContext *ctx)
 	HighlightComplication2::update(ctx);
 
 	// Draw icon (loaded in weather_complication_weather_changed).
-	icon.draw(ctx, icon_shift);
+	icon.draw(ctx);
 }
 
 void WeatherComplication::request_refresh(void*)
@@ -179,22 +179,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 			if(new_weather.icon <= weather_icons.size()) {
 				const uint32_t resource = weather_icons[new_weather.icon];
 
-				icon.reset(resource);
-
-				// Change the icon color
-				icon.iterate([](GDrawCommand *command, uint32_t) {
-					gdraw_command_set_fill_color(command, GColorClear);
-					gdraw_command_set_stroke_color(command, theme().complication_icon_color);
-					return true;
-				});
-
-				// Need to shift it over to account for its size.
-				const GSize icon_size = icon.get_bounds_size();
-				const GRect bounds = this->get_bounds();
-				icon_shift = {
-					.x = static_cast<int16_t>(bounds.size.w / 2 - icon_size.w / 2),
-					.y = static_cast<int16_t>(bounds.size.h / 2 - icon_size.h / 2)
-				};
+				icon.reset(resource, get_bounds());
 			}
 		}
 		number.set_format(empty_format, 0);
@@ -218,7 +203,10 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 void WeatherComplication::configure(const std::array<unsigned int, 4>& config)
 {
 	number.reconfigure_color();
+	icon.recolor();
+
 	gadget_type = static_cast<GadgetType>(std::get<0>(config));
+	mark_dirty();
 }
 
 GColor WeatherComplication::highlight_color() const

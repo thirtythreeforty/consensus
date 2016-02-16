@@ -151,7 +151,7 @@ private:
 
 class BatteryComplication: public HighlightComplication
 {
-	std::experimental::optional<Boulder::GDrawCommandImage> icon;
+	LazyIcon icon;
 
 public:
 	explicit BatteryComplication(GRect frame);
@@ -161,6 +161,7 @@ public:
 protected:
 	void update(GContext *ctx) override;
 	GColor highlight_color() const override;
+	virtual void configure(const std::array<unsigned int, 4>& config) override;
 };
 
 class HealthComplication: public HighlightComplication
@@ -180,6 +181,7 @@ public:
 protected:
 	void update(GContext* ctx) override;
 	virtual GColor highlight_color() const override;
+	virtual void configure(const std::array<unsigned int, 4>& config) override;
 
 private:
 	void recalculate_average_steps();

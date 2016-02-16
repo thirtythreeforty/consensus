@@ -1,6 +1,7 @@
 #include "complication.h"
 
 #include "common.h"
+#include "themes.h"
 
 static uint32_t battery_complication_angle(const BatteryChargeState *state)
 {
@@ -20,9 +21,7 @@ void BatteryComplication::update(GContext *ctx)
 
 	// Draw the icon based on the charging state (icon is loaded/unloaded
 	// in battery_complication_state_changed)
-	if(icon) {
-		icon->draw(ctx, GPointZero);
-	}
+	icon.draw(ctx);
 }
 
 void BatteryComplication::state_changed(const BatteryChargeState *charge)
@@ -32,11 +31,17 @@ void BatteryComplication::state_changed(const BatteryChargeState *charge)
 	// Update the icon
 	const uint32_t resource = charge->is_charging
 		? RESOURCE_ID_BATTERY_CHARGING : RESOURCE_ID_BATTERY;
-	icon.emplace(resource);
+	icon.reset(resource, get_bounds());
 
 	mark_dirty();
 }
 
 GColor BatteryComplication::highlight_color() const {
 	return GColorYellow;
+}
+
+void BatteryComplication::configure(const std::array<unsigned int, 4>& config)
+{
+	icon.recolor();
+	mark_dirty();
 }

@@ -12,6 +12,7 @@ DateComplication::DateComplication(GRect frame)
 void DateComplication::configure(const std::array<unsigned int, 4>&)
 {
 	date.reconfigure_color();
+	mark_dirty();
 }
 
 void DateComplication::time_changed(struct tm *time)
