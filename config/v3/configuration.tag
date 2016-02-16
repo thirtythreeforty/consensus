@@ -117,6 +117,14 @@
 		<configuration-footer>
 			Vibrate when the watch gains or loses its Bluetooth connection to the phone.
 		</configuration-footer>
+		<configuration-content>
+			<configuration-toggle attrib={ parent.parent.quiet_during_sleep }>
+				Quiet while sleeping
+			</configuration-toggle>
+		</configuration-content>
+		<configuration-footer>
+			When you are sleeping, disable all these vibrations (but don't worry: alarms and timers will still buzz). Has no effect if Pebble Health is disabled.
+		</configuration-footer>
 	</configuration-container>
 
 	<script>
@@ -125,11 +133,13 @@
 	this.vibrate_on_hour = new this.Attribute(true);
 	this.vibrate_on_disconnect = new this.Attribute(true);
 	this.vibrate_on_connect = new this.Attribute(false);
+	this.quiet_during_sleep = new this.Attribute(false);
 
 	from_json(pack) {
 		this.vibrate_on_hour.set(pack["vibrate_on_hour"]);
 		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
 		this.vibrate_on_connect.set(pack["vibrate_on_connect"]);
+		this.quiet_during_sleep.set(pack["quiet_during_sleep"]);
 		this.update();
 	}
 
@@ -137,6 +147,7 @@
 		pack['vibrate_on_hour'] = this.vibrate_on_hour.get();
 		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
 		pack['vibrate_on_connect'] = this.vibrate_on_connect.get();
+		pack['quiet_during_sleep'] = this.quiet_during_sleep.get();
 	}
 	</script>
 </configure-notifications>
