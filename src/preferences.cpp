@@ -32,6 +32,11 @@ bool should_show_second()
 	return persist::load_default<bool>(PERSIST_PREF_SHOW_SECOND_HAND, false);
 }
 
+bool should_quiet_during_sleep()
+{
+	return persist::load_default<bool>(PERSIST_PREF_QUIET_DURING_SLEEP, false);
+}
+
 complication_config left_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION,
@@ -130,4 +135,7 @@ void parse_preferences(DictionaryIterator *iterator)
 
 	update_preference<unsigned int>(iterator, KEY_PREF_THEME,
 	                                          PERSIST_PREF_THEME);
+
+	update_preference<bool>(iterator, KEY_PREF_QUIET_DURING_SLEEP,
+	                                  PERSIST_PREF_QUIET_DURING_SLEEP);
 }

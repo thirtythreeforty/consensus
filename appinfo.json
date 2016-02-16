@@ -47,7 +47,9 @@
 
     "KEY_PREF_VIBRATE_ON_CONNECT": 25,
 
-    "KEY_PREF_THEME": 26
+    "KEY_PREF_THEME": 26,
+
+    "KEY_PREF_QUIET_DURING_SLEEP": 27
   },
   "resources": {
     "media": [

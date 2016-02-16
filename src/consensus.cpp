@@ -56,6 +56,25 @@ static void update_health_complications(HealthEventType event, void*)
 	});
 }
 
+static bool user_is_asleep()
+{
+	if(health_service_metric_accessible(HealthMetricSleepSeconds, time_start_of_today(), time(nullptr))) {
+		return (health_service_peek_current_activities()
+				& (HealthActivitySleep | HealthActivityRestfulSleep));
+	}
+	else {
+		return false;
+	}
+}
+
+static bool vibration_ok()
+{
+	// Vibration is allowed if the user is not asleep or the user doesn't care
+	// if we vibrate while they are asleep
+	return should_quiet_during_sleep() &&
+	       !user_is_asleep();
+}
+
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	if(face_layer) {
@@ -68,6 +87,7 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 
 	// Vibrate once on the hour and twice at noon.
 	if(should_vibrate_on_hour() &&
+	   vibration_ok() &&
 	   tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
 		static const uint32_t vibe_pattern[] = {100, 250, 100};
 		VibePattern vibe = {
@@ -101,7 +121,9 @@ void on_connection_change(bool connected)
 	const bool became_disconnected = was_connected == WAS_CONNECTED_TRUE && !connected;
 	const bool became_connected = was_connected == WAS_CONNECTED_FALSE && connected;
 
-	if(became_disconnected && should_vibrate_on_disconnect()) {
+	if(became_disconnected &&
+	   vibration_ok() &&
+	   should_vibrate_on_disconnect()) {
 		static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
 		static const VibePattern vibe = {
 			.durations = vibe_pattern,

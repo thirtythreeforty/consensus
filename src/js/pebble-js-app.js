@@ -190,6 +190,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
 		KEY_PREF_VIBRATE_ON_CONNECT: toInt(configData['vibrate_on_connect']),
+		KEY_PREF_QUIET_DURING_SLEEP: toInt(configData['quiet_during_sleep']),
 	};
 
 	complicationConfigToInts(dict, 'Left');

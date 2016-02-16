@@ -13,6 +13,7 @@ bool should_vibrate_on_disconnect();
 bool should_vibrate_on_connect();
 bool should_hide_no_bluetooth();
 bool should_show_second();
+bool should_quiet_during_sleep();
 
 uint8_t current_theme();
 
