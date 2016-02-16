@@ -5,21 +5,11 @@
 
 using std::experimental::nullopt;
 
-static time_t start_of_today()
-{
-	time_t now = time(nullptr);
-	struct tm* ltime = localtime(&now);
-	ltime->tm_hour = 0;
-	ltime->tm_min = 0;
-	ltime->tm_sec = 0;
-	return mktime(ltime);
-}
-
 HealthComplication::HealthComplication(GRect frame)
 	: HighlightComplication(frame)
 {
 	// Try to restore from persistent storage
-	const time_t day_start = start_of_today();
+	const time_t day_start = time_start_of_today();
 	// persist_read_int() returns 0 if not set; since it is no longer 1970,
 	// this is acceptable.
 	if(persist_read_int(PERSIST_HEALTH_TIME_OF_AVERAGE) >= day_start) {
@@ -76,7 +66,7 @@ GColor HealthComplication::highlight_color() const
 void HealthComplication::recalculate_average_steps()
 {
 	constexpr time_t seconds_in_day = 60 * 60 * 24;
-	time_t today_start = start_of_today();
+	time_t today_start = time_start_of_today();
 
 	// No matter what we do, we'll need a redraw
 	mark_dirty();
