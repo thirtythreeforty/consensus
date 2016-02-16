@@ -5,8 +5,6 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include "ScrambledNumber.h"
-
 typedef struct {
 	bool valid;
 
@@ -24,6 +22,7 @@ void weather_to_persist(const WeatherData *wdata);
 
 #include "boulder.h"
 #include "lazy_icon.h"
+#include "ScrambledNumber.h"
 
 class Complication: public Boulder::Layer
 {
