@@ -3,8 +3,25 @@
 
 	<configure-notifications></configure-notifications>
 
-	<configuration-container title="Complications">
+	<configuration-container name="compcont" title="Complications">
 		<complication-chooser-list/>
+	</configuration-container>
+
+	<configuration-container title="Miscellaneous">
+		<configuration-content>
+		<configuration-footer>
+			Consensus takes me lots of time to design and build. If you enjoy the watchface, please consider a small donation to buy me a coffee while I work on new features. Thanks for your support!
+		</configuration-footer>
+		<center>
+			<!-- This blob is directly from PayPal, although target has been modified to "_blank" -->
+			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+			<input type="hidden" name="cmd" value="_s-xclick">
+			<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+			">
+			<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+			</form>
+		</center>
+		</configuration-content>
 	</configuration-container>
 
 	<div class='item-container'>
@@ -17,8 +34,8 @@
 	// complication-chooser-list is a sub-tag, so make a list of all the savables
 	this.modules = $.extend({}, this.tags);
 
-	delete this.modules["configuration-container"];
-	this.modules["complication-chooser-list"] = this.tags["configuration-container"].tags["complication-chooser-list"];
+	delete this.modules["compcont"];
+	this.modules["complication-chooser-list"] = this.tags["compcont"].tags["complication-chooser-list"];
 	emitsave() {
 		var pack = {};
 		for (tagName in this.modules) {
