@@ -177,11 +177,11 @@ protected:
 
 class HealthComplication: public HighlightComplication
 {
-	std::experimental::optional<uint32_t> average_steps;
+	Variant<void, uint32_t> step_goal;
 
 public:
 	explicit HealthComplication(GRect frame);
-	~HealthComplication();
+	~HealthComplication() = default;
 
 	virtual void configure(const config_bundle_t& config) override;
 

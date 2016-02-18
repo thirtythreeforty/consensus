@@ -179,6 +179,11 @@ Pebble.addEventListener('webviewclosed', function(e) {
 			}[cOptions["gadget"]];
 			break;
 		case "Health":
+			if(cOptions["goal_type"] === "manual") {
+				dict[opt1Key] = parseInt(cOptions["goal"], 10);
+			} else {
+				dict[opt1Key] = 0;
+			}
 			break;
 		}
 	}
