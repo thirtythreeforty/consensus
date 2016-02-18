@@ -37,10 +37,7 @@ template<typename C, typename F>
 void complication_do(const F& f)
 {
 	for(auto& c: complications) {
-		auto downcast_complication = c.template downcast<C>();
-		if(downcast_complication) {
-			f(*downcast_complication);
-		}
+		c.if_is<C>(f);
 	};
 }
 
@@ -206,17 +203,25 @@ static void reinit_complications()
 
 	for(size_t i = 0; i < complication_params.size(); ++i) {
 		using std::get;
-		bool type_changed = complications[i].change_type(get<0>(get<1>(complication_params[i])),
-		                                                 get<0>(complication_params[i]));
+		const GRect& position = get<0>(complication_params[i]);
+		const auto& config = get<1>(complication_params[i]);
+		const auto& type = get<0>(config);
+		bool type_different = complications[i].type() != type;
+		bool new_type_valid = AbstractComplication::typenum_of<void>() != type;
 
-		Complication& new_complication = complications[i];
-		if(complications[i].valid()) {
-			new_complication.configure(get<1>(get<1>(complication_params[i])));
+		if(type_different) {
+			complications[i].emplace(type, position);
 		}
 
-		if(type_changed) {
-			// Type was changed, add the child
-			complications_layer->add_child(new_complication);
+		if(new_type_valid) {
+			Complication& new_complication = complications[i].as<Complication>();
+
+			new_complication.configure(get<1>(config));
+
+			if(type_different) {
+				// Type was changed, add the child
+				complications_layer->add_child(new_complication);
+			}
 		}
 	}
 
@@ -320,7 +325,7 @@ static void deinit_layers(void)
 {
 	delete face_layer;
 	for(auto& complication: complications) {
-		complication.destroy();
+		complication.reset();
 	}
 	delete complications_layer;
 	bitmap_layer_destroy(no_bluetooth_layer);

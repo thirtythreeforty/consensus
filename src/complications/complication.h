@@ -23,6 +23,7 @@ void weather_to_persist(const WeatherData *wdata);
 #include "boulder.h"
 #include "lazy_icon.h"
 #include "ScrambledNumber.h"
+#include "variant.h"
 
 class Complication: public Boulder::Layer
 {
@@ -194,78 +195,13 @@ private:
 	void recalculate_average_steps();
 };
 
-template<typename T> constexpr uint8_t complication_type_map;
-template<> constexpr uint8_t complication_type_map<void> = 0;
-template<> constexpr uint8_t complication_type_map<BatteryComplication> = 1;
-template<> constexpr uint8_t complication_type_map<DateComplication> = 2;
-template<> constexpr uint8_t complication_type_map<WeatherComplication> = 3;
-template<> constexpr uint8_t complication_type_map<HealthComplication> = 4;
-
-class AbstractComplication
-{
-	Complication *complication;
-	uint8_t _type;
-
-	template<typename T>
-	AbstractComplication(T *ptr)
-		: complication(ptr)
-		, _type(complication_type_map<T>)
-	{}
-
-public:
-	AbstractComplication() : _type(complication_type_map<void>) {}
-
-	template<typename T>
-	auto downcast() -> T* {
-		if(_type == complication_type_map<T>) {
-			return static_cast<T*>(complication);
-		}
-		else {
-			return nullptr;
-		}
-	}
-
-	bool valid() { return _type != complication_type_map<void>; }
-
-	operator Complication&() {
-		return *complication;
-	}
-
-	auto type() { return _type; }
-
-	static AbstractComplication create(unsigned int type, const GRect& frame) {
-		switch(type) {
-		case complication_type_map<void>:
-			return {};
-		case complication_type_map<BatteryComplication>:
-			return {new BatteryComplication(frame)};
-		case complication_type_map<DateComplication>:
-			return {new DateComplication(frame)};
-		case complication_type_map<WeatherComplication>:
-			return {new WeatherComplication(frame)};
-		case complication_type_map<HealthComplication>:
-			return {new HealthComplication(frame)};
-		default:
-			APP_LOG(APP_LOG_LEVEL_ERROR, "Asked for bad complication type %i", type);
-			return {};
-		}
-	}
-
-	bool change_type(unsigned int type, const GRect& frame) {
-		if(type == this->_type) {
-			return false;
-		}
-		destroy();
-		*this = create(type, frame);
-		return valid();
-	}
-
-	void destroy() {
-		if(_type != complication_type_map<void>) {
-			delete complication;
-			_type = complication_type_map<void>;
-		}
-	}
-};
+using AbstractComplication = Variant<
+	// These must be kept in this order to preserve the mapping in the config
+	void,
+	BatteryComplication,
+	DateComplication,
+	WeatherComplication,
+	HealthComplication
+>;
 
 #endif

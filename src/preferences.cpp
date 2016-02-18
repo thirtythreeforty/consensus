@@ -40,7 +40,7 @@ bool should_quiet_during_sleep()
 complication_config left_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION,
-	                                            complication_type_map<BatteryComplication>),
+	                                            AbstractComplication::typenum_of<BatteryComplication>()),
 	        {
 	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT1),
 	        	persist::load<unsigned int>(PERSIST_PREF_LEFT_COMPLICATION_OPT2),
@@ -52,7 +52,7 @@ complication_config left_complication_type()
 complication_config bottom_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION,
-	                                            complication_type_map<WeatherComplication>),
+	                                            AbstractComplication::typenum_of<WeatherComplication>()),
 	        {
 	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT1),
 	        	persist::load<unsigned int>(PERSIST_PREF_BOTTOM_COMPLICATION_OPT2),
@@ -64,7 +64,7 @@ complication_config bottom_complication_type()
 complication_config right_complication_type()
 {
 	return {persist::load_default<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION,
-	                                            complication_type_map<DateComplication>),
+	                                            AbstractComplication::typenum_of<DateComplication>()),
 	        {
 	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT1),
 	        	persist::load<unsigned int>(PERSIST_PREF_RIGHT_COMPLICATION_OPT2),
