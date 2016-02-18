@@ -43,7 +43,7 @@
 			if (tag.to_json) {
 				tag.to_json(pack);
 			} else {
-				console.log(tag, "contains no to_json!");
+				console.log(tag.toString(), "contains no to_json!");
 			}
 		}
 		this.trigger('save', pack);
@@ -55,7 +55,7 @@
 			if (tag.from_json) {
 				tag.from_json(pack);
 			} else {
-				console.log(tag, "contains no from_json!");
+				console.log(tag.toString(), "contains no from_json!");
 			}
 		}
 	}
