@@ -33,7 +33,7 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 	}
 }
 
-void Complication::configure(const std::array<unsigned int, 4>& config)
+void Complication::configure(const config_bundle_t& config)
 {}
 
 void Complication::update(GContext* ctx)

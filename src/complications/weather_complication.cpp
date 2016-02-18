@@ -189,7 +189,7 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	mark_dirty();
 }
 
-void WeatherComplication::configure(const std::array<unsigned int, 4>& config)
+void WeatherComplication::configure(const config_bundle_t& config)
 {
 	HighlightComplication2::configure(config);
 

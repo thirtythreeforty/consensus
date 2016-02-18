@@ -37,6 +37,11 @@ HealthComplication::~HealthComplication()
 	}
 }
 
+void HealthComplication::configure(const config_bundle_t& config)
+{
+	IconTextComplication::configure(config);
+}
+
 void HealthComplication::on_significant_update()
 {
 	recalculate_average_steps();

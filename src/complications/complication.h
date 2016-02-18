@@ -27,9 +27,10 @@ void weather_to_persist(const WeatherData *wdata);
 class Complication: public Boulder::Layer
 {
 public:
+	using config_bundle_t = std::array<unsigned int, 4>;
 	~Complication() = default;
 
-	virtual void configure(const std::array<unsigned int, 4>& config);
+	virtual void configure(const config_bundle_t& config);
 
 protected:
 	explicit Complication(GRect frame) : Boulder::Layer(frame) {}
@@ -45,7 +46,7 @@ class IconTextComplication: public Complication
 	LazyIcon icon;
 
 public:
-	virtual void configure(const std::array<unsigned int, 4>& config) override;
+	virtual void configure(const config_bundle_t& config) override;
 
 protected:
 	IconTextComplication(GRect frame);
@@ -117,7 +118,7 @@ public:
 	DateComplication(GRect frame);
 	~DateComplication() = default;
 
-	virtual void configure(const std::array<unsigned int, 4>&) override;
+	virtual void configure(const config_bundle_t&) override;
 
 	void time_changed(struct tm *time);
 };
@@ -145,7 +146,7 @@ public:
 
 	void weather_changed(const WeatherData &new_weather);
 
-	virtual void configure(const std::array<unsigned int, 4>& config) override;
+	virtual void configure(const config_bundle_t& config) override;
 
 protected:
 	virtual GColor highlight_color() const override;
@@ -180,6 +181,8 @@ class HealthComplication: public HighlightComplication
 public:
 	explicit HealthComplication(GRect frame);
 	~HealthComplication();
+
+	virtual void configure(const config_bundle_t& config) override;
 
 	void on_movement_update();
 	void on_significant_update();
