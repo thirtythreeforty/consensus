@@ -27,7 +27,7 @@ static enum {
 } was_connected = WAS_CONNECTED_INIT;
 static BitmapLayer *no_bluetooth_layer = NULL;
 
-static GDrawCommandImage *ticks_image = NULL;
+static Boulder::GDrawCommandImage ticks_image;
 static GBitmap *no_bluetooth_image = NULL;
 
 using std::begin;
@@ -245,6 +245,7 @@ static void on_preferences_in(DictionaryIterator *iterator)
 {
 	parse_preferences(iterator);
 	set_theme();
+	ticks_image.recolor(theme().tick_color, GColorClear);
 
 	const bool show_second = should_show_second();
 	const TimeUnits units = update_time_interval(show_second);
@@ -281,7 +282,7 @@ static void update_background(Layer *layer, GContext *ctx)
 	graphics_context_set_fill_color(ctx, theme().background_color);
 	graphics_fill_rect(ctx, rect, 0, GCornerNone);
 
-	gdraw_command_image_draw(ctx, ticks_image, GPointZero);
+	ticks_image.draw(ctx, GPointZero);
 }
 
 static void init_layers(void)
@@ -289,8 +290,9 @@ static void init_layers(void)
 	GRect size = layer_get_bounds(window_get_root_layer(window));
 	GPoint center = grect_center_point(&size);
 
-	ticks_image = gdraw_command_image_create_with_resource(RESOURCE_ID_TICKS);
-	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
+	// Static constructor doesn't seem to work; this must be done here.
+	ticks_image = Boulder::GDrawCommandImage(RESOURCE_ID_TICKS);
+	ticks_image.recolor(theme().tick_color, GColorClear);
 
 	background_layer = layer_create(size);
 	layer_set_update_proc(background_layer, update_background);
@@ -331,7 +333,7 @@ static void deinit_layers(void)
 	bitmap_layer_destroy(no_bluetooth_layer);
 	gbitmap_destroy(no_bluetooth_image);
 	layer_destroy(background_layer);
-	free(ticks_image);
+	ticks_image = Boulder::GDrawCommandImage();
 }
 
 void main_window_load(Window *window)

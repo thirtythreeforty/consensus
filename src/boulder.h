@@ -185,6 +185,14 @@ public:
 			&functor
 		);
 	}
+
+	void recolor(GColor stroke, GColor fill) {
+		iterate([&](GDrawCommand *command, uint32_t) {
+			gdraw_command_set_fill_color(command, fill);
+			gdraw_command_set_stroke_color(command, stroke);
+			return true;
+		});
+	}
 };
 
 

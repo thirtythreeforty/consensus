@@ -50,11 +50,7 @@ public:
 
 	void recolor() {
 		if(current_id != none_id) {
-			image.iterate([](GDrawCommand *command, uint32_t) {
-				gdraw_command_set_fill_color(command, GColorClear);
-				gdraw_command_set_stroke_color(command, theme().complication_icon_color);
-				return true;
-			});
+			image.recolor(theme().complication_icon_color, GColorClear);
 		}
 	}
 

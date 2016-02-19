@@ -6,6 +6,7 @@ namespace {
 	Theme themes[] = {
 		{ // "Bold"
 			.background_color = GColorBlack,
+			.tick_color = GColorWhite,
 			.hour_hand_color = GColorVividCerulean,
 			.minute_hand_color = GColorWhite,
 			.second_hand_color = GColorFolly,
@@ -17,6 +18,7 @@ namespace {
 		},
 		{ // "Thin"
 			.background_color = GColorBlack,
+			.tick_color = GColorDarkGray,
 			.hour_hand_color = GColorVeryLightBlue,
 			.minute_hand_color = GColorPictonBlue,
 			.second_hand_color = GColorRed,
@@ -28,6 +30,7 @@ namespace {
 		},
 		{ // "White"
 			.background_color = GColorWhite,
+			.tick_color = GColorBlack,
 			.hour_hand_color = GColorOxfordBlue,
 			.minute_hand_color = GColorBlack,
 			.second_hand_color = GColorDarkCandyAppleRed,

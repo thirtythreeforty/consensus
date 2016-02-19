@@ -8,6 +8,7 @@ extern "C" {
 struct Theme
 {
 	GColor background_color;
+	GColor tick_color;
 	GColor hour_hand_color;
 	GColor minute_hand_color;
 	GColor second_hand_color;
