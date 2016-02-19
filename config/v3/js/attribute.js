@@ -1,7 +1,10 @@
 var Attribute = {
 	Attribute: function (defVal, onSet) {
+		this.var = val;
 		this.onSet = onSet;
-		this.set(defVal);
+		if(this.onSet) {
+			this.onSet(val);
+		}
 	}
 }
 
