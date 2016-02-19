@@ -95,7 +95,7 @@ public:
 	}
 
 	Variant() {
-		reset();
+		create_as<void>();
 	}
 
 	template<typename T>
