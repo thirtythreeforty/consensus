@@ -60,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="" />
       </cc:Work>
@@ -72,28 +72,9 @@
      inkscape:label="Base Icon"
      style="display:inline"
      transform="translate(0,-25)">
-    <rect
-       style="fill:none;stroke:#666666;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect3430"
-       width="21"
-       height="13"
-       x="1"
-       y="31" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#666666;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 24,33 0,9"
-       id="path5026"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#666666;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 24,42 0,-9"
-       id="path5028"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="display:inline;fill:#ff5500;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 18,26 8,38 10,38 6,48 16,36 14,36 Z"
+       style="display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#666666;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 18,26 6.9999999,38 10,38 6,48 17,36 14,36 Z"
        id="path4201"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccc" />
