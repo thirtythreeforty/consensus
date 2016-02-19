@@ -1,6 +1,7 @@
 var Attribute = {
-	Attribute: function (defVal) {
-		this.var = defVal;
+	Attribute: function (defVal, onSet) {
+		this.onSet = onSet;
+		this.set(defVal);
 	}
 }
 

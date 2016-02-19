@@ -19,11 +19,10 @@
 	var self = this;
 
 	this.mixin(Attribute);
-	this.goal_type = new this.Attribute("auto");
-	this.goal_type.onSet = function(val) {
+	this.goal_type = new this.Attribute("auto", function(val) {
 		self.tags['goalinput'].root.style.display =
 			(val === 'manual') ? "initial" : "none";
-	}
+	});
 	this.goal = new this.Attribute("10000");
 
 	from_json(pack) {
