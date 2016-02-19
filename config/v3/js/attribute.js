@@ -1,9 +1,9 @@
 var Attribute = {
 	Attribute: function (defVal, onSet) {
-		this.var = val;
+		this.val = defVal;
 		this.onSet = onSet;
 		if(this.onSet) {
-			this.onSet(val);
+			this.onSet(defVal);
 		}
 	}
 }
@@ -12,7 +12,7 @@ Attribute.Attribute.prototype = {
 	set: function (val) {
 		// "undefined" is not a valid value for any attribute I'm tracking
 		if(val !== undefined) {
-			this.var = val;
+			this.val = val;
 			if(this.onSet) {
 				this.onSet(val);
 			}
@@ -20,6 +20,6 @@ Attribute.Attribute.prototype = {
 	},
 
 	get: function () {
-		return this.var;
+		return this.val;
 	}
 }
