@@ -130,7 +130,9 @@ void on_connection_change(bool connected)
 		vibes_enqueue_custom_pattern(vibe);
 	}
 
-	if(became_connected && should_vibrate_on_connect()) {
+	if(became_connected &&
+	   vibration_ok() &&
+	   should_vibrate_on_connect()) {
 		static const uint32_t vibe_pattern[] = {150, 100, 150};
 		static const VibePattern vibe = {
 			.durations = vibe_pattern,
