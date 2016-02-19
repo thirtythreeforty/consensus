@@ -2,6 +2,40 @@
 </complication-customize>
 
 <complication-customize-health>
+	<configuration-content>
+		<configuration-dropdown caption='Goal Type' attrib={ parent.goal_type }>
+			<option class="item-select-option" value='auto'>Auto</configuration-option>
+			<option class="item-select-option" value='manual'>Manual</configuration-option>
+		</configuration-dropdown>
+	</configuration-content>
+	<configuration-content name='goalinput'>
+		<configuration-input input_type="number" attrib={ parent.goal }/>
+	</configuration-content>
+	<configuration-footer>
+		Choose your daily step goal, either by specifying it yourself or (recommended) letting Pebble calculate it for you.
+	</configuration-footer>
+
+	<script>
+	var self = this;
+
+	this.mixin(Attribute);
+	this.goal_type = new this.Attribute("auto");
+	this.goal_type.onSet = function(val) {
+		self.tags['goalinput'].root.style.display =
+			(val === 'manual') ? "initial" : "none";
+	}
+	this.goal = new this.Attribute("10000");
+
+	from_json(pack) {
+		this.goal_type.set(pack["goal_type"]);
+		this.goal.set(pack["goal"]);
+		this.update();
+	}
+	to_json(pack) {
+		pack["goal_type"] = this.goal_type.get();
+		pack["goal"] = this.goal.get();
+	}
+	</script>
 </complication-customize-health>
 
 <complication-customize-weather>

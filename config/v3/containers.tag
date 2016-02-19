@@ -36,7 +36,6 @@ var Injection = {
 <configuration-toggle>
 	<label class='item'>
 		<yield />
-		<!-- TODO inputid is not going to work -->
 		<input type='checkbox' class='item-toggle' checked={ opts.attrib.get() } onclick={ onclickhandle }></input>
 	</label>
 
@@ -49,6 +48,20 @@ var Injection = {
 	}
 	</script>
 </configuration-toggle>
+
+<configuration-input>
+	<label class='item'>
+		<div class='item-input-wrapper'>
+			<input type={ opts.input_type } class='item-input' value={ opts.attrib.get() } oninput={ oninputhandle }></input>
+		</div>
+	</label>
+
+	<script>
+	oninputhandle(e) {
+		opts.attrib.set(e.target.value);
+	}
+	</script>
+</configuration-input>
 
 <configuration-dropdown>
 	<label class="item">
