@@ -57,7 +57,7 @@ static bool user_is_asleep()
 {
 	if(health_service_metric_accessible(HealthMetricSleepSeconds, time_start_of_today(), time(nullptr))) {
 		return (health_service_peek_current_activities()
-				& (HealthActivitySleep | HealthActivityRestfulSleep));
+		        & (HealthActivitySleep | HealthActivityRestfulSleep));
 	}
 	else {
 		return false;
@@ -68,8 +68,12 @@ static bool vibration_ok()
 {
 	// Vibration is allowed if the user is not asleep or the user doesn't care
 	// if we vibrate while they are asleep
-	return should_quiet_during_sleep() &&
-	       !user_is_asleep();
+	if(user_is_asleep()) {
+		return !should_quiet_during_sleep();
+	}
+	else {
+		return true;
+	}
 }
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
