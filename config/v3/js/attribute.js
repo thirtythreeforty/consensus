@@ -1,9 +1,9 @@
 var Attribute = {
 	Attribute: function (defVal, onSet) {
-		this.val = defVal;
+		this.val = val;
 		this.onSet = onSet;
-		if(this.onSet) {
-			this.onSet(defVal);
+		if(onSet) {
+			onSet.bind(this)(val);
 		}
 	}
 }
