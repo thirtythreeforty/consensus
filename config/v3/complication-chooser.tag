@@ -66,16 +66,15 @@
 
 <complication-chooser>
 	<configuration-content name='content'>
-		<configuration-dropdown style="font-weight:bolder;" caption="{ parent.opts.position }" attrib={ parent.chosentype }>
+		<configuration-dropdown style="font-weight:bold;" caption="{ parent.opts.position }" attrib={ parent.chosentype }>
 			<option class="item-select-option">None</option>
 			<option class="item-select-option">Battery</option>
 			<option class="item-select-option">Health</option>
 			<option class="item-select-option">Date</option>
 			<option class="item-select-option">Weather</option>
 		</configuration-dropdown>
-
-		<complication-customize name='customizer' />
 	</configuration-content>
+	<complication-customize name='customizer' />
 
 	<script>
 	this.mixin(Attribute);
@@ -102,7 +101,7 @@
 		}[val] || "complication-customize";
 
 		// Mount it
-		self.customizer = riot.mount(self.tags['content'].tags['customizer'].root, whichComplication, {})[0];
+		self.customizer = riot.mount(self.tags['customizer'].root, whichComplication, {})[0];
 
 		// Configure it
 		self.configureCustomizer();
