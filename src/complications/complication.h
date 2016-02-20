@@ -139,7 +139,7 @@ class WeatherComplication: public HighlightComplication2
 	};
 	GadgetType gadget_type;
 
-	std::experimental::optional<Boulder::AppTimer> refresh_timer;
+	static std::experimental::optional<Boulder::AppTimer> refresh_timer;
 
 public:
 	explicit WeatherComplication(GRect frame);
@@ -154,7 +154,7 @@ protected:
 	virtual GColor highlight_color2() const override;
 
 private:
-	void schedule_refresh(time_t last_refresh_time);
+	static void schedule_refresh(time_t last_refresh_time);
 
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 	static void request_refresh(void*);

@@ -9,7 +9,7 @@ DateComplication::DateComplication(GRect frame)
 	add_child(date.get_text_layer());
 }
 
-void DateComplication::configure(const std::array<unsigned int, 4>&)
+void DateComplication::configure(const config_bundle_t&)
 {
 	date.reconfigure_color();
 	mark_dirty();

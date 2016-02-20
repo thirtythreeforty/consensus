@@ -31,11 +31,10 @@ function xhrRequest(url, type, callback) {
 	xhr.send();
 }
 
-function getWeather() {
-	function locationSuccess(pos) {
+function getWeather(complicationPosition) {
+	function makeWeatherRequest(pos) {
 		// Construct URL
-		var url = "http://api.openweathermap.org/data/2.5/weather?lat=" +
-			pos.coords.latitude + "&lon=" + pos.coords.longitude + '&appid=' + myAPIKey;
+		var url = "http://api.openweathermap.org/data/2.5/weather?appid=" + myAPIKey + pos;
 
 		// Send request to OpenWeatherMap
 		xhrRequest(url, 'GET',
@@ -99,15 +98,22 @@ function getWeather() {
 		);
 	}
 
-	function locationError(err) {
-		console.log("Error requesting location!");
+	var weatherSettings = JSON.parse(localStorage["weatherSettings"]);
+	if(weatherSettings !== undefined && weatherSettings["location_type"] === 'manual') {
+		makeWeatherRequest("&zip=" + weatherSettings["location"]);
+	} else {
+		navigator.geolocation.getCurrentPosition(
+			function locationSuccess(pos) {
+				makeWeatherRequest(
+					"&lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude
+				);
+			},
+			function locationError(err) {
+				console.log("Error requesting location!");
+			},
+			{timeout: 15000, maximumAge: 60000}
+		);
 	}
-
-	navigator.geolocation.getCurrentPosition(
-		locationSuccess,
-		locationError,
-		{timeout: 15000, maximumAge: 60000}
-	);
 }
 
 // Listen for when the watchface is opened
@@ -119,7 +125,6 @@ Pebble.addEventListener('ready', function(e) {
 Pebble.addEventListener('appmessage', function(e) {
 	console.log("AppMessage received!");
 	console.log(JSON.stringify(e.payload))
-	console.log(e.payload.KEY_WEATHER_ICON)
 
 	if("KEY_WEATHER_REQUEST" in e.payload) {
 		console.log("Got weather request");
@@ -139,6 +144,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	console.log('Configuration page returned: ' + configStr);
 	var configData = JSON.parse(configStr);
 
+	// Save the needed bits to our storage
+	localStorage["weatherSettings"] = JSON.stringify({
+		'location_type': configData['location_type'],
+		'location': configData['location'],
+	});
+	console.log("saved weather settings:" + localStorage["weatherSettings"]);
+
+	// Build the config pack to send to Pebble
 	function toInt(val) { return val ? 1 : 0; }
 	function themeToInt(val) {
 		return {

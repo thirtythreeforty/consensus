@@ -8,6 +8,10 @@ const char* WeatherComplication::deg_format = "%i\u00B0";
 const char* WeatherComplication::relhum_format = "%i";
 const char* WeatherComplication::empty_format = "";
 
+using std::experimental::nullopt;
+std::experimental::optional<Boulder::AppTimer> WeatherComplication::refresh_timer
+	= nullopt;
+
 void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 {
 	Tuple *temp_tuple = dict_find(iterator, KEY_WEATHER_TEMP_C);
@@ -119,21 +123,28 @@ void WeatherComplication::request_refresh(void*)
 	app_message_outbox_begin(&iter);
 	dict_write_int(iter, KEY_WEATHER_REQUEST, &value, sizeof value, false);
 	app_message_outbox_send();
+
+	// TODO this causes an undesired "timer doesn't exist" message (which is true)
+	// because the timer deletes itself after it fires.  Boulder::AppTimer needs logic
+	// to handle the timer firing.
+	refresh_timer = nullopt;
 }
 
 void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 {
-	time_t now = time(NULL);
+	if(!refresh_timer) {
+		time_t now = time(nullptr);
 
-	static const time_t refresh_interval = 60 * 60 * 2;
-	const time_t slight_future = now + 10;
+		static const time_t refresh_interval = 60 * 60 * 2;
+		const time_t slight_future = now + 10;
 
-	const unsigned int next_refresh_time =
-		std::max(slight_future, last_refresh_time + refresh_interval);
+		const unsigned int next_refresh_time =
+			std::max(slight_future, last_refresh_time + refresh_interval);
 
-	const uint32_t delay_ms = (next_refresh_time - now) * 1000;
+		const uint32_t delay_ms = (next_refresh_time - now) * 1000;
 
-	refresh_timer.emplace(delay_ms, WeatherComplication::request_refresh, nullptr);
+		refresh_timer.emplace(delay_ms, WeatherComplication::request_refresh, nullptr);
+	}
 }
 
 WeatherComplication::WeatherComplication(GRect frame)
