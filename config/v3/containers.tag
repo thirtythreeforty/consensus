@@ -52,7 +52,7 @@ var Injection = {
 <configuration-input>
 	<label class='item'>
 		<div class='item-input-wrapper'>
-			<input type={ opts.input_type } class='item-input' value={ opts.attrib.get() } oninput={ oninputhandle }></input>
+			<input type={ opts.input_type } placeholder={ opts.input_placeholder } class='item-input' value={ opts.attrib.get() } oninput={ oninputhandle }></input>
 		</div>
 	</label>
 

@@ -1,7 +1,7 @@
 <configure-app>
 	<configure-appearance></configure-appearance>
 
-	<configure-notifications></configure-notifications>
+	<configure-behavior />
 
 	<configuration-container name="compcont" title="Complications">
 		<complication-chooser-list/>
@@ -111,8 +111,8 @@
 	</script>
 </configure-appearance>
 
-<configure-notifications>
-	<configuration-container title='Notifications'>
+<configure-behavior>
+	<configuration-container title='Behavior'>
 		<configuration-content>
 			<configuration-toggle attrib={ parent.parent.vibrate_on_hour }>
 				Vibrate on the hour
@@ -143,20 +143,41 @@
 			When you are sleeping, disable all these vibrations (but don't worry: alarms and timers will still buzz). Has no effect if Pebble Health is disabled.
 		</configuration-footer>
 	</configuration-container>
+	<configuration-content>
+		<configuration-dropdown caption='Location' attrib={ parent.location_type }>
+			<option class="item-select-option" value='auto'>Current</configuration-option>
+			<option class="item-select-option" value='manual'>Manual</configuration-option>
+		</configuration-dropdown>
+	</configuration-content>
+	<configuration-content name='location'>
+		<configuration-input input_type="text" input_placeholder="ZIP/Postal Code" attrib={ parent.location }/>
+	</configuration-content>
+	<configuration-footer>
+		Set the location to use when fetching weather data. If "Current," your phone's location services must be enabled.
+	</configuration-footer>
 
 	<script>
+	var self = this;
+
 	this.mixin(Attribute);
 
 	this.vibrate_on_hour = new this.Attribute(true);
 	this.vibrate_on_disconnect = new this.Attribute(true);
 	this.vibrate_on_connect = new this.Attribute(false);
 	this.quiet_during_sleep = new this.Attribute(false);
+	this.location_type = new this.Attribute("auto", function(val) {
+		self.tags['location'].root.style.display =
+			(val === 'manual') ? "initial" : "none";
+	});
+	this.location = new this.Attribute("");
 
 	from_json(pack) {
 		this.vibrate_on_hour.set(pack["vibrate_on_hour"]);
 		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
 		this.vibrate_on_connect.set(pack["vibrate_on_connect"]);
 		this.quiet_during_sleep.set(pack["quiet_during_sleep"]);
+		this.location.set(pack["location"]);
+		this.location_type.set(pack["location_type"]);
 		this.update();
 	}
 
@@ -165,6 +186,8 @@
 		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
 		pack['vibrate_on_connect'] = this.vibrate_on_connect.get();
 		pack['quiet_during_sleep'] = this.quiet_during_sleep.get();
+		pack["location"] = this.location.get();
+		pack["location_type"] = this.location_type.get();
 	}
 	</script>
-</configure-notifications>
+</configure-behavior>
