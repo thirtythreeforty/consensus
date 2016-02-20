@@ -99,7 +99,8 @@ function getWeather(complicationPosition) {
 	}
 
 	var weatherSettings = JSON.parse(localStorage["weatherSettings"]);
-	if(weatherSettings !== undefined && weatherSettings["location_type"] === 'manual') {
+	if(weatherSettings !== undefined && weatherSettings !== null &&
+	   weatherSettings["location_type"] === 'manual') {
 		makeWeatherRequest("&zip=" + weatherSettings["location"]);
 	} else {
 		navigator.geolocation.getCurrentPosition(
