@@ -31,7 +31,7 @@ function xhrRequest(url, type, callback) {
 	xhr.send();
 }
 
-function getWeather(complicationPosition) {
+function getWeather() {
 	function makeWeatherRequest(pos) {
 		// Construct URL
 		var url = "http://api.openweathermap.org/data/2.5/weather?appid=" + myAPIKey + pos;
@@ -98,7 +98,15 @@ function getWeather(complicationPosition) {
 		);
 	}
 
-	var weatherSettings = JSON.parse(localStorage["weatherSettings"]);
+	var weatherSettingsStr = localStorage["weatherSettings"];
+	var weatherSettings;
+	if(weatherSettingsStr === undefined || weatherSettingsStr === null) {
+		weatherSettings = {
+			"location_type": "auto"
+		};
+	} else {
+		weatherSettings = JSON.parse(localStorage["weatherSettings"]);
+	}
 	if(weatherSettings !== undefined && weatherSettings !== null &&
 	   weatherSettings["location_type"] === 'manual') {
 		makeWeatherRequest("&zip=" + weatherSettings["location"]);
