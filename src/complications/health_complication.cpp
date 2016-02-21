@@ -36,7 +36,6 @@ void HealthComplication::on_movement_update()
 	auto onValid = [&](Goal& goal){
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
 
-		APP_DEBUG("steps, goal = %lu, %lu", today_steps, goal.goal);
 		set_angle(TRIG_MAX_ANGLE * today_steps / goal.goal);
 		set_icon(today_steps > goal.goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 	};
