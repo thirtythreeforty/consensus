@@ -177,7 +177,14 @@ protected:
 
 class HealthComplication: public HighlightComplication
 {
-	Variant<void, uint32_t> step_goal;
+	struct Goal {
+		uint32_t goal;
+		Goal(uint32_t goal) : goal(goal) {}
+	};
+	struct AutoGoal : public Goal { using Goal::Goal; };
+	struct ManualGoal : public Goal { using Goal::Goal; };
+
+	Variant<void, AutoGoal, ManualGoal> step_goal;
 
 public:
 	explicit HealthComplication(GRect frame);

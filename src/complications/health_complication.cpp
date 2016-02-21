@@ -13,9 +13,9 @@ void HealthComplication::configure(const config_bundle_t& config)
 {
 	HighlightComplication::configure(config);
 
-	const auto& user_goal = std::get<0>(config);
+	const auto user_goal = std::get<0>(config);
 	if(user_goal != 0) {
-		step_goal = (uint32_t)user_goal;
+		step_goal = ManualGoal(user_goal);
 	}
 	else {
 		recalculate_average_steps();
@@ -25,18 +25,24 @@ void HealthComplication::configure(const config_bundle_t& config)
 
 void HealthComplication::on_significant_update()
 {
-	recalculate_average_steps();
+	if(step_goal.is<AutoGoal>()) {
+		recalculate_average_steps();
+	}
 	on_movement_update();
 }
 
 void HealthComplication::on_movement_update()
 {
-	step_goal.if_is_else<uint32_t>([&](uint32_t& goal){
+	auto onValid = [&](Goal& goal){
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
 
-		set_angle(TRIG_MAX_ANGLE * today_steps / goal);
-		set_icon(today_steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
-	}, [&]{
+		APP_DEBUG("steps, goal = %lu, %lu", today_steps, goal.goal);
+		set_angle(TRIG_MAX_ANGLE * today_steps / goal.goal);
+		set_icon(today_steps > goal.goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
+	};
+	step_goal.if_is<AutoGoal>(onValid);
+	step_goal.if_is<ManualGoal>(onValid);
+	step_goal.if_is<void>([&]{
 		set_angle(0);
 		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	});
@@ -63,7 +69,7 @@ void HealthComplication::recalculate_average_steps()
 		const time_t ago = today_start - seconds_in_day * days;
 		if(health_service_metric_accessible(HealthMetricStepCount, ago, today_start) ==
 		   HealthServiceAccessibilityMaskAvailable) {
-			step_goal = health_service_sum(HealthMetricStepCount, ago, today_start) / days;
+			step_goal = AutoGoal(health_service_sum(HealthMetricStepCount, ago, today_start) / days);
 			return;
 		}
 	}
