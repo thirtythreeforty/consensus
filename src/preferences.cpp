@@ -98,6 +98,8 @@ void parse_preferences(DictionaryIterator *iterator)
 	                                  PERSIST_PREF_VIBRATE_ON_HOUR);
 	update_preference<bool>(iterator, KEY_PREF_VIBRATE_ON_DISCONNECT,
 	                                  PERSIST_PREF_VIBRATE_ON_DISCONNECT);
+	update_preference<bool>(iterator, KEY_PREF_VIBRATE_ON_CONNECT,
+	                                  PERSIST_PREF_VIBRATE_ON_CONNECT);
 
 	update_preference<unsigned int>(iterator, KEY_PREF_LEFT_COMPLICATION,
 	                                          PERSIST_PREF_LEFT_COMPLICATION);
