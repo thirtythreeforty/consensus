@@ -299,6 +299,7 @@ static void init_layers(void)
 	// Static constructor doesn't seem to work; this must be done here.
 	ticks_image = Boulder::GDrawCommandImage(RESOURCE_ID_TICKS);
 	ticks_image.recolor(theme().tick_color, GColorClear);
+	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
 
 	background_layer = layer_create(size);
 	layer_set_update_proc(background_layer, update_background);
