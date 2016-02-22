@@ -45,8 +45,6 @@ void HealthComplication::on_movement_update()
 		set_angle(0);
 		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	});
-
-	mark_dirty();
 }
 
 GColor HealthComplication::highlight_color() const
@@ -58,9 +56,6 @@ void HealthComplication::recalculate_average_steps()
 {
 	constexpr time_t seconds_in_day = 60 * 60 * 24;
 	time_t today_start = time_start_of_today();
-
-	// No matter what we do, we'll need a redraw
-	mark_dirty();
 
 	// Pebble takes the average over the past 30 days, although there isn't an API for this
 	// yet. See https://pebbledev.slack.com/archives/health-beta/p1454373385000080 (private channel)

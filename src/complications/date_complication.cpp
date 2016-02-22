@@ -12,7 +12,6 @@ DateComplication::DateComplication(GRect frame)
 void DateComplication::configure(const config_bundle_t&)
 {
 	date.reconfigure_color();
-	mark_dirty();
 }
 
 void DateComplication::time_changed(struct tm *time)

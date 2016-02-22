@@ -196,8 +196,6 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	}
 
 	schedule_refresh(new_weather.time_updated);
-
-	mark_dirty();
 }
 
 void WeatherComplication::configure(const config_bundle_t& config)

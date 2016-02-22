@@ -23,8 +23,6 @@ void BatteryComplication::state_changed(const BatteryChargeState *charge)
 	const uint32_t resource = charge->is_charging
 		? RESOURCE_ID_BATTERY_CHARGING : RESOURCE_ID_BATTERY;
 	set_icon(resource);
-
-	mark_dirty();
 }
 
 GColor BatteryComplication::highlight_color() const {
