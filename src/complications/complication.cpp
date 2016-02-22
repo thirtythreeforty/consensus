@@ -139,44 +139,56 @@ void HighlightComplication2::set_angle2(angle_t new_angle)
 
 void HighlightComplication::animate_to_requested()
 {
-	animating = true;
-	// TODO if it's a small change, don't bother animating
+	// if it's a small change, don't bother animating
+	if(abs(angle - requested_angle) < TRIG_MAX_ANGLE / 100) {
+		angle = requested_angle;
+		mark_dirty();
+	}
+	else {
+		animating = true;
 
-	using Boulder::PropertyAnimationGetter;
-	using Boulder::PropertyAnimationSetter;
+		using Boulder::PropertyAnimationGetter;
+		using Boulder::PropertyAnimationSetter;
 
-	Boulder::PropertyAnimation<
-		HighlightComplication, angle_t,
-		panim_set_angle, panim_get_angle
-	> anim(*this, &angle, &requested_angle);
+		Boulder::PropertyAnimation<
+			HighlightComplication, angle_t,
+			panim_set_angle, panim_get_angle
+		> anim(*this, &angle, &requested_angle);
 
-	static const AnimationHandlers handlers = {
-		.started = NULL,
-		.stopped = HighlightComplication::panim_stopped,
-	};
-	base_setup_animation(anim, handlers);
-	anim.schedule();
+		static const AnimationHandlers handlers = {
+			.started = NULL,
+			.stopped = HighlightComplication::panim_stopped,
+		};
+		base_setup_animation(anim, handlers);
+		anim.schedule();
+	}
 }
 
 void HighlightComplication2::animate_to_requested2()
 {
-	animating2 = true;
-	// TODO if it's a small change, don't bother animating
+	// if it's a small change, don't bother animating
+	if(abs(angle2 - requested_angle2) < TRIG_MAX_ANGLE / 100) {
+		angle2 = requested_angle2;
+		mark_dirty();
+	}
+	else {
+		animating2 = true;
 
-	using Boulder::PropertyAnimationGetter;
-	using Boulder::PropertyAnimationSetter;
+		using Boulder::PropertyAnimationGetter;
+		using Boulder::PropertyAnimationSetter;
 
-	Boulder::PropertyAnimation<
-		HighlightComplication2, angle_t,
-		panim_set_angle2, panim_get_angle2
-	> anim(*this, &this->angle2, &requested_angle2);
+		Boulder::PropertyAnimation<
+			HighlightComplication2, angle_t,
+			panim_set_angle2, panim_get_angle2
+		> anim(*this, &angle2, &requested_angle2);
 
-	static const AnimationHandlers handlers = {
-		.started = NULL,
-		.stopped = HighlightComplication2::panim_stopped2,
-	};
-	base_setup_animation(anim, handlers);
-	anim.schedule();
+		static const AnimationHandlers handlers = {
+			.started = NULL,
+			.stopped = HighlightComplication2::panim_stopped2,
+		};
+		base_setup_animation(anim, handlers);
+		anim.schedule();
+	}
 }
 
 void HighlightComplication::panim_stopped(Animation *anim, bool finished, void *context)
