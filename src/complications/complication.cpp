@@ -117,7 +117,8 @@ void HighlightComplication::set_angle(angle_t new_angle)
 		return;
 	}
 
-	requested_angle = new_angle;
+	// Clamp the requested angle to make sure the animations are at the correct speed
+	requested_angle = std::min(std::max(new_angle, angle_t(0)), angle_t(TRIG_MAX_ANGLE));
 
 	if(!animating) {
 		animate_to_requested();
@@ -130,7 +131,8 @@ void HighlightComplication2::set_angle2(angle_t new_angle)
 		return;
 	}
 
-	requested_angle2 = new_angle;
+	// Clamp the requested angle to make sure the animations are at the correct speed
+	requested_angle2 = std::min(std::max(new_angle, angle_t(0)), angle_t(TRIG_MAX_ANGLE));
 
 	if(!animating2) {
 		animate_to_requested2();
