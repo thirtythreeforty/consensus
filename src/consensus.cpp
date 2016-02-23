@@ -41,6 +41,7 @@ void complication_do(const F& f)
 	};
 }
 
+#ifdef PBL_HEALTH
 static void update_health_complications(HealthEventType event, void*)
 {
 	complication_do<HealthComplication>([&](auto& c) {
@@ -52,9 +53,11 @@ static void update_health_complications(HealthEventType event, void*)
 		}
 	});
 }
+#endif
 
 static bool user_is_asleep()
 {
+#ifdef PBL_HEALTH
 	if(health_service_metric_accessible(HealthMetricSleepSeconds, time_start_of_today(), time(nullptr))) {
 		return (health_service_peek_current_activities()
 		        & (HealthActivitySleep | HealthActivityRestfulSleep));
@@ -62,6 +65,9 @@ static bool user_is_asleep()
 	else {
 		return false;
 	}
+#else
+	return false;
+#endif
 }
 
 static bool vibration_ok()
@@ -381,7 +387,9 @@ static void init(void)
 	};
 	connection_service_subscribe(conn_handlers);
 
+#ifdef PBL_HEALTH
 	health_service_events_subscribe(update_health_complications, nullptr);
+#endif
 
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
@@ -394,7 +402,9 @@ static void deinit(void)
 {
 	animation_unschedule_all();
 	app_message_deregister_callbacks();
+#ifdef PBL_HEALTH
 	health_service_events_unsubscribe();
+#endif
 	connection_service_unsubscribe();
 	// accel_tap_service_unsubscribe();
 	battery_state_service_unsubscribe();

@@ -13,6 +13,7 @@ void HealthComplication::configure(const config_bundle_t& config)
 {
 	HighlightComplication::configure(config);
 
+#ifdef PBL_HEALTH
 	const auto user_goal = std::get<0>(config);
 	if(user_goal != 0) {
 		step_goal = ManualGoal(user_goal);
@@ -21,18 +22,25 @@ void HealthComplication::configure(const config_bundle_t& config)
 		recalculate_average_steps();
 	}
 	on_movement_update();
+#else
+	set_angle(0);
+	set_icon(RESOURCE_ID_HEALTH_ERROR);
+#endif
 }
 
 void HealthComplication::on_significant_update()
 {
+#ifdef PBL_HEALTH
 	if(step_goal.is<AutoGoal>()) {
 		recalculate_average_steps();
 	}
 	on_movement_update();
+#endif
 }
 
 void HealthComplication::on_movement_update()
 {
+#ifdef PBL_HEALTH
 	auto onValid = [&](Goal& goal){
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
 
@@ -45,6 +53,7 @@ void HealthComplication::on_movement_update()
 		set_angle(0);
 		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	});
+#endif
 }
 
 GColor HealthComplication::highlight_color() const
@@ -54,6 +63,7 @@ GColor HealthComplication::highlight_color() const
 
 void HealthComplication::recalculate_average_steps()
 {
+#ifdef PBL_HEALTH
 	constexpr time_t seconds_in_day = 60 * 60 * 24;
 	time_t today_start = time_start_of_today();
 
@@ -68,4 +78,5 @@ void HealthComplication::recalculate_average_steps()
 		}
 	}
 	step_goal.reset();
+#endif
 }

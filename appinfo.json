@@ -10,7 +10,7 @@
     "health",
     "configurable"
   ],
-  "targetPlatforms": ["basalt", "chalk"],
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
   "watchapp": {
     "watchface": true
   },

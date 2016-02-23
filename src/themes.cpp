@@ -3,29 +3,33 @@
 #include "preferences.h"
 
 namespace {
+	// TODO these themes could perhaps save a bit of space if they would use
+	// accessor methods; these would be free at worst and optimize away on
+	// Aplite where most colors will always be the opposite of the background
+	// color.
 	Theme themes[] = {
 		{ // "Bold"
 			.background_color = GColorBlack,
 			.tick_color = GColorWhite,
-			.hour_hand_color = GColorVividCerulean,
+			.hour_hand_color = COLOR_FALLBACK(GColorVividCerulean, GColorWhite),
 			.minute_hand_color = GColorWhite,
-			.second_hand_color = GColorFolly,
-			.complication_text_color = GColorLightGray,
-			.complication_icon_color = GColorLightGray,
-			.complication_ring_background_color = GColorDarkGray,
+			.second_hand_color = COLOR_FALLBACK(GColorFolly, GColorWhite),
+			.complication_text_color = COLOR_FALLBACK(GColorLightGray, GColorWhite),
+			.complication_icon_color = COLOR_FALLBACK(GColorLightGray, GColorWhite),
+			.complication_ring_background_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
 			.complication_ring_thickness = 3,
 			.minute_hand_width = 7,
 		},
 		{ // "Thin"
 			.background_color = GColorBlack,
-			.tick_color = GColorDarkGray,
-			.hour_hand_color = GColorVeryLightBlue,
-			.minute_hand_color = GColorPictonBlue,
-			.second_hand_color = GColorRed,
-			.complication_text_color = GColorDarkGray,
-			.complication_icon_color = GColorDarkGray,
-			.complication_ring_background_color = GColorDarkGray,
-			.complication_ring_thickness = 2,
+			.tick_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
+			.hour_hand_color = COLOR_FALLBACK(GColorVeryLightBlue, GColorWhite),
+			.minute_hand_color = COLOR_FALLBACK(GColorPictonBlue, GColorWhite),
+			.second_hand_color = COLOR_FALLBACK(GColorRed, GColorWhite),
+			.complication_text_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
+			.complication_icon_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
+			.complication_ring_background_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
+			.complication_ring_thickness = COLOR_FALLBACK(2, 3),
 			.minute_hand_width = 5,
 		},
 		{ // "White"

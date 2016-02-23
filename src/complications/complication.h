@@ -184,7 +184,12 @@ class HealthComplication: public HighlightComplication
 	struct AutoGoal : public Goal { using Goal::Goal; };
 	struct ManualGoal : public Goal { using Goal::Goal; };
 
+	// Only need these members on watches that will actually use it
+#ifdef PBL_HEALTH
+
 	Variant<void, AutoGoal, ManualGoal> step_goal;
+
+#endif
 
 public:
 	explicit HealthComplication(GRect frame);

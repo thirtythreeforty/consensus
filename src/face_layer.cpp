@@ -3,21 +3,36 @@
 #include "common.h"
 #include "themes.h"
 
+static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GColor stroke_color)
+{
+	graphics_context_set_stroke_width(ctx, stroke_width);
+	graphics_context_set_stroke_color(ctx, stroke_color);
+	gpath_draw_outline(ctx, path);
+}
+
 void FaceLayer::update(GContext *ctx)
 {
-	uint8_t base_width = theme().minute_hand_width;
-	graphics_context_set_stroke_width(ctx, base_width + 2);
-	graphics_context_set_stroke_color(ctx, theme().hour_hand_color);
-	gpath_draw_outline(ctx, hour_path);
+	const uint8_t base_width = theme().minute_hand_width;
+	const uint8_t fatter_width = base_width + 2;
 
-	graphics_context_set_stroke_width(ctx, base_width);
-	graphics_context_set_stroke_color(ctx, theme().minute_hand_color);
-	gpath_draw_outline(ctx, minute_path);
+#ifndef PBL_COLOR
+	// Draw an extra outline to separate the hands from things behind them
+
+	const uint8_t outline_extra = 2;
+	draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color);
+#endif
+	draw_path_with(ctx, hour_path, fatter_width, theme().hour_hand_color);
+
+#ifndef PBL_COLOR
+	draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color);
+#endif
+	draw_path_with(ctx, minute_path, base_width, theme().minute_hand_color);
 
 	if(show_second) {
-		graphics_context_set_stroke_width(ctx, base_width - 4);
-		graphics_context_set_stroke_color(ctx, theme().second_hand_color);
-		gpath_draw_outline_open(ctx, second_path);
+#ifndef PBL_COLOR
+		draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color);
+#endif
+		draw_path_with(ctx, second_path, base_width - 4, theme().second_hand_color);
 	}
 
 	// Middle dot

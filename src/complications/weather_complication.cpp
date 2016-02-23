@@ -208,10 +208,10 @@ void WeatherComplication::configure(const config_bundle_t& config)
 
 GColor WeatherComplication::highlight_color() const
 {
-	return GColorBlue;
+	return COLOR_FALLBACK(GColorBlue, GColorWhite);
 }
 
 GColor WeatherComplication::highlight_color2() const
 {
-	return GColorRed;
+	return COLOR_FALLBACK(GColorRed, GColorWhite);
 }
