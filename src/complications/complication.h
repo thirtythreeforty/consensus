@@ -169,7 +169,7 @@ class BatteryComplication: public HighlightComplication
 public:
 	explicit BatteryComplication(GRect frame);
 
-	void state_changed(const BatteryChargeState *state);
+	void state_changed(const BatteryChargeState& state);
 
 protected:
 	GColor highlight_color() const override;

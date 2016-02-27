@@ -109,7 +109,7 @@ void on_tick(struct tm *tick_time, TimeUnits units_changed)
 void on_battery_state_change(BatteryChargeState charge)
 {
 	complication_do<BatteryComplication>([&](auto& c){
-		c.state_changed(&charge);
+		c.state_changed(charge);
 	});
 }
 
