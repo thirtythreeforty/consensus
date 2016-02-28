@@ -141,6 +141,7 @@ static void init(void)
 		.pebble_app_connection_handler = on_connection_change,
 		.pebblekit_connection_handler = ignore_connection_change,
 	};
+	was_connected = connection_service_peek_pebble_app_connection() ? WAS_CONNECTED_TRUE : WAS_CONNECTED_FALSE;
 	connection_service_subscribe(conn_handlers);
 
 #ifdef PBL_HEALTH
