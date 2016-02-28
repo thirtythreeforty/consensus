@@ -49,6 +49,8 @@ private:
 
 	void reinit_complications();
 
+	static GBitmap* create_themed_bluetooth_bitmap();
+
 	template<typename C, typename F>
 	void complication_do(const F& f)
 	{

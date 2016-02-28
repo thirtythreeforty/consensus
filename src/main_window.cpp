@@ -8,7 +8,7 @@ MainWindow::MainWindow()
 	, background_layer(get_bounds())
 	, face_layer(get_bounds())
 	, complications_layer(get_bounds())
-	, no_bluetooth_image(gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH))
+	, no_bluetooth_image(create_themed_bluetooth_bitmap())
 {
 }
 
@@ -70,6 +70,10 @@ void MainWindow::configure()
 {
 	face_layer.set_show_second(should_show_second());
 	background_layer.recolor();
+
+	gbitmap_destroy(no_bluetooth_image);
+	no_bluetooth_image = create_themed_bluetooth_bitmap();
+	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
 
 	// The show-no-connection pref could have changed
 	update_connection_now();
@@ -198,4 +202,9 @@ void MainWindow::reinit_complications()
 		c.time_changed(time_struct);
 	});
 
+}
+
+GBitmap* MainWindow::create_themed_bluetooth_bitmap()
+{
+	return gbitmap_create_with_resource(theme().no_bluetooth_resource);
 }

@@ -8,6 +8,7 @@ extern "C" {
 struct Theme
 {
 	GColor background_color;
+	uint8_t no_bluetooth_resource;
 	GColor tick_color;
 	uint8_t tick_resource;
 	GColor hour_hand_color;

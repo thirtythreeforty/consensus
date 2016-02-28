@@ -10,6 +10,7 @@ namespace {
 	Theme themes[] = {
 		{ // "Bold"
 			.background_color = GColorBlack,
+			.no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
 			.tick_color = GColorWhite,
 			.tick_resource = RESOURCE_ID_TICKS,
 			.hour_hand_color = COLOR_FALLBACK(GColorVividCerulean, GColorWhite),
@@ -26,6 +27,7 @@ namespace {
 		},
 		{ // "Thin"
 			.background_color = GColorBlack,
+			.no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
 			.tick_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
 			.tick_resource = RESOURCE_ID_TICKS,
 			.hour_hand_color = COLOR_FALLBACK(GColorVeryLightBlue, GColorWhite),
@@ -42,6 +44,7 @@ namespace {
 		},
 		{ // "Bold White"
 			.background_color = GColorWhite,
+			.no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH_BLACK,
 			.tick_color = GColorBlack,
 			.tick_resource = RESOURCE_ID_TICKS,
 			.hour_hand_color = COLOR_FALLBACK(GColorDukeBlue, GColorBlack),
@@ -58,6 +61,7 @@ namespace {
 		},
 		{ // "Minimal Dark"
 			.background_color = GColorBlack,
+			.no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
 			.tick_color = GColorWhite,
 			.tick_resource = RESOURCE_ID_TICKS_MINIMAL,
 			.hour_hand_color = COLOR_FALLBACK(GColorVividCerulean, GColorWhite),
@@ -74,6 +78,7 @@ namespace {
 		},
 		{ // "Minimal White"
 			.background_color = GColorWhite,
+			.no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH_BLACK,
 			.tick_color = GColorBlack,
 			.tick_resource = RESOURCE_ID_TICKS_MINIMAL,
 			.hour_hand_color = COLOR_FALLBACK(GColorDukeBlue, GColorBlack),

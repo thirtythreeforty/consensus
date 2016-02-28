@@ -75,6 +75,11 @@
         "file": "no-bluetooth.png"
       },
       {
+        "type": "bitmap",
+        "name": "NO_BLUETOOTH_BLACK",
+        "file": "no-bluetooth-black.png"
+      },
+      {
         "type": "raw",
         "name": "BATTERY",
         "file": "battery.pdc"
