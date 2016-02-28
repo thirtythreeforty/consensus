@@ -39,6 +39,10 @@ void HealthComplication::on_significant_update()
 
 void HealthComplication::on_movement_update()
 {
+	// This function will be called twice when the program is launched:
+	// once for the configure() call from the main window, and one from the
+	// significant update that the Pebble OS sends out.  I don't know of
+	// any way to avoid this though.
 #ifdef PBL_HEALTH
 	auto onValid = [&](Goal& goal){
 		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
