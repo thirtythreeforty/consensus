@@ -110,11 +110,10 @@ static void on_preferences_in(DictionaryIterator *iterator)
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
 {
-	WeatherData wdata;
-	weather_from_appmessage(iterator, &wdata);
-	// Weather complications are getting recreated below, so no point in telling them about this now
+	WeatherData wdata = WeatherData::from_appmessage(iterator);
 	if(wdata.valid) {
-		weather_to_persist(&wdata);
+		// If this is a preferences message, don't erase saved weather
+		wdata.to_persist();
 	}
 
 	on_preferences_in(iterator);

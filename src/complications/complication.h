@@ -5,18 +5,19 @@ extern "C" {
 #include <pebble.h>
 }
 
-typedef struct {
+struct WeatherData {
 	bool valid;
 
 	time_t time_updated;
 	int8_t temp_c;
 	uint8_t humidity;
 	uint8_t icon;
-} WeatherData;
 
-void weather_from_appmessage(DictionaryIterator *iter, WeatherData *wdata);
-void weather_from_persist(WeatherData *wdata);
-void weather_to_persist(const WeatherData *wdata);
+	void to_persist();
+
+	static WeatherData from_appmessage(DictionaryIterator *iterator);
+	static WeatherData from_persist();
+};
 
 #include <experimental/optional>
 

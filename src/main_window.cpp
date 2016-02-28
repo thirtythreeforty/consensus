@@ -187,8 +187,7 @@ void MainWindow::reinit_complications()
 	const BatteryChargeState charge_state = battery_state_service_peek();
 	on_battery_state_change(charge_state);
 
-	WeatherData wdata;
-	weather_from_persist(&wdata);
+	WeatherData wdata = WeatherData::from_persist();
 	complication_do<WeatherComplication>([&](auto& c) {
 		c.weather_changed(wdata);
 	});

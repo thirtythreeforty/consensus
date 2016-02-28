@@ -211,7 +211,7 @@ static void upgrade_legacy_preferences()
 
 static void delete_legacy_preferences()
 {
-	for(unsigned int pref = PERSIST_PREF_SHOW_SECOND_HAND_DEPRECATED;
+	for(unsigned int pref = PERSIST_WEATHER_TEMP_C_DEPRECATED;
 	    pref <= PERSIST_PREF_QUIET_DURING_SLEEP_DEPRECATED; ++pref)
 	{
 		persist::remove(pref);

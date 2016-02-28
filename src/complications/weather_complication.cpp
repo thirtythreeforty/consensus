@@ -12,8 +12,9 @@ using std::experimental::nullopt;
 std::experimental::optional<Boulder::AppTimer> WeatherComplication::refresh_timer
 	= nullopt;
 
-void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
+WeatherData WeatherData::from_appmessage(DictionaryIterator *iterator)
 {
+	WeatherData data;
 	Tuple *temp_tuple = dict_find(iterator, KEY_WEATHER_TEMP_C);
 	Tuple *humidity_tuple = dict_find(iterator, KEY_WEATHER_HUMIDITY);
 	Tuple *icon_tuple = dict_find(iterator, KEY_WEATHER_ICON);
@@ -23,12 +24,12 @@ void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 		uint8_t humidity = humidity_tuple->value->uint8;
 		uint8_t icon = icon_tuple->value->uint8;
 
-		*wdata = (WeatherData) {
+		data = {
 			.valid = true,
 			.time_updated = time(NULL),
 			.temp_c = temp,
 			.humidity = humidity,
-			.icon = icon
+			.icon = icon,
 		};
 	}
 	else {
@@ -39,42 +40,31 @@ void weather_from_appmessage(DictionaryIterator *iterator, WeatherData *wdata)
 			        temp_tuple, humidity_tuple, icon_tuple);
 		}
 
-		wdata->valid = false;
-	}
-}
-
-void weather_from_persist(WeatherData *wdata)
-{
-	if(!(persist_exists(PERSIST_WEATHER_TIME_UPDATED) &&
-	     persist_exists(PERSIST_WEATHER_TEMP_C) &&
-	     persist_exists(PERSIST_WEATHER_HUMIDITY) &&
-	     persist_exists(PERSIST_WEATHER_ICON))) {
-		wdata->valid = false;
-		return;
+		data.valid = false;
 	}
 
-	*wdata = (WeatherData) {
-		.valid = true,
-		.time_updated = persist_read_int(PERSIST_WEATHER_TIME_UPDATED),
-		.temp_c = static_cast<int8_t>(persist_read_int(PERSIST_WEATHER_TEMP_C)),
-		.humidity = static_cast<uint8_t>(persist_read_int(PERSIST_WEATHER_HUMIDITY)),
-		.icon = static_cast<uint8_t>(persist_read_int(PERSIST_WEATHER_ICON))
-	};
+	return data;
 }
 
-void weather_to_persist(const WeatherData *data)
+WeatherData WeatherData::from_persist()
 {
-	if(data->valid) {
-		persist_write_int(PERSIST_WEATHER_TIME_UPDATED, data->time_updated);
-		persist_write_int(PERSIST_WEATHER_TEMP_C, data->temp_c);
-		persist_write_int(PERSIST_WEATHER_HUMIDITY, data->humidity);
-		persist_write_int(PERSIST_WEATHER_ICON, data->icon);
+	WeatherData data;
+	data.valid = false;
+
+	if(Boulder::persist::exists(PERSIST_WEATHER_STRUCT)) {
+		Boulder::persist::load_data(PERSIST_WEATHER_STRUCT, data);
+	}
+
+	return data;
+}
+
+void WeatherData::to_persist()
+{
+	if(valid) {
+		Boulder::persist::save_data(PERSIST_WEATHER_STRUCT, *this);
 	}
 	else {
-		persist_delete(PERSIST_WEATHER_TIME_UPDATED);
-		persist_delete(PERSIST_WEATHER_TEMP_C);
-		persist_delete(PERSIST_WEATHER_HUMIDITY);
-		persist_delete(PERSIST_WEATHER_ICON);
+		Boulder::persist::remove(PERSIST_WEATHER_STRUCT);
 	}
 }
 
