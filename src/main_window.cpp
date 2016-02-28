@@ -100,9 +100,9 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	});
 
 	// Vibrate once on the hour and twice at noon.
-	if(should_vibrate_on_hour() &&
-	   vibration_ok() &&
-	   tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
+	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0 &&
+	   should_vibrate_on_hour() &&
+	   vibration_ok()) {
 		static const uint32_t vibe_pattern[] = {100, 250, 100};
 		VibePattern vibe = {
 			.durations = vibe_pattern,
