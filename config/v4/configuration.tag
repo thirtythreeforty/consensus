@@ -69,6 +69,7 @@
 			<configuration-dropdown caption='Theme' attrib={ parent.parent.theme }>
 				<option class="item-select-option" value='bold-dark'>Bold Dark</configuration-option>
 				<option class="item-select-option" value='thin'>Thin</configuration-option>
+				<option class="item-select-option" value='bold-white'>Bold White</configuration-option>
 			</configuration-dropdown>
 		</configuration-content>
 		<configuration-content>
