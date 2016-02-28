@@ -30,8 +30,8 @@ inline void _debug_profile_end(const char *file, const uint16_t line)
 	time_t end_time;
 	uint16_t end_ms;
 	time_ms(&end_time, &end_ms);
-	APP_DEBUG("On %s:%i... started @ %lu.%i, now %lu.%i (%lu ms elapsed)",
-	          file, line,
+	APP_DEBUG("On %s:%i...", file, line);
+	APP_DEBUG(" started @ %lu.%i, now %lu.%i (%lu ms elapsed)",
 	          start_time, start_ms, end_time, end_ms,
 	          (end_time - start_time) * 1000 + end_ms - start_ms);
 }
