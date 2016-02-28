@@ -165,7 +165,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	function themeToInt(val) {
 		return {
 			"bold-dark": 0,
-			"thin": 1
+			"thin": 1,
+			"bold-white": 2
 		}[val];
 	}
 	function complicationConfigToInts(dict, position) {
