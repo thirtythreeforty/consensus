@@ -40,7 +40,7 @@ void FaceLayer::update(GContext *ctx)
 	GPoint center = grect_center_point(&bounds);
 
 	graphics_context_set_stroke_width(ctx, 1);
-	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_context_set_fill_color(ctx, theme().background_color);
 	// Yes this is a little hacky, but it works fine
 	graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
 }

@@ -26,5 +26,5 @@ void BatteryComplication::state_changed(const BatteryChargeState& charge)
 }
 
 GColor BatteryComplication::highlight_color() const {
-	return GColorYellow;
+	return theme().battery_complication_color;
 }

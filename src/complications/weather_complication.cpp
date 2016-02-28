@@ -198,10 +198,10 @@ void WeatherComplication::configure(const config_bundle_t& config)
 
 GColor WeatherComplication::highlight_color() const
 {
-	return COLOR_FALLBACK(GColorBlue, GColorWhite);
+	return COLOR_FALLBACK(GColorBlue, theme().complication_ring_background_color);
 }
 
 GColor WeatherComplication::highlight_color2() const
 {
-	return COLOR_FALLBACK(GColorRed, GColorWhite);
+	return COLOR_FALLBACK(GColorRed, theme().complication_ring_background_color);
 }

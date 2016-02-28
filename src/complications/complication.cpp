@@ -20,16 +20,23 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
                      int32_t min_angle, int32_t angle, int32_t max_angle)
 {
 	angle = clamp((long int)0, angle, max_angle - min_angle);
+
+	if(angle < max_angle) {
+		graphics_context_set_stroke_width(ctx, complication_background_line_size);
+		if(theme().complication_fill) {
+			graphics_context_set_fill_color(ctx, theme().complication_ring_background_color);
+			graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, 10000, min_angle, max_angle);
+		}
+		else {
+			graphics_context_set_stroke_color(ctx, theme().complication_ring_background_color);
+			graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle + angle, max_angle);
+		}
+	}
+
 	if(angle > 0) {
 		graphics_context_set_stroke_width(ctx, theme().complication_ring_thickness);
 		graphics_context_set_stroke_color(ctx, color);
 		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle, min_angle + angle);
-	}
-
-	if(angle < max_angle) {
-		graphics_context_set_stroke_width(ctx, complication_background_line_size);
-		graphics_context_set_stroke_color(ctx, theme().complication_ring_background_color);
-		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle + angle, max_angle);
 	}
 }
 
@@ -92,23 +99,23 @@ void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
 
 void HighlightComplication::update(GContext* ctx)
 {
-	IconTextComplication::update(ctx);
-
 	GRect bounds = this->get_bounds();
 	base_complication_appropriate_bounds(bounds);
 
 	draw_arc(ctx, bounds, highlight_color(), 0, angle, TRIG_MAX_ANGLE);
+
+	IconTextComplication::update(ctx);
 }
 
 void HighlightComplication2::update(GContext *ctx)
 {
-	IconTextComplication::update(ctx);
-
 	GRect bounds = this->get_bounds();
 	base_complication_appropriate_bounds(bounds);
 
 	draw_arc(ctx, bounds, highlight_color(), 0, angle, TRIG_MAX_ANGLE / 2);
 	draw_arc(ctx, bounds, highlight_color2(), TRIG_MAX_ANGLE / 2, angle2, TRIG_MAX_ANGLE);
+
+	IconTextComplication::update(ctx);
 }
 
 void HighlightComplication::set_angle(angle_t new_angle)

@@ -67,7 +67,7 @@ bool HealthComplication::want_live_updates()
 
 GColor HealthComplication::highlight_color() const
 {
-	return GColorGreen;
+	return theme().health_complication_color;
 }
 
 void HealthComplication::recalculate_average_steps()
