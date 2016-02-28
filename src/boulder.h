@@ -73,6 +73,64 @@ protected:
 	virtual void update(GContext *ctx) {}
 };
 
+class Window {
+	::Window* _window;
+public:
+	explicit Window()
+		: _window(window_create())
+	{
+		window_set_user_data(_window, this);
+		window_set_window_handlers(_window, _handlers);
+		// Not enabling this yet, because I don't need it and I don't know how
+		// this system works exactly
+		//window_set_click_config_provider_with_context(_window, on_click_st, this);
+	}
+
+	virtual ~Window() {
+		window_destroy(_window);
+	}
+
+	void push(bool animate) {
+		window_stack_push(_window, animate);
+	}
+
+	GRect get_bounds() {
+		return layer_get_bounds(window_get_root_layer(_window));
+	}
+
+protected:
+	virtual void on_load() {}
+	virtual void on_appear() {}
+	virtual void on_disappear() {}
+	virtual void on_unload() {}
+	// virtual void on_click() {}
+
+	void add_child(::Layer *layer) {
+		layer_add_child(window_get_root_layer(_window), layer);
+	}
+
+private:
+#define B_WINDOW_CALLBACK(CallbackName, MemberName) \
+	static void CallbackName(::Window *w) { \
+		Window* bwin = static_cast<Window*>(window_get_user_data(w)); \
+		bwin->MemberName(); \
+	}
+
+	B_WINDOW_CALLBACK(on_load_st, on_load);
+	B_WINDOW_CALLBACK(on_appear_st, on_appear);
+	B_WINDOW_CALLBACK(on_disappear_st, on_disappear);
+	B_WINDOW_CALLBACK(on_unload_st, on_unload);
+
+	// static void on_click_st(void *context) {
+	// 	Window* bwin = static_cast<Window*>(context);
+	// 	bwin->on_click();
+	// }
+
+#undef B_WINDOW_CALLBACK
+
+	static const WindowHandlers _handlers;
+};
+
 class TextLayer
 {
 	::TextLayer *text_layer;

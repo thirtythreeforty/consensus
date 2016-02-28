@@ -23,7 +23,6 @@ void HealthComplication::configure(const config_bundle_t& config)
 	}
 	on_movement_update();
 #else
-	set_angle(0);
 	set_icon(RESOURCE_ID_HEALTH_ERROR);
 #endif
 }
@@ -54,6 +53,12 @@ void HealthComplication::on_movement_update()
 		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	});
 #endif
+}
+
+bool HealthComplication::want_live_updates()
+{
+	// TODO with the center gadget change
+	return false;
 }
 
 GColor HealthComplication::highlight_color() const

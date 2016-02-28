@@ -197,8 +197,11 @@ public:
 
 	virtual void configure(const config_bundle_t& config) override;
 
+	void on_tick();
 	void on_movement_update();
 	void on_significant_update();
+
+	bool want_live_updates();
 
 protected:
 	virtual GColor highlight_color() const override;

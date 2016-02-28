@@ -5,118 +5,47 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include "common.h"
-#include "constants.h"
-
+#include "main_window.h"
 #include "preferences.h"
 #include "themes.h"
+#include "vibration.h"
 
-#include "complications/complication.h"
-#include "face_layer.h"
-
-static Window *window = NULL;
-static FaceLayer *face_layer = NULL;
-static Layer *background_layer = NULL;
-static Boulder::Layer *complications_layer = NULL;
-static std::array<AbstractComplication, 3> complications;
+std::unique_ptr<MainWindow> main_window;
 
 static enum {
 	WAS_CONNECTED_INIT = 0,
 	WAS_CONNECTED_FALSE,
 	WAS_CONNECTED_TRUE
 } was_connected = WAS_CONNECTED_INIT;
-static BitmapLayer *no_bluetooth_layer = NULL;
-
-static Boulder::GDrawCommandImage ticks_image;
-static GBitmap *no_bluetooth_image = NULL;
-
-using std::begin;
-using std::end;
-
-template<typename C, typename F>
-void complication_do(const F& f)
-{
-	for(auto& c: complications) {
-		c.if_is<C>(f);
-	};
-}
 
 #ifdef PBL_HEALTH
-static void update_health_complications(HealthEventType event, void*)
+static void on_health_update(HealthEventType event, void*)
 {
-	complication_do<HealthComplication>([&](auto& c) {
-		if(event == HealthEventSignificantUpdate) {
-			c.on_significant_update();
-		}
-		else if(event == HealthEventMovementUpdate) {
-			c.on_movement_update();
-		}
-	});
+	if(main_window) {
+		main_window->on_health_update(event);
+	}
 }
 #endif
-
-static bool user_is_asleep()
-{
-#ifdef PBL_HEALTH
-	if(health_service_metric_accessible(HealthMetricSleepSeconds, time_start_of_today(), time(nullptr))) {
-		return (health_service_peek_current_activities()
-		        & (HealthActivitySleep | HealthActivityRestfulSleep));
-	}
-	else {
-		return false;
-	}
-#else
-	return false;
-#endif
-}
-
-static bool vibration_ok()
-{
-	// Vibration is allowed if the user is not asleep or the user doesn't care
-	// if we vibrate while they are asleep
-	if(user_is_asleep()) {
-		return !should_quiet_during_sleep();
-	}
-	else {
-		return true;
-	}
-}
 
 void on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
-	if(face_layer) {
-		face_layer->set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
-	}
-
-	complication_do<DateComplication>([&](auto& c) {
-		c.time_changed(tick_time);
-	});
-
-	// Vibrate once on the hour and twice at noon.
-	if(should_vibrate_on_hour() &&
-	   vibration_ok() &&
-	   tick_time->tm_min == 0 && tick_time->tm_sec == 0) {
-		static const uint32_t vibe_pattern[] = {100, 250, 100};
-		VibePattern vibe = {
-			.durations = vibe_pattern,
-			.num_segments = static_cast<unsigned int>(tick_time->tm_hour % 12 == 0 ? 3 : 1)
-		};
-
-		vibes_enqueue_custom_pattern(vibe);
+	if(main_window) {
+		main_window->on_tick(tick_time, units_changed);
 	}
 }
 
 void on_battery_state_change(BatteryChargeState charge)
 {
-	complication_do<BatteryComplication>([&](auto& c){
-		c.state_changed(charge);
-	});
+	if(main_window) {
+		main_window->on_battery_state_change(charge);
+	}
 }
 
 void on_connection_change(bool connected)
 {
-	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
-	                 connected || should_hide_no_bluetooth());
+	if(main_window) {
+		main_window->on_connection_change(connected);
+	}
 
 	const bool became_disconnected = was_connected == WAS_CONNECTED_TRUE && !connected;
 	const bool became_connected = was_connected == WAS_CONNECTED_FALSE && connected;
@@ -152,11 +81,6 @@ void ignore_connection_change(bool connected)
 {
 }
 
-static void update_connection_now()
-{
-	on_connection_change(connection_service_peek_pebble_app_connection());
-}
-
 static void update_time_now()
 {
 	time_t abs_time = time(NULL);
@@ -169,99 +93,19 @@ static TimeUnits update_time_interval(bool show_sec)
 	return show_sec ? SECOND_UNIT : MINUTE_UNIT;
 }
 
-static const int16_t complication_size = 51;
-static const int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
-static const int16_t complication_offset_y = 15;
-
-static void reinit_complications()
-{
-	GRect size = complications_layer->get_frame();
-	GPoint center = grect_center_point(&size);
-
-	const GRect left_complication_position =
-		GRect((int16_t)(center.x - complication_size - complication_offset_x),
-		      (int16_t)(center.y - complication_size / 2),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-
-	const GRect right_complication_position =
-		GRect((int16_t)(center.x + complication_offset_x),
-		      (int16_t)(center.y - complication_size / 2),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-
-	const GRect bottom_complication_position =
-		GRect((int16_t)(center.x - complication_size / 2),
-		      (int16_t)(center.y + complication_offset_y),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
-
-	const std::array<std::pair<const GRect&, complication_config>, 3> complication_params = {{
-		{ left_complication_position, left_complication_type() },
-		{ bottom_complication_position, bottom_complication_type() },
-		{ right_complication_position, right_complication_type() },
-	}};
-	// Make sure we don't walk off of the complications array if its size changes
-	static_assert(std::tuple_size<decltype(complication_params)>::value ==
-	              std::tuple_size<decltype(complications)>::value,
-	              "Complication parameter array size mismatch");
-
-	for(size_t i = 0; i < complication_params.size(); ++i) {
-		using std::get;
-		const GRect& position = get<0>(complication_params[i]);
-		const auto& config = get<1>(complication_params[i]);
-		const auto& type = get<0>(config);
-		bool type_different = complications[i].type() != type;
-		bool new_type_valid = AbstractComplication::typenum_of<void>() != type;
-
-		if(type_different) {
-			complications[i].emplace(type, position);
-		}
-
-		if(new_type_valid) {
-			Complication& new_complication = complications[i].as<Complication>();
-
-			new_complication.configure(get<1>(config));
-
-			if(type_different) {
-				// Type was changed, add the child
-				complications_layer->add_child(new_complication);
-			}
-		}
-	}
-
-	const BatteryChargeState charge_state = battery_state_service_peek();
-	on_battery_state_change(charge_state);
-
-	WeatherData wdata;
-	weather_from_persist(&wdata);
-	complication_do<WeatherComplication>([&](auto& c) {
-		c.weather_changed(wdata);
-	});
-
-	time_t time_s = time(nullptr);
-	struct tm *time_struct = localtime(&time_s);
-	complication_do<DateComplication>([&](auto& c) {
-		c.time_changed(time_struct);
-	});
-}
-
 static void on_preferences_in(DictionaryIterator *iterator)
 {
 	parse_preferences(iterator);
 	set_theme();
-	ticks_image.recolor(theme().tick_color, GColorClear);
 
 	const bool show_second = should_show_second();
 	const TimeUnits units = update_time_interval(show_second);
 	tick_timer_service_subscribe(units, on_tick);
-	face_layer->set_show_second(show_second);
 	update_time_now();
 
-	update_connection_now();
-
-	reinit_complications();
-	layer_mark_dirty(window_get_root_layer(window));
+	if(main_window) {
+		main_window->configure();
+	}
 }
 
 void on_appmessage_in(DictionaryIterator *iterator, void *context)
@@ -281,90 +125,12 @@ void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
 }
 
-static void update_background(Layer *layer, GContext *ctx)
-{
-	GRect rect = layer_get_bounds(layer);
-	graphics_context_set_fill_color(ctx, theme().background_color);
-	graphics_fill_rect(ctx, rect, 0, GCornerNone);
-
-	ticks_image.draw(ctx, GPointZero);
-}
-
-static void init_layers(void)
-{
-	GRect size = layer_get_bounds(window_get_root_layer(window));
-	GPoint center = grect_center_point(&size);
-
-	// Static constructor doesn't seem to work; this must be done here.
-	ticks_image = Boulder::GDrawCommandImage(RESOURCE_ID_TICKS);
-	ticks_image.recolor(theme().tick_color, GColorClear);
-	no_bluetooth_image = gbitmap_create_with_resource(RESOURCE_ID_NO_BLUETOOTH);
-
-	background_layer = layer_create(size);
-	layer_set_update_proc(background_layer, update_background);
-	layer_add_child(window_get_root_layer(window), background_layer);
-
-	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
-	const GRect bluetooth_layer_location =
-		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
-		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
-		      (int16_t)bluetooth_image_size.size.w,
-		      (int16_t)bluetooth_image_size.size.h);
-	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
-	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
-	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
-
-	// Immediately hide or show the icon
-	update_connection_now();
-	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(no_bluetooth_layer));
-
-	complications_layer = new Boulder::Layer(size);
-	layer_add_child(window_get_root_layer(window), *complications_layer);
-
-	reinit_complications();
-
-	face_layer = new FaceLayer(size);
-	face_layer->set_show_second(should_show_second());
-	layer_add_child(window_get_root_layer(window), *face_layer);
-	animation_schedule(face_layer->animate_in(true, true));
-}
-
-static void deinit_layers(void)
-{
-	delete face_layer;
-	for(auto& complication: complications) {
-		complication.reset();
-	}
-	delete complications_layer;
-	bitmap_layer_destroy(no_bluetooth_layer);
-	gbitmap_destroy(no_bluetooth_image);
-	layer_destroy(background_layer);
-	ticks_image = Boulder::GDrawCommandImage();
-}
-
-void main_window_load(Window *window)
-{
-	init_layers();
-}
-
-void main_window_unload(Window *window)
-{
-	deinit_layers();
-}
-
 static void init(void)
 {
 	set_theme();
 
-	window = window_create();
-	static const WindowHandlers h = {
-		main_window_load,
-		NULL,
-		NULL,
-		main_window_unload
-	};
-	window_set_window_handlers(window, h);
-	window_stack_push(window, true);
+	main_window = std::make_unique<MainWindow>();
+	main_window->push(true);
 
 	const TimeUnits units = update_time_interval(should_show_second());
 	tick_timer_service_subscribe(units, on_tick);
@@ -378,7 +144,7 @@ static void init(void)
 	connection_service_subscribe(conn_handlers);
 
 #ifdef PBL_HEALTH
-	health_service_events_subscribe(update_health_complications, nullptr);
+	health_service_events_subscribe(on_health_update, nullptr);
 #endif
 
 	app_message_register_inbox_received(on_appmessage_in);
@@ -398,7 +164,8 @@ static void deinit(void)
 	connection_service_unsubscribe();
 	battery_state_service_unsubscribe();
 	tick_timer_service_unsubscribe();
-	window_destroy(window);
+
+	main_window.reset();
 }
 
 int main(void)
