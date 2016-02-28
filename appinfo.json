@@ -65,6 +65,11 @@
         "file": "ticks.pdc"
       },
       {
+        "type": "raw",
+        "name": "TICKS_MINIMAL",
+        "file": "ticks-minimal.pdc"
+      },
+      {
         "type": "bitmap",
         "name": "NO_BLUETOOTH",
         "file": "no-bluetooth.png"

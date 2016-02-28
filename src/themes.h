@@ -9,6 +9,7 @@ struct Theme
 {
 	GColor background_color;
 	GColor tick_color;
+	uint8_t tick_resource;
 	GColor hour_hand_color;
 	GColor minute_hand_color;
 	GColor second_hand_color;

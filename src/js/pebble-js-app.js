@@ -166,7 +166,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		return {
 			"bold-dark": 0,
 			"thin": 1,
-			"bold-white": 2
+			"bold-white": 2,
+			"minimal-dark": 3,
+			"minimal-white": 4
 		}[val];
 	}
 	function complicationConfigToInts(dict, position) {

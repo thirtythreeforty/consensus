@@ -4,13 +4,13 @@
 
 BackgroundLayer::BackgroundLayer(GRect frame)
 	: Layer(frame)
-	, ticks_image(RESOURCE_ID_TICKS)
 {
 	recolor();
 }
 
 void BackgroundLayer::recolor()
 {
+	ticks_image = Boulder::GDrawCommandImage(theme().tick_resource);
 	ticks_image.recolor(theme().tick_color, GColorClear);
 }
 
