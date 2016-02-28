@@ -19,6 +19,8 @@ struct Theme
 	GColor complication_ring_background_color;
 	GColor battery_complication_color;
 	GColor health_complication_color;
+	GColor weather_complication_humidity_color;
+	GColor weather_complication_temp_color;
 	bool complication_fill;
 	uint8_t complication_ring_thickness;
 	uint8_t minute_hand_width;
