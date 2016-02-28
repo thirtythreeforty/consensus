@@ -433,6 +433,16 @@ namespace persist
 {
 
 // These templates will not be defined, except for their specializations
+inline bool exists(uint32_t persist_key)
+{
+	return persist_exists(persist_key);
+}
+
+inline void remove(uint32_t persist_key)
+{
+	persist_delete(persist_key);
+}
+
 template<typename T>
 inline void save(uint32_t persist_key, T value);
 template<typename T>
@@ -459,6 +469,22 @@ inline T load_default(uint32_t persist_key, T default_value);
 
 B_SPECIALIZE_PERSIST(bool, bool)
 B_SPECIALIZE_PERSIST(unsigned int, int)
+B_SPECIALIZE_PERSIST(uint32_t, int)
+B_SPECIALIZE_PERSIST(uint8_t, int)
+
+template<typename T>
+inline void save_data(uint32_t persist_key, const T& value)
+{
+	static_assert(sizeof(T) < 256, "Type too large to store!");
+	persist_write_data(persist_key, &value, sizeof(T));
+}
+
+template<typename T>
+inline void load_data(uint32_t persist_key, T& value)
+{
+	static_assert(sizeof(T) < 256, "Type too large to store!");
+	persist_read_data(persist_key, &value, sizeof(T));
+}
 
 }
 

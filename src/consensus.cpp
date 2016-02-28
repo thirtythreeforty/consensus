@@ -127,6 +127,7 @@ void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 
 static void init(void)
 {
+	init_preferences();
 	set_theme();
 
 	main_window = std::make_unique<MainWindow>();

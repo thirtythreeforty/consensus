@@ -25,4 +25,6 @@ complication_config right_complication_type();
 
 void parse_preferences(DictionaryIterator *iterator);
 
+void init_preferences();
+
 #endif
