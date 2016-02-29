@@ -1,6 +1,6 @@
 (function() {
 
-var currentVersion = 3;
+var currentVersion = 4;
 
 var keenclient = new Keen({
 	projectId: "56b3b7c3d2eaaa3152913416",
