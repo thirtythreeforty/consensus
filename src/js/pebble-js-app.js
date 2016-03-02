@@ -19,7 +19,8 @@ var pebbleComplicationNames = {
 	"Battery": 1,
 	"Date": 2,
 	"Weather": 3,
-	"Health": 4
+	"Health": 4,
+	"Time Zone": 5
 }
 
 function xhrRequest(url, type, callback) {

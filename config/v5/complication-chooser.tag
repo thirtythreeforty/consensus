@@ -72,6 +72,7 @@
 			<option class="item-select-option">Health</option>
 			<option class="item-select-option">Date</option>
 			<option class="item-select-option">Weather</option>
+			<option class="item-select-option">Time Zone</option>
 		</configuration-dropdown>
 	</configuration-content>
 	<complication-customize name='customizer' />
@@ -97,7 +98,8 @@
 			"Battery": undefined,
 			"Health": "complication-customize-health",
 			"Date": undefined,
-			"Weather": "complication-customize-weather"
+			"Weather": "complication-customize-weather",
+			"Time Zone": undefined
 		}[val] || "complication-customize";
 
 		// Mount it
