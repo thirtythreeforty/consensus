@@ -98,8 +98,8 @@
 			"Battery": undefined,
 			"Health": "complication-customize-health",
 			"Date": undefined,
-			"Weather": "complication-customize-weather"
-			"Time Zone": undefined,
+			"Weather": "complication-customize-weather",
+			"Time Zone": undefined
 		}[val] || "complication-customize";
 
 		// Mount it
