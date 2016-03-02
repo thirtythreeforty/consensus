@@ -211,6 +211,21 @@ Pebble.addEventListener('webviewclosed', function(e) {
 				dict[opt1Key] = 0;
 			}
 			break;
+		case "Time Zone":
+			// Compute the number of seconds' offset
+			// Because we send unsigned values to the Pebble, also have to send
+			// a "negative" flag.  There are ways around this that would be
+			// fragile and that I don't want to deal with.
+			var hour_offset = parseFloat(cOptions["offset"], 10);
+			if(hour_offset < 0) {
+				dict[opt2Key] = 1;
+				hour_offset = -hour_offset;
+			}
+			else {
+				dict[opt2Key] = 0;
+			}
+			var second_offset = hour_offset * 60 * 60;
+			dict[opt1Key] = second_offset;
 		}
 	}
 

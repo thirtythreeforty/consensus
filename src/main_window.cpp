@@ -6,7 +6,7 @@
 MainWindow::MainWindow()
 	: Window()
 	, background_layer(get_bounds())
-	, face_layer(get_bounds())
+	, face_layer(get_bounds(), true)
 	, complications_layer(get_bounds())
 	, no_bluetooth_image(create_themed_bluetooth_bitmap())
 {
@@ -107,6 +107,9 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 		c.on_tick(units_changed);
 	});
 #endif
+	complication_do<TimeZoneComplication>([&](auto& c) {
+		c.on_tick(tick_time, units_changed);
+	});
 
 	// Vibrate once on the hour and twice at noon.
 	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0 &&
@@ -203,10 +206,26 @@ void MainWindow::reinit_complications()
 
 	time_t time_s = time(nullptr);
 	struct tm *time_struct = localtime(&time_s);
+	TimeUnits all_units_changed = TimeUnits(
+		SECOND_UNIT |
+		MINUTE_UNIT |
+		HOUR_UNIT |
+		DAY_UNIT |
+		MONTH_UNIT |
+		YEAR_UNIT
+	);
+
 	complication_do<DateComplication>([&](auto& c) {
 		c.time_changed(time_struct);
 	});
-
+#ifdef PBL_HEALTH
+	complication_do<HealthComplication>([&](auto& c) {
+		c.on_tick(all_units_changed);
+	});
+#endif
+	complication_do<TimeZoneComplication>([&](auto& c) {
+		c.on_tick(time_struct, all_units_changed);
+	});
 }
 
 GBitmap* MainWindow::create_themed_bluetooth_bitmap()

@@ -12,46 +12,61 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 
 void FaceLayer::update(GContext *ctx)
 {
-	const uint8_t base_width = theme().minute_hand_width();
-	const uint8_t fatter_width = base_width + 2;
+	const uint8_t base_width = large ? theme().minute_hand_width() : 3;
+	const uint8_t fatter_width = large ? base_width + 2 : base_width;
+	const GColor hour_hand_color = large ? theme().hour_hand_color()
+	                                     : theme().complication_icon_color();
+	const GColor minute_hand_color = large ? theme().minute_hand_color()
+	                                       : theme().complication_icon_color();
+	const GColor second_hand_color = large ? theme().second_hand_color()
+	                                       : theme().complication_icon_color();
 
 #ifndef PBL_COLOR
 	// Draw an extra outline to separate the hands from things behind them
 
 	const uint8_t outline_extra = 2;
-	draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color());
+	if(large) {
+		draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color());
+	}
 #endif
-	draw_path_with(ctx, hour_path, fatter_width, theme().hour_hand_color());
+	draw_path_with(ctx, hour_path, fatter_width, hour_hand_color);
 
 #ifndef PBL_COLOR
-	draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color());
+	if(large) {
+		draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color());
+	}
 #endif
-	draw_path_with(ctx, minute_path, base_width, theme().minute_hand_color());
+	draw_path_with(ctx, minute_path, base_width, minute_hand_color);
 
 	if(show_second) {
 #ifndef PBL_COLOR
-		draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color());
+		if(large) {
+			draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color());
+		}
 #endif
-		draw_path_with(ctx, second_path, base_width - 4, theme().second_hand_color());
+		draw_path_with(ctx, second_path, base_width - 4, second_hand_color);
 	}
 
-	// Middle dot
-	GRect bounds = this->get_bounds();
-	GPoint center = grect_center_point(&bounds);
+	// Draw middle dot, only if large though
+	if(large) {
+		GRect bounds = this->get_bounds();
+		GPoint center = grect_center_point(&bounds);
 
-	graphics_context_set_stroke_width(ctx, 1);
-	graphics_context_set_fill_color(ctx, theme().background_color());
-	// Yes this is a little hacky, but it works fine
-	graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
+		graphics_context_set_stroke_width(ctx, 1);
+		graphics_context_set_fill_color(ctx, theme().background_color());
+		// Yes this is a little hacky, but it works fine
+		graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
+	}
 }
 
-FaceLayer::FaceLayer(GRect frame)
+FaceLayer::FaceLayer(GRect frame, bool large)
 	: Layer(frame)
 	, animating(false)
-	, hour_path(&hour_hand_path)
-	, minute_path(&minute_hand_path)
-	, second_path(&second_hand_path)
+	, hour_path(large ? &hour_hand_path : &small_hour_hand_path)
+	, minute_path(large ? &minute_hand_path : &small_minute_hand_path)
+	, second_path(large ? &second_hand_path : &small_second_hand_path)
 	, show_second(false)
+	, large(large)
 {
 	GPoint center = grect_center_point(&frame);
 
@@ -133,8 +148,21 @@ void FaceLayer::radius_anim_update(Animation *anim, AnimationProgress dist_norma
 
 void FaceLayer::radius_anim_setup(Animation *anim)
 {
-	// Set the initial scale so there's no flicker of large hands.
+	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
+	face_layer->animating = true;
+
 	radius_anim_update(anim, 0);
+}
+
+void FaceLayer::roll_anim_setup(Animation *anim)
+{
+	// Set the initial roll so there's no flicker of large hands.
+	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
+	// We rely on the AnimationHandlers to set this to false when all the
+	// animations are done.  But this needs to be true here to make sure the
+	// hands are never displayed as the requested_time.
+	face_layer->animating = true;
+	roll_anim_update(anim, 0);
 }
 
 void FaceLayer::roll_anim_update(Animation *anim, AnimationProgress dist_normalized)
@@ -175,7 +203,7 @@ Animation* FaceLayer::make_zoom_anim()
 Animation* FaceLayer::make_roll_anim()
 {
 	static const AnimationImplementation roll_anim_impl = {
-		.setup = NULL,
+		.setup = FaceLayer::roll_anim_setup,
 		.update = FaceLayer::roll_anim_update,
 		.teardown = NULL,
 	};
@@ -253,4 +281,20 @@ const GPoint FaceLayer::second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -60}};
 const GPathInfo FaceLayer::second_hand_path = {
 	.num_points = NELEM(second_hand_path_points),
 	.points = (GPoint*)second_hand_path_points
+};
+
+const GPoint FaceLayer::small_hour_hand_path_points[] = {{0, 0}, {0, -10}};
+const GPathInfo FaceLayer::small_hour_hand_path = {
+	.num_points = NELEM(small_hour_hand_path_points),
+	.points = (GPoint*)small_hour_hand_path_points
+};
+const GPoint FaceLayer::small_minute_hand_path_points[] = {{0, 0}, {0, -18}};
+const GPathInfo FaceLayer::small_minute_hand_path = {
+	.num_points = NELEM(small_minute_hand_path_points),
+	.points = (GPoint*)small_minute_hand_path_points
+};
+const GPoint FaceLayer::small_second_hand_path_points[] = {{0, 0}, {0, -18}};
+const GPathInfo FaceLayer::small_second_hand_path = {
+	.num_points = NELEM(small_second_hand_path_points),
+	.points = (GPoint*)small_second_hand_path_points
 };

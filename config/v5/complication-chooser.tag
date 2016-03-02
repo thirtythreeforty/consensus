@@ -64,6 +64,68 @@
 	</script>
 </complication-customize-weather>
 
+<complication-customize-timezone>
+	<configuration-content>
+		<configuration-dropdown caption='UTC Offset' attrib={ parent.offset }>
+			<option class="item-select-option" value='-12'>UTC&minus;12:00</configuration-option>
+			<option class="item-select-option" value='-11'>UTC&minus;11:00</configuration-option>
+			<option class="item-select-option" value='-10'>UTC&minus;10:00</configuration-option>
+			<option class="item-select-option" value='-9.5'>UTC&minus;09:30</configuration-option>
+			<option class="item-select-option" value='-9'>UTC&minus;09:00</configuration-option>
+			<option class="item-select-option" value='-8'>UTC&minus;08:00</configuration-option>
+			<option class="item-select-option" value='-7'>UTC&minus;07:00</configuration-option>
+			<option class="item-select-option" value='-6'>UTC&minus;06:00</configuration-option>
+			<option class="item-select-option" value='-5'>UTC&minus;05:00</configuration-option>
+			<option class="item-select-option" value='-4.5'>UTC&minus;04:30</configuration-option>
+			<option class="item-select-option" value='-4'>UTC&minus;04:00</configuration-option>
+			<option class="item-select-option" value='-3.5'>UTC&minus;03:30</configuration-option>
+			<option class="item-select-option" value='-3'>UTC&minus;03:00</configuration-option>
+			<option class="item-select-option" value='-2'>UTC&minus;02:00</configuration-option>
+			<option class="item-select-option" value='-1'>UTC&minus;01:00</configuration-option>
+			<option class="item-select-option" value='0'>UTC&plusmn;00:00</configuration-option>
+			<option class="item-select-option" value='1'>UTC+01:00</configuration-option>
+			<option class="item-select-option" value='2'>UTC+02:00</configuration-option>
+			<option class="item-select-option" value='3'>UTC+03:00</configuration-option>
+			<option class="item-select-option" value='3.5'>UTC+03:30</configuration-option>
+			<option class="item-select-option" value='4'>UTC+04:00</configuration-option>
+			<option class="item-select-option" value='4.5'>UTC+04:30</configuration-option>
+			<option class="item-select-option" value='5'>UTC+05:00</configuration-option>
+			<option class="item-select-option" value='5.5'>UTC+05:30</configuration-option>
+			<option class="item-select-option" value='5.75'>UTC+05:45</configuration-option>
+			<option class="item-select-option" value='6'>UTC+06:00</configuration-option>
+			<option class="item-select-option" value='6.5'>UTC+06:30</configuration-option>
+			<option class="item-select-option" value='7'>UTC+07:00</configuration-option>
+			<option class="item-select-option" value='8'>UTC+08:00</configuration-option>
+			<option class="item-select-option" value='8.5'>UTC+08:30</configuration-option>
+			<option class="item-select-option" value='8.75'>UTC+08:45</configuration-option>
+			<option class="item-select-option" value='9'>UTC+09:00</configuration-option>
+			<option class="item-select-option" value='9.5'>UTC+09:30</configuration-option>
+			<option class="item-select-option" value='10'>UTC+10:00</configuration-option>
+			<option class="item-select-option" value='10.5'>UTC+10:30</configuration-option>
+			<option class="item-select-option" value='11'>UTC+11:00</configuration-option>
+			<option class="item-select-option" value='12'>UTC+12:00</configuration-option>
+			<option class="item-select-option" value='12.75'>UTC+12:45</configuration-option>
+			<option class="item-select-option" value='13'>UTC+13:00</configuration-option>
+			<option class="item-select-option" value='14'>UTC+14:00</configuration-option>
+	</configuration-content>
+	<configuration-footer>
+		Choose a UTC offset for the clock.  Note that due to ever-changing daylight savings time preferences, this will not be adjusted for daylight savings time!
+	</configuration-footer>
+
+	<script>
+	this.mixin(Attribute);
+	this.offset = new this.Attribute("0");
+
+	from_json(pack) {
+		this.offset.set(pack["offset"]);
+		this.update();
+	}
+	to_json(pack) {
+		pack["offset"] = this.offset.get();
+	}
+	</script>
+</complication-customize-timezone>
+
 <complication-chooser>
 	<configuration-content name='content'>
 		<configuration-dropdown style="font-weight:bold;" caption="{ parent.opts.position }" attrib={ parent.chosentype }>
@@ -99,7 +161,7 @@
 			"Health": "complication-customize-health",
 			"Date": undefined,
 			"Weather": "complication-customize-weather",
-			"Time Zone": undefined
+			"Time Zone": "complication-customize-timezone"
 		}[val] || "complication-customize";
 
 		// Mount it

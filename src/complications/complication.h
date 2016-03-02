@@ -22,6 +22,7 @@ struct WeatherData {
 #include <experimental/optional>
 
 #include "boulder.h"
+#include "face_layer.h"
 #include "lazy_icon.h"
 #include "ScrambledNumber.h"
 #include "variant.h"
@@ -125,6 +126,23 @@ public:
 	void time_changed(struct tm *time);
 };
 
+class TimeZoneComplication: public Complication
+{
+	FaceLayer face;
+	int32_t offset_sec;
+
+public:
+	TimeZoneComplication(GRect frame);
+	~TimeZoneComplication() = default;
+
+	virtual void configure(const config_bundle_t&) override;
+
+	void on_tick(struct tm *tick_time, TimeUnits units_changed);
+
+private:
+	void update_time();
+};
+
 class WeatherComplication: public HighlightComplication2
 {
 	struct WeatherAngles {
@@ -219,7 +237,8 @@ using AbstractComplication = Variant<
 	BatteryComplication,
 	DateComplication,
 	WeatherComplication,
-	HealthComplication
+	HealthComplication,
+	TimeZoneComplication
 >;
 
 #endif

@@ -27,9 +27,10 @@ class FaceLayer: public Boulder::Layer
 	ScalablePath second_path;
 
 	bool show_second;
+	bool large;
 
 public:
-	FaceLayer(GRect frame);
+	FaceLayer(GRect frame, bool large);
 	~FaceLayer() = default;
 
 	void set_show_second(bool show);
@@ -44,6 +45,7 @@ private:
 	static void radius_anim_setup(Animation *anim);
 
 	static void roll_anim_update(Animation *anim, AnimationProgress dist_normalized);
+	static void roll_anim_setup(Animation *anim);
 
 	Animation* make_anim(int duration,
 	                     int delay,
@@ -60,10 +62,15 @@ private:
 	static const GPathInfo hour_hand_path;
 	static const GPoint minute_hand_path_points[];
 	static const GPathInfo minute_hand_path;
-
 	static const GPoint second_hand_path_points[];
 	static const GPathInfo second_hand_path;
 
+	static const GPoint small_hour_hand_path_points[];
+	static const GPathInfo small_hour_hand_path;
+	static const GPoint small_minute_hand_path_points[];
+	static const GPathInfo small_minute_hand_path;
+	static const GPoint small_second_hand_path_points[];
+	static const GPathInfo small_second_hand_path;
 };
 
 #endif
