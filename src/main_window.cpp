@@ -206,5 +206,5 @@ void MainWindow::reinit_complications()
 
 GBitmap* MainWindow::create_themed_bluetooth_bitmap()
 {
-	return gbitmap_create_with_resource(theme().no_bluetooth_resource);
+	return gbitmap_create_with_resource(theme().no_bluetooth_resource());
 }

@@ -23,18 +23,18 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 
 	if(angle < max_angle) {
 		graphics_context_set_stroke_width(ctx, complication_background_line_size);
-		if(theme().complication_fill) {
-			graphics_context_set_fill_color(ctx, theme().complication_ring_background_color);
+		if(theme().complication_fill()) {
+			graphics_context_set_fill_color(ctx, theme().complication_ring_background_color());
 			graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, 10000, min_angle, max_angle);
 		}
 		else {
-			graphics_context_set_stroke_color(ctx, theme().complication_ring_background_color);
+			graphics_context_set_stroke_color(ctx, theme().complication_ring_background_color());
 			graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle + angle, max_angle);
 		}
 	}
 
 	if(angle > 0) {
-		graphics_context_set_stroke_width(ctx, theme().complication_ring_thickness);
+		graphics_context_set_stroke_width(ctx, theme().complication_ring_thickness());
 		graphics_context_set_stroke_color(ctx, color);
 		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle, min_angle + angle);
 	}

@@ -50,7 +50,7 @@ public:
 
 	void recolor() {
 		if(current_id != none_id) {
-			image.recolor(theme().complication_icon_color, GColorClear);
+			image.recolor(theme().complication_icon_color(), GColorClear);
 		}
 	}
 

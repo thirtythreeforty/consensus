@@ -12,27 +12,27 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 
 void FaceLayer::update(GContext *ctx)
 {
-	const uint8_t base_width = theme().minute_hand_width;
+	const uint8_t base_width = theme().minute_hand_width();
 	const uint8_t fatter_width = base_width + 2;
 
 #ifndef PBL_COLOR
 	// Draw an extra outline to separate the hands from things behind them
 
 	const uint8_t outline_extra = 2;
-	draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color);
+	draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color());
 #endif
-	draw_path_with(ctx, hour_path, fatter_width, theme().hour_hand_color);
+	draw_path_with(ctx, hour_path, fatter_width, theme().hour_hand_color());
 
 #ifndef PBL_COLOR
-	draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color);
+	draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color());
 #endif
-	draw_path_with(ctx, minute_path, base_width, theme().minute_hand_color);
+	draw_path_with(ctx, minute_path, base_width, theme().minute_hand_color());
 
 	if(show_second) {
 #ifndef PBL_COLOR
-		draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color);
+		draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color());
 #endif
-		draw_path_with(ctx, second_path, base_width - 4, theme().second_hand_color);
+		draw_path_with(ctx, second_path, base_width - 4, theme().second_hand_color());
 	}
 
 	// Middle dot
@@ -40,7 +40,7 @@ void FaceLayer::update(GContext *ctx)
 	GPoint center = grect_center_point(&bounds);
 
 	graphics_context_set_stroke_width(ctx, 1);
-	graphics_context_set_fill_color(ctx, theme().background_color);
+	graphics_context_set_fill_color(ctx, theme().background_color());
 	// Yes this is a little hacky, but it works fine
 	graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
 }

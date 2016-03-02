@@ -31,7 +31,7 @@ GRect ScrambledNumber::calculate_text_frame(const GRect& our_frame)
 
 void ScrambledNumber::reconfigure_color()
 {
-	text_layer.set_text_color(theme().complication_text_color);
+	text_layer.set_text_color(theme().complication_text_color());
 }
 
 void ScrambledNumber::set(int32_t number)

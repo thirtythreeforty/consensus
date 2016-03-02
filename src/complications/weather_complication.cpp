@@ -198,10 +198,10 @@ void WeatherComplication::configure(const config_bundle_t& config)
 
 GColor WeatherComplication::highlight_color() const
 {
-	return theme().weather_complication_humidity_color;
+	return theme().weather_complication_humidity_color();
 }
 
 GColor WeatherComplication::highlight_color2() const
 {
-	return theme().weather_complication_temp_color;
+	return theme().weather_complication_temp_color();
 }
