@@ -27,14 +27,30 @@ void HealthComplication::configure(const config_bundle_t& config)
 #endif
 }
 
+GColor HealthComplication::highlight_color() const
+{
+	return theme().health_complication_color();
+}
+
+#ifdef PBL_HEALTH
+Variant<void, int32_t> HealthComplication::today_steps;
+
+void HealthComplication::on_tick(TimeUnits units_changed)
+{
+	if(units_changed & MINUTE_UNIT) {
+		update_angle_and_icon();
+	}
+}
+
 void HealthComplication::on_significant_update()
 {
-#ifdef PBL_HEALTH
 	if(step_goal.is<AutoGoal>()) {
 		recalculate_average_steps();
 	}
 	on_movement_update();
-#endif
+
+	// Don't wait for the minute to roll around in this case
+	update_angle_and_icon();
 }
 
 void HealthComplication::on_movement_update()
@@ -43,36 +59,11 @@ void HealthComplication::on_movement_update()
 	// once for the configure() call from the main window, and one from the
 	// significant update that the Pebble OS sends out.  I don't know of
 	// any way to avoid this though.
-#ifdef PBL_HEALTH
-	auto onValid = [&](Goal& goal){
-		uint32_t today_steps = health_service_sum_today(HealthMetricStepCount);
-
-		set_angle(TRIG_MAX_ANGLE * today_steps / goal.goal);
-		set_icon(today_steps > goal.goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
-	};
-	step_goal.if_is<AutoGoal>(onValid);
-	step_goal.if_is<ManualGoal>(onValid);
-	step_goal.if_is<void>([&]{
-		set_angle(0);
-		set_icon(RESOURCE_ID_HEALTH_ERROR);
-	});
-#endif
-}
-
-bool HealthComplication::want_live_updates()
-{
-	// TODO with the center gadget change
-	return false;
-}
-
-GColor HealthComplication::highlight_color() const
-{
-	return theme().health_complication_color();
+	invalidate_steps_today();
 }
 
 void HealthComplication::recalculate_average_steps()
 {
-#ifdef PBL_HEALTH
 	constexpr time_t seconds_in_day = 60 * 60 * 24;
 	time_t today_start = time_start_of_today();
 
@@ -87,5 +78,34 @@ void HealthComplication::recalculate_average_steps()
 		}
 	}
 	step_goal.reset();
-#endif
 }
+
+void HealthComplication::refresh_steps_today()
+{
+	if(today_steps.is<void>()) {
+		today_steps = health_service_sum_today(HealthMetricStepCount);
+	}
+}
+
+void HealthComplication::invalidate_steps_today()
+{
+	today_steps.reset();
+}
+
+void HealthComplication::update_angle_and_icon()
+{
+	if(!step_goal.is<void>()) {
+		refresh_steps_today();
+
+		auto& goal = step_goal.as<Goal>().goal;
+		auto& steps = today_steps.as<int32_t>();
+
+		set_angle(TRIG_MAX_ANGLE * steps / goal);
+		set_icon(steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
+	}
+	else {
+		set_angle(0);
+		set_icon(RESOURCE_ID_HEALTH_ERROR);
+	};
+}
+#endif

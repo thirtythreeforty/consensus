@@ -102,6 +102,11 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	complication_do<DateComplication>([&](auto& c) {
 		c.time_changed(tick_time);
 	});
+#ifdef PBL_HEALTH
+	complication_do<HealthComplication>([&](auto& c) {
+		c.on_tick(units_changed);
+	});
+#endif
 
 	// Vibrate once on the hour and twice at noon.
 	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0 &&

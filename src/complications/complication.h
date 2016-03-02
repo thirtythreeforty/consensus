@@ -179,8 +179,8 @@ protected:
 class HealthComplication: public HighlightComplication
 {
 	struct Goal {
-		uint32_t goal;
-		Goal(uint32_t goal) : goal(goal) {}
+		int32_t goal;
+		Goal(int32_t goal) : goal(goal) {}
 	};
 	struct AutoGoal : public Goal { using Goal::Goal; };
 	struct ManualGoal : public Goal { using Goal::Goal; };
@@ -189,6 +189,7 @@ class HealthComplication: public HighlightComplication
 #ifdef PBL_HEALTH
 
 	Variant<void, AutoGoal, ManualGoal> step_goal;
+	static Variant<void, int32_t> today_steps;
 
 #endif
 
@@ -198,17 +199,18 @@ public:
 
 	virtual void configure(const config_bundle_t& config) override;
 
-	void on_tick();
+	void on_tick(TimeUnits units_changed);
 	void on_movement_update();
 	void on_significant_update();
-
-	bool want_live_updates();
 
 protected:
 	virtual GColor highlight_color() const override;
 
 private:
 	void recalculate_average_steps();
+	static void refresh_steps_today();
+	static void invalidate_steps_today();
+	void update_angle_and_icon();
 };
 
 using AbstractComplication = Variant<
