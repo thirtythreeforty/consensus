@@ -150,7 +150,7 @@ static void init(void)
 
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
-	app_message_open(128, 64);
+	app_message_open(256, 64);
 
 	update_time_now();
 }
