@@ -3,8 +3,6 @@
 #include "common.h"
 #include "constants.h"
 
-using std::experimental::nullopt;
-
 HealthComplication::HealthComplication(GRect frame)
 	: HighlightComplication(frame)
 {}
