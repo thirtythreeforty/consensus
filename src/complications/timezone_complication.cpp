@@ -21,7 +21,7 @@ void TimeZoneComplication::configure(const config_bundle_t& config)
 	update_time();
 }
 
-void TimeZoneComplication::on_tick(struct tm *, TimeUnits units_changed)
+void TimeZoneComplication::on_tick(TimeUnits units_changed)
 {
 	if(units_changed & MINUTE_UNIT) {
 		update_time();
@@ -30,8 +30,6 @@ void TimeZoneComplication::on_tick(struct tm *, TimeUnits units_changed)
 
 void TimeZoneComplication::update_time()
 {
-	// We basically ignore the passed in struct, because we do our own
-	// calculations from GMT
 	time_t utc = time(nullptr);
 	utc += offset_sec;
 	struct tm *offset_time = gmtime(&utc);

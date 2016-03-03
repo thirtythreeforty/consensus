@@ -137,7 +137,7 @@ public:
 
 	virtual void configure(const config_bundle_t&) override;
 
-	void on_tick(struct tm *tick_time, TimeUnits units_changed);
+	void on_tick(TimeUnits units_changed);
 
 private:
 	void update_time();

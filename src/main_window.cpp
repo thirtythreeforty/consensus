@@ -108,7 +108,7 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	});
 #endif
 	complication_do<TimeZoneComplication>([&](auto& c) {
-		c.on_tick(tick_time, units_changed);
+		c.on_tick(units_changed);
 	});
 
 	// Vibrate once on the hour and twice at noon.
@@ -224,7 +224,7 @@ void MainWindow::reinit_complications()
 	});
 #endif
 	complication_do<TimeZoneComplication>([&](auto& c) {
-		c.on_tick(time_struct, all_units_changed);
+		c.on_tick(all_units_changed);
 	});
 }
 
