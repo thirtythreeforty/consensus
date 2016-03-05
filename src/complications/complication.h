@@ -19,8 +19,6 @@ struct WeatherData {
 	static WeatherData from_persist();
 };
 
-#include <experimental/optional>
-
 #include "boulder.h"
 #include "face_layer.h"
 #include "lazy_icon.h"
@@ -158,7 +156,7 @@ class WeatherComplication: public HighlightComplication2
 	};
 	GadgetType gadget_type;
 
-	static std::experimental::optional<Boulder::AppTimer> refresh_timer;
+	static Variant<void, Boulder::AppTimer> refresh_timer;
 
 public:
 	explicit WeatherComplication(GRect frame);

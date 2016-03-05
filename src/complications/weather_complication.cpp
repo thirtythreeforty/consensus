@@ -8,9 +8,7 @@ const char* WeatherComplication::deg_format = "%i\u00B0";
 const char* WeatherComplication::relhum_format = "%i";
 const char* WeatherComplication::empty_format = "";
 
-using std::experimental::nullopt;
-std::experimental::optional<Boulder::AppTimer> WeatherComplication::refresh_timer
-	= nullopt;
+Variant<void, Boulder::AppTimer> WeatherComplication::refresh_timer{};
 
 WeatherData WeatherData::from_appmessage(DictionaryIterator *iterator)
 {
@@ -117,12 +115,12 @@ void WeatherComplication::request_refresh(void*)
 	// TODO this causes an undesired "timer doesn't exist" message (which is true)
 	// because the timer deletes itself after it fires.  Boulder::AppTimer needs logic
 	// to handle the timer firing.
-	refresh_timer = nullopt;
+	refresh_timer.reset();
 }
 
 void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 {
-	if(!refresh_timer) {
+	if(!refresh_timer.is<Boulder::AppTimer>()) {
 		time_t now = time(nullptr);
 
 		static const time_t refresh_interval = 60 * 60 * 2;
@@ -133,7 +131,7 @@ void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 
 		const uint32_t delay_ms = (next_refresh_time - now) * 1000;
 
-		refresh_timer.emplace(delay_ms, WeatherComplication::request_refresh, nullptr);
+		refresh_timer.emplace_as<Boulder::AppTimer>(delay_ms, WeatherComplication::request_refresh, nullptr);
 	}
 }
 
