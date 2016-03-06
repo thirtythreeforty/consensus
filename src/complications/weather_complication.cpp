@@ -8,8 +8,6 @@ const char* WeatherComplication::deg_format = "%i\u00B0";
 const char* WeatherComplication::relhum_format = "%i";
 const char* WeatherComplication::empty_format = "";
 
-Variant<void, Boulder::AppTimer> WeatherComplication::refresh_timer{};
-
 WeatherData WeatherData::from_appmessage(DictionaryIterator *iterator)
 {
 	WeatherData data;
@@ -104,35 +102,25 @@ auto WeatherComplication::compute_angles(const WeatherData &wdata) -> WeatherAng
 	}
 }
 
-void WeatherComplication::request_refresh(void*)
-{
-	DictionaryIterator *iter;
-	static const uint8_t value = 0;
-	app_message_outbox_begin(&iter);
-	dict_write_int(iter, KEY_WEATHER_REQUEST, &value, sizeof value, false);
-	app_message_outbox_send();
-
-	// TODO this causes an undesired "timer doesn't exist" message (which is true)
-	// because the timer deletes itself after it fires.  Boulder::AppTimer needs logic
-	// to handle the timer firing.
-	refresh_timer.reset();
-}
-
 void WeatherComplication::schedule_refresh(time_t last_refresh_time)
 {
-	if(!refresh_timer.is<Boulder::AppTimer>()) {
-		time_t now = time(nullptr);
+	time_t now = time(nullptr);
 
-		static const time_t refresh_interval = 60 * 60 * 2;
-		const time_t slight_future = now + 10;
+	static const time_t refresh_interval = 60 * 60 * 2;
+	const time_t slight_future = now + 10;
 
-		const unsigned int next_refresh_time =
-			std::max(slight_future, last_refresh_time + refresh_interval);
+	const unsigned int next_refresh_time =
+		std::max(slight_future, last_refresh_time + refresh_interval);
 
-		const uint32_t delay_ms = (next_refresh_time - now) * 1000;
+	const uint32_t delay_ms = (next_refresh_time - now) * 1000;
 
-		refresh_timer.emplace_as<Boulder::AppTimer>(delay_ms, WeatherComplication::request_refresh, nullptr);
-	}
+	Boulder::AppTimer::create(delay_ms, []{
+		DictionaryIterator *iter;
+		static const uint8_t value = 0;
+		app_message_outbox_begin(&iter);
+		dict_write_int(iter, KEY_WEATHER_REQUEST, &value, sizeof value, false);
+		app_message_outbox_send();
+	});
 }
 
 WeatherComplication::WeatherComplication(GRect frame)

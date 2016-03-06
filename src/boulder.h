@@ -170,20 +170,42 @@ public:
 	}
 };
 
-class AppTimer {
-	::AppTimer *timer;
+namespace AppTimer {
+	template<typename T>
+	class TimerHandle {
+		::AppTimer* handle;
+		T* func;
 
-public:
-	AppTimer(uint32_t delay_ms, void (*callback)(void*), void *ptr)
-		: timer(app_timer_register(delay_ms, callback, ptr))
-	{}
+	public:
+		TimerHandle(::AppTimer *handle, T* func)
+			: handle(handle)
+			, func(func)
+		{}
 
-	~AppTimer() {
-		app_timer_cancel(timer);
+		void cancel() {
+			app_timer_cancel(handle);
+			delete func;
+		}
+
+		void reschedule(uint32_t new_timeout_ms) {
+			app_timer_reschedule(handle, new_timeout_ms);
+		}
+	};
+
+	namespace {
+		template<typename F>
+		void on_timer(void* f) {
+			auto func = static_cast<F*>(f);
+			(*func)();
+			delete func;
+		}
 	}
 
-	void reschedule(uint32_t new_timeout_ms) {
-		app_timer_reschedule(timer, new_timeout_ms);
+	template<typename T>
+	TimerHandle<T> create(uint32_t delay_ms, T f) {
+		auto func = new T(std::move(f));
+		auto handle = app_timer_register(delay_ms, on_timer<T>, func);
+		return {handle, func};
 	}
 };
 

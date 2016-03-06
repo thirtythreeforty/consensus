@@ -142,8 +142,6 @@ class WeatherComplication: public HighlightComplication2
 	};
 	GadgetType gadget_type;
 
-	static Variant<void, Boulder::AppTimer> refresh_timer;
-
 public:
 	explicit WeatherComplication(GRect frame);
 	~WeatherComplication() = default;
@@ -160,7 +158,6 @@ private:
 	static void schedule_refresh(time_t last_refresh_time);
 
 	static WeatherAngles compute_angles(const WeatherData& wdata);
-	static void request_refresh(void*);
 
 	static const char* deg_format;
 	static const char* relhum_format;
