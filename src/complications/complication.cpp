@@ -97,6 +97,23 @@ void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
 	number.set_format(fmt, n);
 }
 
+HighlightComplication::HighlightComplication(GRect frame)
+	: IconTextComplication(frame)
+{
+	angle.set_callback(this);
+}
+
+HighlightComplication2::HighlightComplication2(GRect frame)
+	: HighlightComplication(frame)
+{
+	angle2.set_callback(this);
+}
+
+bool HighlightComplication::angles_are_close(const angle_t& a, const angle_t& b)
+{
+	return abs(a - b) < TRIG_MAX_ANGLE / 100;
+}
+
 void HighlightComplication::update(GContext* ctx)
 {
 	GRect bounds = this->get_bounds();
@@ -118,135 +135,7 @@ void HighlightComplication2::update(GContext *ctx)
 	IconTextComplication::update(ctx);
 }
 
-void HighlightComplication::set_angle(angle_t new_angle)
+void HighlightComplication::on_animated_update()
 {
-	if(requested_angle == new_angle) {
-		return;
-	}
-
-	// Clamp the requested angle to make sure the animations are at the correct speed
-	requested_angle = std::min(std::max(new_angle, angle_t(0)), angle_t(TRIG_MAX_ANGLE));
-
-	if(!animating) {
-		animate_to_requested();
-	}
-}
-
-void HighlightComplication2::set_angle2(angle_t new_angle)
-{
-	if(requested_angle2 == new_angle) {
-		return;
-	}
-
-	// Clamp the requested angle to make sure the animations are at the correct speed
-	requested_angle2 = std::min(std::max(new_angle, angle_t(0)), angle_t(TRIG_MAX_ANGLE));
-
-	if(!animating2) {
-		animate_to_requested2();
-	}
-}
-
-void HighlightComplication::animate_to_requested()
-{
-	// if it's a small change, don't bother animating
-	if(abs(angle - requested_angle) < TRIG_MAX_ANGLE / 100) {
-		angle = requested_angle;
-		mark_dirty();
-	}
-	else {
-		animating = true;
-
-		using Boulder::PropertyAnimationGetter;
-		using Boulder::PropertyAnimationSetter;
-
-		Boulder::PropertyAnimation<
-			HighlightComplication, angle_t,
-			panim_set_angle, panim_get_angle
-		> anim(*this, &angle, &requested_angle);
-
-		static const AnimationHandlers handlers = {
-			.started = NULL,
-			.stopped = HighlightComplication::panim_stopped,
-		};
-		base_setup_animation(anim, handlers);
-		anim.schedule();
-	}
-}
-
-void HighlightComplication2::animate_to_requested2()
-{
-	// if it's a small change, don't bother animating
-	if(abs(angle2 - requested_angle2) < TRIG_MAX_ANGLE / 100) {
-		angle2 = requested_angle2;
-		mark_dirty();
-	}
-	else {
-		animating2 = true;
-
-		using Boulder::PropertyAnimationGetter;
-		using Boulder::PropertyAnimationSetter;
-
-		Boulder::PropertyAnimation<
-			HighlightComplication2, angle_t,
-			panim_set_angle2, panim_get_angle2
-		> anim(*this, &angle2, &requested_angle2);
-
-		static const AnimationHandlers handlers = {
-			.started = NULL,
-			.stopped = HighlightComplication2::panim_stopped2,
-		};
-		base_setup_animation(anim, handlers);
-		anim.schedule();
-	}
-}
-
-void HighlightComplication::panim_stopped(Animation *anim, bool finished, void *context)
-{
-	auto *complication = static_cast<HighlightComplication*>(context);
-
-	complication->animating = false;
-
-	if(complication->requested_angle != complication->angle) {
-		complication->animate_to_requested();
-	}
-}
-
-void HighlightComplication2::panim_stopped2(Animation *anim, bool finished, void *context)
-{
-	auto *complication = static_cast<HighlightComplication2*>(context);
-
-	complication->animating2 = false;
-
-	if(complication->requested_angle2 != complication->angle2) {
-		complication->animate_to_requested2();
-	}
-}
-
-void HighlightComplication::panim_set_angle(HighlightComplication& complication, const angle_t& new_angle) {
-	complication.angle = new_angle;
-	complication.mark_dirty();
-}
-
-auto HighlightComplication::panim_get_angle(const HighlightComplication& complication) -> const angle_t& {
-	return complication.angle;
-}
-
-void HighlightComplication2::panim_set_angle2(HighlightComplication2& complication, const angle_t& new_angle) {
-	complication.angle2 = new_angle;
-	complication.mark_dirty();
-}
-
-auto HighlightComplication2::panim_get_angle2(const HighlightComplication2& complication) -> const angle_t& {
-	return complication.angle2;
-}
-
-void Complication::base_setup_animation(Animation *anim, const AnimationHandlers &handlers)
-{
-	static const unsigned int duration = 700;
-	static const unsigned int delay = 200;
-
-	animation_set_duration(anim, duration);
-	animation_set_delay(anim, delay);
-	animation_set_curve(anim, AnimationCurveEaseInOut);
-	animation_set_handlers(anim, handlers, this);
+	mark_dirty();
 }

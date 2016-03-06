@@ -19,6 +19,7 @@ struct WeatherData {
 	static WeatherData from_persist();
 };
 
+#include "animated.h"
 #include "boulder.h"
 #include "face_layer.h"
 #include "lazy_icon.h"
@@ -61,54 +62,39 @@ protected:
 	void set_number_format(const char* fmt, int32_t n);
 };
 
-class HighlightComplication: public IconTextComplication
+class HighlightComplication: public IconTextComplication, private AnimatedCallback
 {
 	friend class HighlightComplication2;
 	using angle_t = int32_t;
 
-	bool animating = false;
-	angle_t requested_angle = 0, angle = 0;
+	static bool angles_are_close(const angle_t& a, const angle_t& b);
+	using AnimatedAngle = Animated<angle_t, angles_are_close>;
 
 protected:
-	using IconTextComplication::IconTextComplication;
+	AnimatedAngle angle;
+
+protected:
+	HighlightComplication(GRect frame);
 
 	virtual void update(GContext* ctx) override;
-
-	void set_angle(angle_t new_angle);
-	inline const angle_t& get_angle() { return requested_angle; }
 
 	virtual GColor highlight_color() const = 0;
 
 private:
-	// Helpers for animations
-	void animate_to_requested();
-	static void panim_set_angle(HighlightComplication& complication, const angle_t& new_angle);
-	static const angle_t& panim_get_angle(const HighlightComplication& complication);
-	static void panim_stopped(Animation *anim, bool finished, void *context);
+	virtual void on_animated_update() override;
 };
 
 class HighlightComplication2: public HighlightComplication
 {
-	bool animating2 = false;
-	angle_t requested_angle2 = 0, angle2 = 0;
+protected:
+	AnimatedAngle angle2;
 
 protected:
-	using HighlightComplication::HighlightComplication;
+	HighlightComplication2(GRect frame);
 
 	virtual void update(GContext* ctx) override;
 
-	void set_angle2(angle_t new_angle2);
-	inline const angle_t& get_angle2() { return requested_angle2; }
-
 	virtual GColor highlight_color2() const = 0;
-
-private:
-	// The '2' versions of all these functions are kinda gross, but they all
-	// refer to angle2 of this class.
-	static void panim_set_angle2(HighlightComplication2& complication, const angle_t& new_angle);
-	static const angle_t& panim_get_angle2(const HighlightComplication2& complication);
-	void animate_to_requested2();
-	static void panim_stopped2(Animation *anim, bool finished, void *context);
 };
 
 class DateComplication: public Complication

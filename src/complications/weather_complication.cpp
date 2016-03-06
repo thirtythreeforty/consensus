@@ -142,8 +142,8 @@ WeatherComplication::WeatherComplication(GRect frame)
 void WeatherComplication::weather_changed(const WeatherData &new_weather)
 {
 	auto angles = compute_angles(new_weather);
-	set_angle(angles.humidity_angle);
-	set_angle2(angles.temp_angle);
+	angle = angles.humidity_angle;
+	angle2 = angles.temp_angle;
 
 	reset_icon();
 

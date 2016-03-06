@@ -98,11 +98,11 @@ void HealthComplication::update_angle_and_icon()
 		auto& goal = step_goal.as<Goal>().goal;
 		auto& steps = today_steps.as<int32_t>();
 
-		set_angle(TRIG_MAX_ANGLE * steps / goal);
+		angle = TRIG_MAX_ANGLE * steps / goal;
 		set_icon(steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 	}
 	else {
-		set_angle(0);
+		angle = 0;
 		set_icon(RESOURCE_ID_HEALTH_ERROR);
 	};
 }
