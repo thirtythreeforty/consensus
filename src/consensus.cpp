@@ -124,6 +124,27 @@ void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
 }
 
+void on_tap(AccelAxisType axis, int32_t direction)
+{
+	if(main_window && main_window->should_power_compass()) {
+		main_window->on_compass_power(true);
+
+		compass_service_subscribe([](CompassHeadingData heading){
+			if(main_window) {
+				main_window->on_compass_update(heading);
+			}
+		});
+
+		Boulder::AppTimer::create(30000, []{
+			compass_service_unsubscribe();
+			if(main_window) {
+				main_window->on_compass_power(false);
+			}
+		});
+
+	}
+}
+
 static void init(void)
 {
 	init_preferences();
@@ -148,6 +169,8 @@ static void init(void)
 	health_service_events_subscribe(on_health_update, nullptr);
 #endif
 
+	accel_tap_service_subscribe(on_tap);
+
 	app_message_register_inbox_received(on_appmessage_in);
 	app_message_register_inbox_dropped(on_appmessage_in_dropped);
 	app_message_open(256, 64);
@@ -159,6 +182,7 @@ static void deinit(void)
 {
 	animation_unschedule_all();
 	app_message_deregister_callbacks();
+	accel_tap_service_unsubscribe();
 #ifdef PBL_HEALTH
 	health_service_events_unsubscribe();
 #endif

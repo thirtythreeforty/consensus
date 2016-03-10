@@ -68,7 +68,8 @@ class HighlightComplication: public IconTextComplication, private AnimatedCallba
 	using angle_t = int32_t;
 
 	static bool angles_are_close(const angle_t& a, const angle_t& b);
-	using AnimatedAngle = Animated<angle_t, angles_are_close>;
+	static angle_t clamp_angle(const angle_t& angle);
+	using AnimatedAngle = Animated<angle_t, angles_are_close, clamp_angle>;
 
 protected:
 	AnimatedAngle angle;
@@ -125,6 +126,20 @@ public:
 
 private:
 	void update_time();
+};
+
+class CompassComplication: public IconTextComplication
+{
+public:
+	CompassComplication(GRect frame);
+
+	virtual void configure(const config_bundle_t& config) override;
+
+	void on_power(bool on);
+	void on_update(CompassHeadingData& heading);
+
+protected:
+	virtual void update(GContext* ctx) override;
 };
 
 class WeatherComplication: public HighlightComplication2
@@ -219,7 +234,8 @@ using AbstractComplication = Variant<
 	DateComplication,
 	WeatherComplication,
 	HealthComplication,
-	TimeZoneComplication
+	TimeZoneComplication,
+	CompassComplication
 >;
 
 #endif

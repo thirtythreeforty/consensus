@@ -114,6 +114,12 @@ bool HighlightComplication::angles_are_close(const angle_t& a, const angle_t& b)
 	return abs(a - b) < TRIG_MAX_ANGLE / 100;
 }
 
+auto HighlightComplication::clamp_angle(const angle_t& angle) -> angle_t
+{
+	return std::min(std::max(angle, (angle_t)0), (angle_t)TRIG_MAX_ANGLE);
+}
+
+
 void HighlightComplication::update(GContext* ctx)
 {
 	GRect bounds = this->get_bounds();

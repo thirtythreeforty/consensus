@@ -11,9 +11,12 @@ namespace animated_detail {
 template<typename T>
 using CloseChecker = bool (*)(const T&, const T&);
 
+template<typename T>
+using Clamp = T(const T&);
+
 class AnimatedCallback
 {
-	template<typename T, CloseChecker<T>>
+	template<typename T, CloseChecker<T>, Clamp<T> TsClamp>
 	friend class Animated;
 private:
 	virtual void on_animated_update() = 0;
@@ -28,9 +31,14 @@ static DefaultAnimatedCallback default_callback;
 template<typename T>
 bool default_are_close(const T&, const T&) { return false; }
 
-template<typename T, CloseChecker<T> TsClose>
+template<typename T>
+T default_clamp(const T& t) { return t; }
+
+template<typename T, CloseChecker<T> TsClose, Clamp<T> TsClamp>
 class Animated
 {
+	using Self = Animated<T, TsClose, TsClamp>;
+
 	// Currently there is no need to store requested in an Optional or something
 	// similar because I'm just animating POD types like ints.
 	static_assert(std::is_pod<T>::value, "Animated type is not POD");
@@ -54,7 +62,7 @@ public:
 			return;
 		}
 
-		requested = new_t;
+		requested = TsClamp(new_t);
 
 		if(!animating) {
 			animate_to_requested();
@@ -81,8 +89,8 @@ private:
 		animating = true;
 
 		Boulder::PropertyAnimation<
-			Animated<T, TsClose>, T,
-			Animated<T, TsClose>::set_st, Animated<T, TsClose>::get_st
+			Self, T,
+			Self::set_st, Self::get_st
 		> anim(*this, &current, &requested);
 
 		static const AnimationHandlers handlers = {
@@ -101,17 +109,17 @@ private:
 		anim.schedule();
 	}
 
-	static void set_st(Animated<T, TsClose>& animated, const T& new_t) {
+	static void set_st(Self& animated, const T& new_t) {
 		animated.current = new_t;
 		animated.callback->on_animated_update();
 	}
 
-	static const T& get_st(const Animated<T, TsClose>& animated) {
+	static const T& get_st(const Self& animated) {
 		return animated.current;
 	}
 
 	static void anim_stopped_handler(Animation *anim, bool finished, void* context) {
-		auto animated = static_cast<Animated<T, TsClose>*>(context);
+		auto animated = static_cast<Self*>(context);
 
 		animated->animating = false;
 
@@ -125,7 +133,7 @@ private:
 
 using animated_detail::AnimatedCallback;
 
-template<typename T, animated_detail::CloseChecker<T> TsClose = animated_detail::default_are_close>
-using Animated = animated_detail::Animated<T, TsClose>;
+template<typename T, animated_detail::CloseChecker<T> TsClose = animated_detail::default_are_close, animated_detail::Clamp<T> TsClamp = animated_detail::default_clamp>
+using Animated = animated_detail::Animated<T, TsClose, TsClamp>;
 
 #endif

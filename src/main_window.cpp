@@ -125,6 +125,30 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	}
 }
 
+bool MainWindow::should_power_compass()
+{
+	for(auto& c: complications) {
+		if(c.is<CompassComplication>()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void MainWindow::on_compass_power(bool on)
+{
+	complication_do<CompassComplication>([&](auto& c) {
+		c.on_power(on);
+	});
+}
+
+void MainWindow::on_compass_update(CompassHeadingData& heading)
+{
+	complication_do<CompassComplication>([&](auto& c) {
+		c.on_update(heading);
+	});
+}
+
 #ifdef PBL_HEALTH
 void MainWindow::on_health_update(HealthEventType event)
 {
