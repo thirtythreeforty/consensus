@@ -151,6 +151,11 @@
       },
       {
         "type": "raw",
+        "name": "COMPASS",
+        "file": "compass.pdc"
+      },
+      {
+        "type": "raw",
         "name": "SLEEP",
         "file": "sleep.pdc"
       }

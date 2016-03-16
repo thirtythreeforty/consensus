@@ -28,13 +28,15 @@ public:
 	{}
 	~LazyIcon() = default;
 
-	void reset(uint32_t new_id, GRect container_bounds) {
-		if(current_id != new_id) {
+	bool reset(uint32_t new_id, GRect container_bounds) {
+		bool needs_change = current_id != new_id;
+		if(needs_change) {
 			image = Boulder::GDrawCommandImage(new_id);
 			current_id = new_id;
 		}
 		align(container_bounds);
 		recolor();
+		return needs_change;
 	}
 
 	void reset() {
@@ -59,6 +61,8 @@ public:
 			image.draw(ctx, icon_shift);
 		}
 	}
+
+	auto id() const { return current_id; }
 
 #define LAZY_PROXY_METHOD(MethodName, DefaultValue) \
 	template<class...Args> auto MethodName(Args&&... args) { \
