@@ -128,20 +128,6 @@ private:
 	void update_time();
 };
 
-class CompassComplication: public IconTextComplication
-{
-public:
-	CompassComplication(GRect frame);
-
-	virtual void configure(const config_bundle_t& config) override;
-
-	void on_power(bool on);
-	void on_update(CompassHeadingData& heading);
-
-protected:
-	virtual void update(GContext* ctx) override;
-};
-
 class WeatherComplication: public HighlightComplication2
 {
 	struct WeatherAngles {
@@ -234,8 +220,7 @@ using AbstractComplication = Variant<
 	DateComplication,
 	WeatherComplication,
 	HealthComplication,
-	TimeZoneComplication,
-	CompassComplication
+	TimeZoneComplication
 >;
 
 #endif
