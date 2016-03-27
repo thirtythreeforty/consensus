@@ -90,12 +90,12 @@ public:
 		window_destroy(_window);
 	}
 
-	void push(bool animate) {
-		window_stack_push(_window, animate);
-	}
-
 	GRect get_bounds() {
 		return layer_get_bounds(window_get_root_layer(_window));
+	}
+
+	operator ::Window*() {
+		return _window;
 	}
 
 protected:
@@ -130,6 +130,28 @@ private:
 
 	static const WindowHandlers _handlers;
 };
+
+namespace WindowStack {
+	inline void push(Window& window, bool animated) {
+		window_stack_push(window, animated);
+	}
+	inline void pop(bool animated) {
+		window_stack_pop(animated);
+	}
+	inline void pop_all(bool animated) {
+		window_stack_pop_all(animated);
+	}
+	inline void remove(Window& window, bool animated) {
+		window_stack_remove(window, animated);
+	}
+	inline Window& top_window() {
+		auto w = window_stack_get_top_window();
+		return *static_cast<Window*>(window_get_user_data(w));
+	}
+	inline bool contains(Window& window) {
+		return window_stack_contains_window(window);
+	}
+}
 
 class TextLayer
 {

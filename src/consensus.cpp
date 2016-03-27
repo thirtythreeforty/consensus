@@ -151,7 +151,7 @@ static void init(void)
 	set_theme();
 
 	main_window = std::make_unique<MainWindow>();
-	main_window->push(true);
+	Boulder::WindowStack::push(*main_window, true);
 
 	const TimeUnits units = update_time_interval(should_show_second());
 	tick_timer_service_subscribe(units, on_tick);
