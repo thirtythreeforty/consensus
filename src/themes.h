@@ -14,9 +14,7 @@ extern "C" {
 	THEME_ACCESSOR(GColor, ElementName)
 #else
 #define THEME_ACCESSOR_FGCOLOR(ElementName) \
-	GColor ElementName() const { \
-		return _background_color.argb == GColorBlack.argb ? GColorWhite : GColorBlack; \
-	}
+	const auto& ElementName() const { return _tick_color; }
 #endif
 
 struct Theme
