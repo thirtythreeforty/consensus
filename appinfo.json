@@ -3,7 +3,7 @@
   "shortName": "Consensus",
   "longName": "Consensus",
   "companyName": "George Hilliard",
-  "versionLabel": "4.1",
+  "versionLabel": "5.0",
   "sdkVersion": "3",
   "capabilities": [
     "location",
