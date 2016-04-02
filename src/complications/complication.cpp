@@ -16,6 +16,15 @@ static void base_complication_appropriate_bounds(GRect& bounds)
 	bounds.origin.y += 2;
 }
 
+static void draw_foreground_arc(GContext *ctx, GRect& bounds,
+                                uint8_t stroke_width, GColor stroke_color,
+                                int32_t min_angle, int32_t max_angle)
+{
+		graphics_context_set_stroke_width(ctx, stroke_width);
+		graphics_context_set_stroke_color(ctx, stroke_color);
+		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle, max_angle);
+}
+
 static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
                      int32_t min_angle, int32_t angle, int32_t max_angle)
 {
@@ -34,9 +43,8 @@ static void draw_arc(GContext *ctx, GRect& bounds, GColor color,
 	}
 
 	if(angle > 0) {
-		graphics_context_set_stroke_width(ctx, theme().complication_ring_thickness());
-		graphics_context_set_stroke_color(ctx, color);
-		graphics_draw_arc(ctx, bounds, GOvalScaleModeFitCircle, min_angle, min_angle + angle);
+		draw_foreground_arc(ctx, bounds, theme().complication_ring_thickness(),
+		                    color, min_angle, min_angle + angle);
 	}
 }
 
@@ -128,6 +136,25 @@ void HighlightComplication::update(GContext* ctx)
 	draw_arc(ctx, bounds, highlight_color(), 0, angle, TRIG_MAX_ANGLE);
 
 	IconTextComplication::update(ctx);
+}
+
+TickComplication::TickComplication(GRect frame)
+	: HighlightComplication(frame)
+{
+	tick_angle.set_callback(this);
+}
+
+void TickComplication::update(GContext* ctx)
+{
+	HighlightComplication::update(ctx);
+
+	// Draw the yellow "average steps now" tick mark
+	GRect bounds = this->get_bounds();
+	base_complication_appropriate_bounds(bounds);
+
+	constexpr unsigned int tick_thickness = TRIG_MAX_ANGLE / 1800;
+	draw_foreground_arc(ctx, bounds, theme().complication_ring_thickness() + 2,
+	                    tick_color(), tick_angle - tick_thickness / 2, tick_angle + tick_thickness / 2);
 }
 
 void HighlightComplication2::update(GContext *ctx)

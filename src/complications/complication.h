@@ -62,16 +62,16 @@ protected:
 	void set_number_format(const char* fmt, int32_t n);
 };
 
-class HighlightComplication: public IconTextComplication, private AnimatedCallback
+class HighlightComplication: public IconTextComplication, protected AnimatedCallback
 {
 	friend class HighlightComplication2;
 	using angle_t = int32_t;
 
 	static bool angles_are_close(const angle_t& a, const angle_t& b);
 	static angle_t clamp_angle(const angle_t& angle);
-	using AnimatedAngle = Animated<angle_t, angles_are_close, clamp_angle>;
 
 protected:
+	using AnimatedAngle = Animated<angle_t, angles_are_close, clamp_angle>;
 	AnimatedAngle angle;
 
 protected:
@@ -83,6 +83,17 @@ protected:
 
 private:
 	virtual void on_animated_update() override;
+};
+
+class TickComplication: public HighlightComplication
+{
+protected:
+	AnimatedAngle tick_angle;
+
+	TickComplication(GRect frame);
+
+	virtual void update(GContext* ctx) override;
+	virtual GColor tick_color() const = 0;
 };
 
 class HighlightComplication2: public HighlightComplication
