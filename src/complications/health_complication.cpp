@@ -4,7 +4,7 @@
 #include "constants.h"
 
 HealthComplication::HealthComplication(GRect frame)
-	: HighlightComplication(frame)
+	: TickComplication(frame)
 {}
 
 void HealthComplication::configure(const config_bundle_t& config)
@@ -30,8 +30,14 @@ GColor HealthComplication::highlight_color() const
 	return theme().health_complication_color();
 }
 
+GColor HealthComplication::tick_color() const
+{
+	return GColorYellow;
+}
+
 #ifdef PBL_HEALTH
 Variant<void, int32_t> HealthComplication::today_steps;
+Variant<void, int32_t> HealthComplication::today_average_steps;
 
 void HealthComplication::on_tick(TimeUnits units_changed)
 {
@@ -85,11 +91,20 @@ void HealthComplication::refresh_steps_today()
 	if(today_steps.is<void>()) {
 		today_steps = health_service_sum_today(HealthMetricStepCount);
 	}
+	if(today_average_steps.is<void>()) {
+		today_average_steps = health_service_sum_averaged(
+			HealthMetricStepCount,
+			time_start_of_today(),
+			time(nullptr),
+			HealthServiceTimeScopeDailyWeekdayOrWeekend
+		);
+	}
 }
 
 void HealthComplication::invalidate_steps_today()
 {
 	today_steps.reset();
+	today_average_steps.reset();
 }
 
 void HealthComplication::update_angle_and_icon()
@@ -99,8 +114,10 @@ void HealthComplication::update_angle_and_icon()
 
 		auto& goal = step_goal.as<Goal>().goal;
 		auto& steps = today_steps.as<int32_t>();
+		auto& avg_steps = today_average_steps.as<int32_t>();
 
 		angle = TRIG_MAX_ANGLE * steps / goal;
+		tick_angle = TRIG_MAX_ANGLE * avg_steps / goal;
 		set_icon(steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 	}
 	else {

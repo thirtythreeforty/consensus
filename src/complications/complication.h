@@ -187,7 +187,7 @@ protected:
 	GColor highlight_color() const override;
 };
 
-class HealthComplication: public HighlightComplication
+class HealthComplication: public TickComplication
 {
 	struct Goal {
 		int32_t goal;
@@ -201,6 +201,7 @@ class HealthComplication: public HighlightComplication
 
 	Variant<void, AutoGoal, ManualGoal> step_goal;
 	static Variant<void, int32_t> today_steps;
+	static Variant<void, int32_t> today_average_steps;
 
 #endif
 
@@ -216,6 +217,7 @@ public:
 
 protected:
 	virtual GColor highlight_color() const override;
+	virtual GColor tick_color() const override;
 
 private:
 	void recalculate_average_steps();
