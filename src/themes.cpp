@@ -21,6 +21,7 @@ namespace {
 			._complication_ring_background_color = GColorDarkGray,
 			._battery_complication_color = GColorYellow,
 			._health_complication_color = GColorGreen,
+			._health_complication_dot_color = GColorYellow,
 			._weather_complication_humidity_color = GColorBlue,
 			._weather_complication_temp_color = GColorRed,
 #endif
@@ -42,6 +43,7 @@ namespace {
 			._complication_ring_background_color = GColorDarkGray,
 			._battery_complication_color = GColorYellow,
 			._health_complication_color = GColorGreen,
+			._health_complication_dot_color = GColorYellow,
 			._weather_complication_humidity_color = GColorBlue,
 			._weather_complication_temp_color = GColorRed,
 #endif
@@ -63,6 +65,7 @@ namespace {
 			._complication_ring_background_color = GColorDarkGray,
 			._battery_complication_color = GColorChromeYellow,
 			._health_complication_color = GColorDarkGreen,
+			._health_complication_dot_color = GColorChromeYellow,
 			._weather_complication_humidity_color = GColorBlue,
 			._weather_complication_temp_color = GColorRed,
 #endif
@@ -84,6 +87,7 @@ namespace {
 			._complication_ring_background_color = GColorBlack,
 			._battery_complication_color = GColorYellow,
 			._health_complication_color = GColorGreen,
+			._health_complication_dot_color = GColorYellow,
 			._weather_complication_humidity_color = GColorBlue,
 			._weather_complication_temp_color = GColorRed,
 #endif
@@ -105,6 +109,7 @@ namespace {
 			._complication_ring_background_color = GColorWhite,
 			._battery_complication_color = GColorChromeYellow,
 			._health_complication_color = GColorDarkGreen,
+			._health_complication_dot_color = GColorChromeYellow,
 			._weather_complication_humidity_color = GColorBlue,
 			._weather_complication_temp_color = GColorRed,
 #endif

@@ -34,6 +34,7 @@ struct Theme
 	THEME_ACCESSOR_FGCOLOR(complication_ring_background_color);
 	THEME_ACCESSOR_FGCOLOR(battery_complication_color);
 	THEME_ACCESSOR_FGCOLOR(health_complication_color);
+	THEME_ACCESSOR_FGCOLOR(health_complication_dot_color);
 	THEME_ACCESSOR_FGCOLOR(weather_complication_humidity_color);
 	THEME_ACCESSOR_FGCOLOR(weather_complication_temp_color);
 };

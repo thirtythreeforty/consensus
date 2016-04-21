@@ -32,7 +32,7 @@ GColor HealthComplication::highlight_color() const
 
 GColor HealthComplication::tick_color() const
 {
-	return GColorYellow;
+	return theme().health_complication_dot_color();
 }
 
 #ifdef PBL_HEALTH
