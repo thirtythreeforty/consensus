@@ -48,6 +48,8 @@
 	</configuration-content>
 	<configuration-footer>
 		Select the gadget displayed in the center of the complication's ring.
+
+		<img src="weather-explanation.svg" style="width:100%;">
 	</configuration-footer>
 
 	<script>
