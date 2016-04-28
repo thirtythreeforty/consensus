@@ -30,7 +30,7 @@ def configure(ctx):
         ctx.load('g++')
 
         e.CXX = cxx
-        e.CXXFLAGS = list(ctx.env.CFLAGS)
+        e.CXXFLAGS = list(e.CFLAGS)
         e.CXXFLAGS.remove('-std=c99')
         e.CXXFLAGS.extend(['-c', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
         e.LINKFLAGS.extend(['-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
