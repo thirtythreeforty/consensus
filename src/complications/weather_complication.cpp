@@ -4,10 +4,6 @@
 #include "constants.h"
 #include "themes.h"
 
-const char* WeatherComplication::deg_format = "%i\u00B0";
-const char* WeatherComplication::relhum_format = "%i";
-const char* WeatherComplication::empty_format = "";
-
 WeatherData WeatherData::from_appmessage(DictionaryIterator *iterator)
 {
 	WeatherData data;
@@ -133,8 +129,6 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 	angle = angles.humidity_angle;
 	angle2 = angles.temp_angle;
 
-	reset_icon();
-
 	switch(gadget_type) {
 	case ICON:
 		// Set the new icon
@@ -157,8 +151,16 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 
 				set_icon(resource);
 			}
+			else {
+				// Shouldn't happen
+				reset_icon();
+				reset_number();
+			}
 		}
-		set_number_format(empty_format, 0);
+		else {
+			reset_icon();
+			reset_number();
+		}
 		break;
 	case TEMP_F:
 		set_number_format(deg_format, (new_weather.temp_c * 18 + 320) / 10);

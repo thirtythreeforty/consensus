@@ -90,6 +90,7 @@ void IconTextComplication::update(GContext *ctx)
 void IconTextComplication::set_icon(uint32_t resource_id) {
 	icon.reset(resource_id, get_bounds());
 	mark_dirty();
+	reset_number();
 }
 
 void IconTextComplication::reset_icon() {
@@ -99,10 +100,12 @@ void IconTextComplication::reset_icon() {
 
 void IconTextComplication::set_number(int32_t n) {
 	number.set(n);
+	reset_icon();
 }
 
 void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
 	number.set_format(fmt, n);
+	reset_icon();
 }
 
 void IconTextComplication::reset_number()

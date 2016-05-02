@@ -61,6 +61,10 @@ protected:
 	void set_number(int32_t n);
 	void set_number_format(const char* fmt, int32_t n);
 	void reset_number();
+
+	constexpr static const char* plain_number_format = "%i";
+	constexpr static const char* deg_format = "%i\u00B0";
+	constexpr static const char* empty_format = "";
 };
 
 class HighlightComplication: public IconTextComplication, protected AnimatedCallback
@@ -172,9 +176,7 @@ private:
 
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 
-	static const char* deg_format;
-	static const char* relhum_format;
-	static const char* empty_format;
+	constexpr static const char* relhum_format = plain_number_format;
 };
 
 class BatteryComplication: public HighlightComplication
