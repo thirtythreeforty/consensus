@@ -105,6 +105,11 @@ void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
 	number.set_format(fmt, n);
 }
 
+void IconTextComplication::reset_number()
+{
+	number.set_format("", 0);
+}
+
 HighlightComplication::HighlightComplication(GRect frame)
 	: IconTextComplication(frame)
 {

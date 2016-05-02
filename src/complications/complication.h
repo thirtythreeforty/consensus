@@ -60,6 +60,7 @@ protected:
 
 	void set_number(int32_t n);
 	void set_number_format(const char* fmt, int32_t n);
+	void reset_number();
 };
 
 class HighlightComplication: public IconTextComplication, protected AnimatedCallback
