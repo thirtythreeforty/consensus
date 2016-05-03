@@ -199,13 +199,26 @@ class HealthComplication: public TickComplication
 	struct AutoGoal : public Goal { using Goal::Goal; };
 	struct ManualGoal : public Goal { using Goal::Goal; };
 
+	enum GadgetType {
+		ICON = 0,
+		STEPS,
+		DISTANCE_M,
+		DISTANCE_FT,
+		CALORIES_ACTIVE,
+		CALORIES_RESTING,
+		CALORIES_TOTAL,
+		ACTIVE_SECONDS,
+	};
+
 	// Only need these members on watches that will actually use it
 #ifdef PBL_HEALTH
+	GadgetType gadget_type;
 
 	Variant<void, AutoGoal, ManualGoal> step_goal;
-	static Variant<void, int32_t> today_steps;
-	static Variant<void, int32_t> today_average_steps;
+	Variant<void, int32_t> today_metric;
 
+	static Variant<void, int32_t> st_today_steps;
+	static Variant<void, int32_t> st_today_average_steps;
 #endif
 
 public:
@@ -223,10 +236,15 @@ protected:
 	virtual GColor tick_color() const override;
 
 private:
-	void recalculate_average_steps();
-	static void refresh_steps_today();
-	static void invalidate_steps_today();
-	void update_angle_and_icon();
+	void recalculate_today_data();
+	void invalidate_today_data();
+
+	void recalculate_auto_goal();
+
+	void update_angle_and_gadget();
+
+	static void refresh_static_steps_today();
+	static void invalidate_static_today_data();
 };
 
 using AbstractComplication = Variant<
