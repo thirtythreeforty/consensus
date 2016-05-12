@@ -36,9 +36,9 @@ void ScrambledNumber::reconfigure_color()
 
 void ScrambledNumber::set(int32_t number)
 {
+	const bool is_close = abs(number - requested_number) <= 5;
 	requested_number = number;
 	if(state != ANIMATING) {
-		const bool is_close = abs(number - requested_number) <= 5;
 		if(state == INIT || !is_close) {
 			animate_to_requested();
 		}
