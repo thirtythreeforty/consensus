@@ -169,7 +169,7 @@ void HealthComplication::update_angle_and_gadget()
 			set_icon(steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 			break;
 		default:
-			set_number_format(plain_number_format, today_metric.as<int32_t>());
+			set_number_format(plain_number_format, today_metric.as<int32_t>(), "steps");
 			break;
 		}
 	}

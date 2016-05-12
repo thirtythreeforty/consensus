@@ -45,6 +45,7 @@ protected:
 class IconTextComplication: public Complication
 {
 	ScrambledNumber number;
+	Boulder::TextLayer unit_text;
 	LazyIcon icon;
 
 public:
@@ -59,12 +60,14 @@ protected:
 	void reset_icon();
 
 	void set_number(int32_t n);
-	void set_number_format(const char* fmt, int32_t n);
+	void set_number_format(const char* fmt, int32_t n, const char* unit);
 	void reset_number();
 
 	constexpr static const char* plain_number_format = "%i";
-	constexpr static const char* deg_format = "%i\u00B0";
-	constexpr static const char* empty_format = "";
+	constexpr static const char* empty = "";
+
+private:
+	static GRect calculate_unit_frame(const GRect& complication_frame);
 };
 
 class HighlightComplication: public IconTextComplication, protected AnimatedCallback
@@ -177,6 +180,10 @@ private:
 	static WeatherAngles compute_angles(const WeatherData& wdata);
 
 	constexpr static const char* relhum_format = plain_number_format;
+
+	constexpr static const char* degf_unit = "\u00B0F";
+	constexpr static const char* degc_unit = "\u00B0C";
+	constexpr static const char* percent_unit = "%";
 };
 
 class BatteryComplication: public HighlightComplication

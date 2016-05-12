@@ -61,10 +61,25 @@ void Complication::update(GContext* ctx)
 
 IconTextComplication::IconTextComplication(GRect frame)
 	: Complication(frame)
-	, number(get_bounds(), "")
+	, number(get_bounds(), empty)
+	, unit_text(calculate_unit_frame(frame))
 	, icon()
 {
 	add_child(number.get_text_layer());
+	add_child(unit_text);
+	unit_text.set_text_alignment(GTextAlignmentCenter);
+	unit_text.set_background_color(GColorClear);
+	unit_text.set_font(fonts_get_system_font(FONT_KEY_GOTHIC_09));
+}
+
+GRect IconTextComplication::calculate_unit_frame(const GRect& c_frame)
+{
+	static constexpr int16_t unit_height = 12;
+	return {
+		//HACK
+		.origin = GPoint(0, int16_t(c_frame.size.h / 2 - unit_height / 2 + 13)),
+		.size = GSize(c_frame.size.w, unit_height)
+	};
 }
 
 void IconTextComplication::configure(const std::array<unsigned int, 4>& config)
@@ -72,6 +87,7 @@ void IconTextComplication::configure(const std::array<unsigned int, 4>& config)
 	Complication::configure(config);
 
 	icon.recolor();
+	unit_text.set_text_color(theme().complication_text_color());
 	number.reconfigure_color();
 	mark_dirty();
 }
@@ -103,14 +119,16 @@ void IconTextComplication::set_number(int32_t n) {
 	reset_icon();
 }
 
-void IconTextComplication::set_number_format(const char* fmt, int32_t n) {
+void IconTextComplication::set_number_format(const char* fmt, int32_t n, const char* unit) {
 	number.set_format(fmt, n);
+	unit_text.set_text(unit);
 	reset_icon();
 }
 
 void IconTextComplication::reset_number()
 {
-	number.set_format("", 0);
+	number.set_format(empty, 0);
+	unit_text.set_text(empty);
 }
 
 HighlightComplication::HighlightComplication(GRect frame)

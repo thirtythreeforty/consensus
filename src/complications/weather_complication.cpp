@@ -163,13 +163,13 @@ void WeatherComplication::weather_changed(const WeatherData &new_weather)
 		}
 		break;
 	case TEMP_F:
-		set_number_format(deg_format, (new_weather.temp_c * 18 + 320) / 10);
+		set_number_format(plain_number_format, (new_weather.temp_c * 18 + 320) / 10, degf_unit);
 		break;
 	case TEMP_C:
-		set_number_format(deg_format, new_weather.temp_c);
+		set_number_format(plain_number_format, new_weather.temp_c, degc_unit);
 		break;
 	case RELHUM:
-		set_number_format(relhum_format, new_weather.humidity);
+		set_number_format(plain_number_format, new_weather.humidity, percent_unit);
 		break;
 	}
 
