@@ -55,6 +55,7 @@ protected:
 	IconTextComplication(GRect frame);
 
 	virtual void update(GContext* ctx) override;
+	void icontext_update(GContext* ctx);
 
 	void set_icon(uint32_t resource_id);
 	void reset_icon();
@@ -117,9 +118,14 @@ protected:
 	virtual GColor highlight_color2() const = 0;
 };
 
-class DateComplication: public Complication
+class DateComplication: public IconTextComplication
 {
-	ScrambledNumber date;
+	typedef enum {
+		DayOfWk = 0,
+		Month,
+		None
+	} UnitType;
+	UnitType unit_type;
 
 public:
 	DateComplication(GRect frame);
@@ -128,6 +134,11 @@ public:
 	virtual void configure(const config_bundle_t&) override;
 
 	void time_changed(struct tm *time);
+
+private:
+	const char* unit(struct tm *time);
+	static const char* weekday(int wday);
+	static const char* month(int m);
 };
 
 class TimeZoneComplication: public Complication

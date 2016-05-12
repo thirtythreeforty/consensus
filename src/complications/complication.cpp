@@ -94,11 +94,13 @@ void IconTextComplication::configure(const std::array<unsigned int, 4>& config)
 
 void IconTextComplication::update(GContext *ctx)
 {
-	// This may not be the best architecture, because this is currently called
-	// as a "helper" function from HighlightComplication's update function.
-	// But (at some point) we will have IconTextComplications that are not
-	// HighlightComplication, like the proposed compass complication.
+	Complication::update(ctx);
 
+	icontext_update(ctx);
+}
+
+void IconTextComplication::icontext_update(GContext *ctx)
+{
 	icon.draw(ctx);
 	// text will draw itself; it's a sublayer
 }
@@ -161,7 +163,7 @@ void HighlightComplication::update(GContext* ctx)
 
 	draw_arc(ctx, bounds, highlight_color(), 0, angle, TRIG_MAX_ANGLE);
 
-	IconTextComplication::update(ctx);
+	icontext_update(ctx);
 }
 
 TickComplication::TickComplication(GRect frame)
@@ -191,7 +193,7 @@ void HighlightComplication2::update(GContext *ctx)
 	draw_arc(ctx, bounds, highlight_color(), 0, angle, TRIG_MAX_ANGLE / 2);
 	draw_arc(ctx, bounds, highlight_color2(), TRIG_MAX_ANGLE / 2, angle2, TRIG_MAX_ANGLE);
 
-	IconTextComplication::update(ctx);
+	icontext_update(ctx);
 }
 
 void HighlightComplication::on_animated_update()
