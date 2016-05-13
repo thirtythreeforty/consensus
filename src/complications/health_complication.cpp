@@ -127,26 +127,31 @@ void HealthComplication::recalculate_today_data()
 		case ICON:
 			break;
 		case STEPS:
-			today_metric = st_today_steps;
+			if(st_today_steps.is<void>()) {
+				today_metric.reset();
+			}
+			else {
+				today_metric = Metric(st_today_steps.as<int32_t>(), "STEPS");
+			}
 			break;
 		case DISTANCE_M:
-			today_metric = health_service_sum_today(HealthMetricWalkedDistanceMeters);
+			today_metric = Metric(health_service_sum_today(HealthMetricWalkedDistanceMeters), "M");
 			break;
 		case DISTANCE_FT:
-			today_metric = health_service_sum_today(HealthMetricWalkedDistanceMeters) * 328 / 100;
+			today_metric = Metric(health_service_sum_today(HealthMetricWalkedDistanceMeters) * 328 / 100, "FT");
 			break;
 		case CALORIES_ACTIVE:
-			today_metric = health_service_sum_today(HealthMetricActiveKCalories);
+			today_metric = Metric(health_service_sum_today(HealthMetricActiveKCalories), "KCAL");
 			break;
 		case CALORIES_RESTING:
-			today_metric = health_service_sum_today(HealthMetricRestingKCalories);
+			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories), "KCAL");
 			break;
 		case CALORIES_TOTAL:
-			today_metric = health_service_sum_today(HealthMetricRestingKCalories)
-			             + health_service_sum_today(HealthMetricActiveKCalories);
+			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories)
+			                      + health_service_sum_today(HealthMetricActiveKCalories), "KCAL");
 			break;
 		case ACTIVE_SECONDS:
-			today_metric = health_service_sum_today(HealthMetricActiveSeconds);
+			today_metric = Metric(health_service_sum_today(HealthMetricActiveSeconds), "SEC");
 			break;
 		}
 	}
@@ -169,7 +174,8 @@ void HealthComplication::update_angle_and_gadget()
 			set_icon(steps > goal ? RESOURCE_ID_HEALTH_CHECK : RESOURCE_ID_HEALTH);
 			break;
 		default:
-			set_number_format(plain_number_format, today_metric.as<int32_t>(), "steps");
+			auto& tm = today_metric.as<Metric>();
+			set_number_format(plain_number_format, tm.metric, tm.unit);
 			break;
 		}
 	}

@@ -217,6 +217,14 @@ class HealthComplication: public TickComplication
 	struct AutoGoal : public Goal { using Goal::Goal; };
 	struct ManualGoal : public Goal { using Goal::Goal; };
 
+	struct Metric {
+		int32_t metric;
+		const char* unit;
+		Metric(int32_t metric, const char* unit)
+			: metric(metric), unit(unit)
+		{}
+	};
+
 	enum GadgetType {
 		ICON = 0,
 		STEPS,
@@ -233,7 +241,7 @@ class HealthComplication: public TickComplication
 	GadgetType gadget_type;
 
 	Variant<void, AutoGoal, ManualGoal> step_goal;
-	Variant<void, int32_t> today_metric;
+	Variant<void, Metric> today_metric;
 
 	static Variant<void, int32_t> st_today_steps;
 	static Variant<void, int32_t> st_today_average_steps;
