@@ -50,7 +50,10 @@ class Animated
 
 public:
 	Animated()
-		: callback{&default_callback}
+		: requested()
+		, current()
+		, animating(false)
+		, callback{&default_callback}
 	{}
 
 	void set_callback(AnimatedCallback* new_callback) {
