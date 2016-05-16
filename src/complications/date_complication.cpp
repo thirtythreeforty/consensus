@@ -4,16 +4,20 @@
 
 DateComplication::DateComplication(GRect frame)
 	: IconTextComplication(frame)
-{}
+	, TimeCallback(DAY_UNIT)
+{
+	update_time_now();
+}
 
 void DateComplication::configure(const config_bundle_t& config)
 {
 	IconTextComplication::configure(config);
 
 	unit_type = static_cast<UnitType>(std::get<1>(config));
+	update_time_now();
 }
 
-void DateComplication::time_changed(struct tm *time)
+void DateComplication::on_tick(struct tm *time, TimeUnits)
 {
 	set_number_format(plain_number_format, time->tm_mday, unit(time));
 }

@@ -5,6 +5,9 @@
 
 HealthComplication::HealthComplication(GRect frame)
 	: TickComplication(frame)
+#ifdef PBL_HEALTH
+	, TimeCallback(MINUTE_UNIT)
+#endif
 {}
 
 void HealthComplication::configure(const config_bundle_t& config)
@@ -41,11 +44,9 @@ GColor HealthComplication::tick_color() const
 Variant<void, int32_t> HealthComplication::st_today_steps;
 Variant<void, int32_t> HealthComplication::st_today_average_steps;
 
-void HealthComplication::on_tick(TimeUnits units_changed)
+void HealthComplication::on_tick(struct tm*, TimeUnits units_changed)
 {
-	if(units_changed & MINUTE_UNIT) {
-		update_angle_and_gadget();
-	}
+	update_angle_and_gadget();
 }
 
 void HealthComplication::on_significant_update()

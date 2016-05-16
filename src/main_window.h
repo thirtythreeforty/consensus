@@ -11,10 +11,12 @@ extern "C" {
 #include "complications/complication.h"
 #include "face_layer.h"
 
+#include "watcher/TimeWatcher.h"
+
 #include <array>
 #include <memory>
 
-class MainWindow : public Boulder::Window {
+class MainWindow : public Boulder::Window, private TimeCallback {
 	BackgroundLayer background_layer;
 	FaceLayer face_layer;
 	Boulder::Layer complications_layer;
@@ -30,16 +32,12 @@ public:
 	void configure();
 
 	void on_connection_change(bool connected);
-	void on_battery_state_change(const BatteryChargeState& charge);
-	void on_tick(struct tm *tick_time, TimeUnits units_changed);
 
 	bool should_power_compass();
 	void on_compass_power(bool on);
 	void on_compass_update(CompassHeadingData& heading);
 
-#ifdef PBL_HEALTH
-	void on_health_update(HealthEventType event);
-#endif
+	virtual void on_tick(struct tm *tick_time, TimeUnits units_changed) override;
 
 protected:
 	void on_load() override;

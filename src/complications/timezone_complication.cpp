@@ -2,6 +2,7 @@
 
 TimeZoneComplication::TimeZoneComplication(GRect frame)
 	: Complication(frame)
+	, TimeCallback(MINUTE_UNIT)
 	, face(get_bounds(), false)
 {
 	add_child(face);
@@ -21,11 +22,9 @@ void TimeZoneComplication::configure(const config_bundle_t& config)
 	update_time();
 }
 
-void TimeZoneComplication::on_tick(TimeUnits units_changed)
+void TimeZoneComplication::on_tick(struct tm*, TimeUnits)
 {
-	if(units_changed & MINUTE_UNIT) {
-		update_time();
-	}
+	update_time();
 }
 
 void TimeZoneComplication::update_time()

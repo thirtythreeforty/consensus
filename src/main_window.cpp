@@ -5,11 +5,13 @@
 
 MainWindow::MainWindow()
 	: Window()
+	, TimeCallback(should_show_second() ? SECOND_UNIT : MINUTE_UNIT)
 	, background_layer(get_bounds())
 	, face_layer(get_bounds(), true)
 	, complications_layer(get_bounds())
 	, no_bluetooth_image(create_themed_bluetooth_bitmap())
 {
+	update_time_now();
 }
 
 MainWindow::~MainWindow()
@@ -78,6 +80,9 @@ void MainWindow::configure()
 	// The show-no-connection pref could have changed
 	update_connection_now();
 
+	update_time_subscription(should_show_second() ? SECOND_UNIT : MINUTE_UNIT);
+	update_time_now();
+
 	reinit_complications();
 }
 
@@ -87,29 +92,9 @@ void MainWindow::on_connection_change(bool connected)
 	                 connected || should_hide_no_bluetooth());
 }
 
-void MainWindow::on_battery_state_change(const BatteryChargeState& charge)
-{
-	complication_do<BatteryComplication>([&](auto& c){
-		c.state_changed(charge);
-	});
-}
-
-
 void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	face_layer.set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
-
-	complication_do<DateComplication>([&](auto& c) {
-		c.time_changed(tick_time);
-	});
-#ifdef PBL_HEALTH
-	complication_do<HealthComplication>([&](auto& c) {
-		c.on_tick(units_changed);
-	});
-#endif
-	complication_do<TimeZoneComplication>([&](auto& c) {
-		c.on_tick(units_changed);
-	});
 
 	// Vibrate once on the hour and twice at noon.
 	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0 &&
@@ -137,20 +122,6 @@ void MainWindow::on_compass_power(bool on)
 void MainWindow::on_compass_update(CompassHeadingData& heading)
 {
 }
-
-#ifdef PBL_HEALTH
-void MainWindow::on_health_update(HealthEventType event)
-{
-	complication_do<HealthComplication>([&](auto& c) {
-		if(event == HealthEventSignificantUpdate) {
-			c.on_significant_update();
-		}
-		else if(event == HealthEventMovementUpdate) {
-			c.on_movement_update();
-		}
-	});
-}
-#endif
 
 void MainWindow::reinit_complications()
 {
@@ -209,35 +180,9 @@ void MainWindow::reinit_complications()
 		}
 	}
 
-	const BatteryChargeState charge_state = battery_state_service_peek();
-	on_battery_state_change(charge_state);
-
 	WeatherData wdata = WeatherData::from_persist();
 	complication_do<WeatherComplication>([&](auto& c) {
 		c.weather_changed(wdata);
-	});
-
-	time_t time_s = time(nullptr);
-	struct tm *time_struct = localtime(&time_s);
-	TimeUnits all_units_changed = TimeUnits(
-		SECOND_UNIT |
-		MINUTE_UNIT |
-		HOUR_UNIT |
-		DAY_UNIT |
-		MONTH_UNIT |
-		YEAR_UNIT
-	);
-
-	complication_do<DateComplication>([&](auto& c) {
-		c.time_changed(time_struct);
-	});
-#ifdef PBL_HEALTH
-	complication_do<HealthComplication>([&](auto& c) {
-		c.on_tick(all_units_changed);
-	});
-#endif
-	complication_do<TimeZoneComplication>([&](auto& c) {
-		c.on_tick(all_units_changed);
 	});
 }
 

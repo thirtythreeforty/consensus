@@ -26,6 +26,10 @@ struct WeatherData {
 #include "ScrambledNumber.h"
 #include "variant.h"
 
+#include "watcher/BatteryWatcher.h"
+#include "watcher/HealthWatcher.h"
+#include "watcher/TimeWatcher.h"
+
 class Complication: public Boulder::Layer
 {
 public:
@@ -118,7 +122,7 @@ protected:
 	virtual GColor highlight_color2() const = 0;
 };
 
-class DateComplication: public IconTextComplication
+class DateComplication: public IconTextComplication, private TimeCallback
 {
 	typedef enum {
 		DayOfWk = 0,
@@ -133,7 +137,7 @@ public:
 
 	virtual void configure(const config_bundle_t&) override;
 
-	void time_changed(struct tm *time);
+	virtual void on_tick(struct tm *time, TimeUnits) override;
 
 private:
 	const char* unit(struct tm *time);
@@ -141,7 +145,7 @@ private:
 	static const char* month(int m);
 };
 
-class TimeZoneComplication: public Complication
+class TimeZoneComplication: public Complication, private TimeCallback
 {
 	FaceLayer face;
 	int32_t offset_sec;
@@ -152,7 +156,7 @@ public:
 
 	virtual void configure(const config_bundle_t&) override;
 
-	void on_tick(TimeUnits units_changed);
+	virtual void on_tick(struct tm *tick_time, TimeUnits units_changed) override;
 
 private:
 	void update_time();
@@ -197,18 +201,26 @@ private:
 	constexpr static const char* percent_unit = "%";
 };
 
-class BatteryComplication: public HighlightComplication
+class BatteryComplication: public HighlightComplication, private BatteryCallback
 {
 public:
 	explicit BatteryComplication(GRect frame);
 
-	void state_changed(const BatteryChargeState& state);
+	virtual void on_battery_change(const BatteryChargeState& state) override;
 
 protected:
 	GColor highlight_color() const override;
+
+private:
+	static uint32_t calc_angle(const BatteryChargeState& state);
 };
 
-class HealthComplication: public TickComplication
+class HealthComplication
+	: public TickComplication
+#ifdef PBL_HEALTH
+	, private HealthCallback
+	, private TimeCallback
+#endif
 {
 	struct Goal {
 		int32_t goal;
@@ -253,9 +265,12 @@ public:
 
 	virtual void configure(const config_bundle_t& config) override;
 
-	void on_tick(TimeUnits units_changed);
-	void on_movement_update();
-	void on_significant_update();
+#ifdef PBL_HEALTH
+	virtual void on_tick(struct tm*, TimeUnits units_changed) override;
+
+	virtual void on_movement_update() override;
+	virtual void on_significant_update() override;
+#endif
 
 protected:
 	virtual GColor highlight_color() const override;
