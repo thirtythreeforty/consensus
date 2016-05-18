@@ -168,65 +168,12 @@ void parse_preferences(DictionaryIterator *iterator)
 	save_preferences();
 }
 
-template<typename T>
-static void read_legacy_pref(uint32_t persist_key, T& pref)
-{
-	if(persist::exists(persist_key)) {
-		pref = persist::load<T>(persist_key);
-	}
-}
-
-static void upgrade_legacy_preferences()
-{
-	read_legacy_pref(PERSIST_PREF_SHOW_SECOND_HAND_DEPRECATED, prefs.should_show_second);
-	read_legacy_pref(PERSIST_PREF_SHOW_NO_CONNECTION_DEPRECATED, prefs.should_show_no_connection);
-
-	read_legacy_pref(PERSIST_PREF_VIBRATE_ON_HOUR_DEPRECATED, prefs.should_vibrate_on_hour);
-	read_legacy_pref(PERSIST_PREF_VIBRATE_ON_DISCONNECT_DEPRECATED, prefs.should_vibrate_on_disconnect);
-	read_legacy_pref(PERSIST_PREF_VIBRATE_ON_CONNECT_DEPRECATED, prefs.should_vibrate_on_connect);
-
-	read_legacy_pref(PERSIST_PREF_QUIET_DURING_SLEEP_DEPRECATED, prefs.should_quiet_during_sleep);
-
-	read_legacy_pref(PERSIST_PREF_LEFT_COMPLICATION_DEPRECATED, prefs.left_complication_type);
-	read_legacy_pref(PERSIST_PREF_BOTTOM_COMPLICATION_DEPRECATED, prefs.bottom_complication_type);
-	read_legacy_pref(PERSIST_PREF_RIGHT_COMPLICATION_DEPRECATED, prefs.right_complication_type);
-
-	read_legacy_pref(PERSIST_PREF_LEFT_COMPLICATION_OPT1_DEPRECATED, prefs.left_complication_opt1);
-	read_legacy_pref(PERSIST_PREF_LEFT_COMPLICATION_OPT2_DEPRECATED, prefs.left_complication_opt2);
-	read_legacy_pref(PERSIST_PREF_LEFT_COMPLICATION_OPT3_DEPRECATED, prefs.left_complication_opt3);
-	read_legacy_pref(PERSIST_PREF_LEFT_COMPLICATION_OPT4_DEPRECATED, prefs.left_complication_opt4);
-
-	read_legacy_pref(PERSIST_PREF_BOTTOM_COMPLICATION_OPT1_DEPRECATED, prefs.bottom_complication_opt1);
-	read_legacy_pref(PERSIST_PREF_BOTTOM_COMPLICATION_OPT2_DEPRECATED, prefs.bottom_complication_opt2);
-	read_legacy_pref(PERSIST_PREF_BOTTOM_COMPLICATION_OPT3_DEPRECATED, prefs.bottom_complication_opt3);
-	read_legacy_pref(PERSIST_PREF_BOTTOM_COMPLICATION_OPT4_DEPRECATED, prefs.bottom_complication_opt4);
-
-	read_legacy_pref(PERSIST_PREF_RIGHT_COMPLICATION_OPT1_DEPRECATED, prefs.right_complication_opt1);
-	read_legacy_pref(PERSIST_PREF_RIGHT_COMPLICATION_OPT2_DEPRECATED, prefs.right_complication_opt2);
-	read_legacy_pref(PERSIST_PREF_RIGHT_COMPLICATION_OPT3_DEPRECATED, prefs.right_complication_opt3);
-	read_legacy_pref(PERSIST_PREF_RIGHT_COMPLICATION_OPT4_DEPRECATED, prefs.right_complication_opt4);
-
-	read_legacy_pref(PERSIST_PREF_THEME_DEPRECATED, prefs.theme);
-}
-
-static void delete_legacy_preferences()
-{
-	for(unsigned int pref = PERSIST_WEATHER_TEMP_C_DEPRECATED;
-	    pref <= PERSIST_PREF_QUIET_DURING_SLEEP_DEPRECATED; ++pref)
-	{
-		persist::remove(pref);
-	}
-}
-
 void init_preferences()
 {
 	if(persist::exists(PERSIST_PREFS_STRUCT)) {
 		load_preferences();
 	}
 	else {
-		// Upgrade from legacy key-based preferences.  This should only need to happen once.
-		upgrade_legacy_preferences();
-		save_preferences();
-		delete_legacy_preferences();
+		// TODO: ask phone for preferences from previous installation
 	}
 }
