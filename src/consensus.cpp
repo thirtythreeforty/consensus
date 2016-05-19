@@ -5,6 +5,7 @@ extern "C" {
 #include <pebble.h>
 }
 
+#include "constants.h"
 #include "main_window.h"
 #include "preferences.h"
 #include "themes.h"
@@ -76,6 +77,9 @@ void on_appmessage_in(DictionaryIterator *iterator, void *context)
 		wdata.to_persist();
 	}
 
+	if(Boulder::Tuple(dict_find(iterator, KEY_PREFS_DONT_EXIST)).valid()) {
+		prefs_dont_exist();
+	}
 	on_preferences_in(iterator);
 }
 

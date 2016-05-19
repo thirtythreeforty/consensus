@@ -38,6 +38,9 @@ enum {
 	KEY_PREF_THEME,
 
 	KEY_PREF_QUIET_DURING_SLEEP,
+
+	KEY_PREFS_REQUEST,
+	KEY_PREFS_DONT_EXIST,
 };
 
 // Persistent storage keys:

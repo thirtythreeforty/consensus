@@ -49,7 +49,10 @@
 
     "KEY_PREF_THEME": 26,
 
-    "KEY_PREF_QUIET_DURING_SLEEP": 27
+    "KEY_PREF_QUIET_DURING_SLEEP": 27,
+
+    "KEY_PREFS_REQUEST": 28,
+    "KEY_PREFS_DONT_EXIST": 29
   },
   "resources": {
     "media": [

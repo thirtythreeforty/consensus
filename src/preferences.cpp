@@ -174,6 +174,21 @@ void init_preferences()
 		load_preferences();
 	}
 	else {
-		// TODO: ask phone for preferences from previous installation
+		// Request prefs after JS has time to start
+		Boulder::AppTimer::create(1000, []{
+			DictionaryIterator *iter;
+			static const uint8_t value = 0;
+			APP_LOG(APP_LOG_LEVEL_INFO, "Requesting previous preferences");
+			app_message_outbox_begin(&iter);
+			dict_write_int(iter, KEY_PREFS_REQUEST, &value, sizeof value, false);
+			app_message_outbox_send();
+		});
 	}
+}
+
+void prefs_dont_exist()
+{
+	// Just save the defaults so we don't bother the phone again next time
+	APP_LOG(APP_LOG_LEVEL_INFO, "Previous preferences do not exist");
+	save_preferences();
 }

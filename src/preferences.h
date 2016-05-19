@@ -27,4 +27,7 @@ void parse_preferences(DictionaryIterator *iterator);
 
 void init_preferences();
 
+void request_previous_prefs();
+void prefs_dont_exist();
+
 #endif

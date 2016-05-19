@@ -126,40 +126,8 @@ function getWeather() {
 	}
 }
 
-// Listen for when the watchface is opened
-Pebble.addEventListener('ready', function(e) {
-	console.log("PebbleKit JS ready!");
-});
-
-// Listen for when an AppMessage is received
-Pebble.addEventListener('appmessage', function(e) {
-	console.log("AppMessage received!");
-	console.log(JSON.stringify(e.payload))
-
-	if("KEY_WEATHER_REQUEST" in e.payload) {
-		console.log("Got weather request");
-		getWeather();
-	}
-});
-
-Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://thirtythreeforty.github.io/consensus/config/v5/';
-	console.log('Showing configuration page: ' + url);
-
-	Pebble.openURL(url);
-});
-
-Pebble.addEventListener('webviewclosed', function(e) {
-	var configStr = decodeURIComponent(e.response);
-	console.log('Configuration page returned: ' + configStr);
+function handleSettingsString(configStr) {
 	var configData = JSON.parse(configStr);
-
-	// Save the needed bits to our storage
-	localStorage["weatherSettings"] = JSON.stringify({
-		'location_type': configData['location_type'],
-		'location': configData['location'],
-	});
-	console.log("saved weather settings:" + localStorage["weatherSettings"]);
 
 	// Build the config pack to send to Pebble
 	function toInt(val) { return val ? 1 : 0; }
@@ -252,4 +220,58 @@ Pebble.addEventListener('webviewclosed', function(e) {
 			console.log('Preference update failed!');
 		}
 	);
+}
+
+// Listen for when the watchface is opened
+Pebble.addEventListener('ready', function(e) {
+	console.log("PebbleKit JS ready!");
 });
+
+// Listen for when an AppMessage is received
+Pebble.addEventListener('appmessage', function(e) {
+	console.log("AppMessage received!");
+	console.log(JSON.stringify(e.payload))
+
+	if("KEY_WEATHER_REQUEST" in e.payload) {
+		console.log("Got weather request");
+		getWeather();
+	}
+
+	if("KEY_PREFS_REQUEST" in e.payload) {
+		console.log("Got first-run settings request");
+
+		var configStr = localStorage["allSettings"];
+		if(configStr === undefined || configStr === null) {
+			console.log("Saved settings do not exist!");
+			Pebble.sendAppMessage({ KEY_PREFS_DONT_EXIST: 0, }, null, null);
+		} else {
+			handleSettingsString(configStr);
+		}
+	}
+});
+
+Pebble.addEventListener('showConfiguration', function() {
+	var url = 'https://thirtythreeforty.github.io/consensus/config/v5/';
+	console.log('Showing configuration page: ' + url);
+
+	Pebble.openURL(url);
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+	var configStr = decodeURIComponent(e.response);
+	console.log('Configuration page returned: ' + configStr);
+	var configData = JSON.parse(configStr);
+
+	localStorage["allSettings"] = configStr;
+	console.log("saved settings pack");
+
+	// Save the needed bits to our storage
+	localStorage["weatherSettings"] = JSON.stringify({
+		'location_type': configData['location_type'],
+		'location': configData['location'],
+	});
+	console.log("saved weather settings:" + localStorage["weatherSettings"]);
+
+	handleSettingsString(configStr);
+});
+
