@@ -13,7 +13,7 @@ void DateComplication::configure(const config_bundle_t& config)
 {
 	IconTextComplication::configure(config);
 
-	unit_type = static_cast<UnitType>(std::get<1>(config));
+	unit_type = static_cast<UnitType>(std::get<0>(config));
 	update_time_now();
 }
 
