@@ -1,6 +1,32 @@
 <complication-customize>
 </complication-customize>
 
+<complication-customize-date>
+	<configuration-content>
+		<configuration-dropdown caption='Gadget' attrib={ parent.gadget }>
+			<option class="item-select-option" value='day'>Day of Week</configuration-option>
+			<option class="item-select-option" value='month'>Month</configuration-option>
+			<option class="item-select-option" value='none'>None</configuration-option>
+		</configuration-dropdown>
+	</configuration-content>
+	<configuration-footer>
+		Select the gadget displayed alongside the current date.
+	</configuration-footer>
+
+	<script>
+	this.mixin(Attribute);
+	this.gadget = new this.Attribute('day');
+
+	from_json(pack) {
+		this.gadget.set(pack["gadget"]);
+		this.update();
+	}
+	to_json(pack) {
+		pack["gadget"] = this.gadget.get();
+	}
+	</script>
+</complication-customize-date>
+
 <complication-customize-health>
 	<configuration-content>
 		<configuration-dropdown caption='Goal Type' attrib={ parent.goal_type }>
@@ -161,7 +187,7 @@
 			"None": undefined,
 			"Battery": undefined,
 			"Health": "complication-customize-health",
-			"Date": undefined,
+			"Date": "complication-customize-date",
 			"Weather": "complication-customize-weather",
 			"Time Zone": "complication-customize-timezone"
 		}[val] || "complication-customize";

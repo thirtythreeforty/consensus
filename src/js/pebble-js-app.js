@@ -163,6 +163,11 @@ function handleSettingsString(configStr) {
 		case "Battery":
 			break;
 		case "Date":
+			dict[opt1Key] = {
+				"day": 0,
+				"month": 1,
+				"none": 2,
+			}[cOptions["gadget"]];
 			break;
 		case "Weather":
 			dict[opt1Key] = {
