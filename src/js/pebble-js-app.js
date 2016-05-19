@@ -183,6 +183,14 @@ function handleSettingsString(configStr) {
 			} else {
 				dict[opt1Key] = 0;
 			}
+			dict[opt2Key] = {
+				"icon": 0,
+				"distance": 2,
+				"kcal_act": 3,
+				"kcal_rest": 4,
+				"kcal_tot": 5,
+				"act_sec": 6
+			}[cOptions["gadget"]];
 			break;
 		case "Time Zone":
 			// Compute the number of seconds' offset

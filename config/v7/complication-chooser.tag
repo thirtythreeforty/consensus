@@ -29,6 +29,19 @@
 
 <complication-customize-health>
 	<configuration-content>
+		<configuration-dropdown caption='Gadget' attrib={ parent.gadget }>
+			<option class="item-select-option" value='icon'>Status icon</configuration-option>
+			<option class="item-select-option" value='distance'>Distance walked</configuration-option>
+			<option class="item-select-option" value='kcal_act'>KCal active</configuration-option>
+			<option class="item-select-option" value='kcal_rest'>KCal resting</configuration-option>
+			<option class="item-select-option" value='kcal_tot'>KCal total</configuration-option>
+			<option class="item-select-option" value='act_sec'>Time active</configuration-option>
+		</configuration-dropdown>
+	</configuration-content>
+	<configuration-footer>
+		Select the gadget displayed in the center of the complication's ring.
+	</configuration-footer>
+	<configuration-content>
 		<configuration-dropdown caption='Goal Type' attrib={ parent.goal_type }>
 			<option class="item-select-option" value='auto'>Auto</configuration-option>
 			<option class="item-select-option" value='manual'>Manual</configuration-option>
@@ -45,6 +58,7 @@
 	var self = this;
 
 	this.mixin(Attribute);
+	this.gadget = new this.Attribute("icon");
 	this.goal_type = new this.Attribute("auto", function(val) {
 		self.tags['goalinput'].root.style.display =
 			(val === 'manual') ? "initial" : "none";
@@ -52,11 +66,13 @@
 	this.goal = new this.Attribute("10000");
 
 	from_json(pack) {
+		this.gadget.set(pack["gadget"]);
 		this.goal_type.set(pack["goal_type"]);
 		this.goal.set(pack["goal"]);
 		this.update();
 	}
 	to_json(pack) {
+		pack["gadget"] = this.gadget.get();
 		pack["goal_type"] = this.goal_type.get();
 		pack["goal"] = this.goal.get();
 	}

@@ -229,19 +229,22 @@ class HealthComplication
 	struct AutoGoal : public Goal { using Goal::Goal; };
 	struct ManualGoal : public Goal { using Goal::Goal; };
 
+	using divisor_t = std::tuple<unsigned int, unsigned int, const char*, const char*>;
+	template<int N> using divisor_list_t = std::array<divisor_t, N>;
+
 	struct Metric {
 		int32_t metric;
 		const char* unit;
-		Metric(int32_t metric, const char* unit)
-			: metric(metric), unit(unit)
+		const char* format;
+		Metric(int32_t metric, const char* unit, const char* format)
+			: metric(metric), unit(unit), format(format)
 		{}
 	};
 
 	enum GadgetType {
 		ICON = 0,
 		STEPS,
-		DISTANCE_M,
-		DISTANCE_FT,
+		DISTANCE,
 		CALORIES_ACTIVE,
 		CALORIES_RESTING,
 		CALORIES_TOTAL,
@@ -280,12 +283,26 @@ private:
 	void recalculate_today_data();
 	void invalidate_today_data();
 
+	void store_scaled_metric(uint32_t metric, const divisor_t* begin, const divisor_t* end);
+
+	template<typename T>
+	void store_scaled_metric(uint32_t metric, const T& t) {
+		store_scaled_metric(metric, t.begin(), t.end());
+	}
+
 	void recalculate_auto_goal();
 
 	void update_angle_and_gadget();
 
 	static void refresh_static_steps_today();
 	static void invalidate_static_today_data();
+
+	static const divisor_list_t<3> time_divisors;
+	static const divisor_list_t<3> imperial_distance_divisors;
+	static const divisor_list_t<3> metric_distance_divisors;
+
+	constexpr static const char *point_number_format = ".%i";
+	constexpr static const char *steps_unit = "STEPS";
 };
 
 using AbstractComplication = Variant<

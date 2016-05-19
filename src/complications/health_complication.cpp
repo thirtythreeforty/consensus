@@ -41,6 +41,24 @@ GColor HealthComplication::tick_color() const
 }
 
 #ifdef PBL_HEALTH
+const HealthComplication::divisor_list_t<3> HealthComplication::time_divisors = {
+	std::make_tuple(1, 60, "SEC", plain_number_format),
+	std::make_tuple(60, 60, "MIN", plain_number_format),
+	std::make_tuple(60, -1, "HR", plain_number_format)
+};
+
+const HealthComplication::divisor_list_t<3> HealthComplication::imperial_distance_divisors = {
+	std::make_tuple(1, 528, "FT", plain_number_format),
+	std::make_tuple(528, 10, "MI", point_number_format),
+	std::make_tuple(10, -1, "MI", plain_number_format)
+};
+
+const HealthComplication::divisor_list_t<3> HealthComplication::metric_distance_divisors = {
+	std::make_tuple(1, 100, "M", plain_number_format),
+	std::make_tuple(100, 10, "KM", point_number_format),
+	std::make_tuple(10, -1, "KM", plain_number_format)
+};
+
 Variant<void, int32_t> HealthComplication::st_today_steps;
 Variant<void, int32_t> HealthComplication::st_today_average_steps;
 
@@ -119,6 +137,21 @@ void HealthComplication::invalidate_today_data()
 	today_metric.reset();
 }
 
+void HealthComplication::store_scaled_metric(uint32_t metric, const divisor_t* begin, const divisor_t* end)
+{
+	auto i = begin;
+	do {
+		metric /= std::get<0>(*i);
+		if(metric < std::get<1>(*i)) {
+			++i;
+			break;
+		}
+	} while(++i < end);
+
+	--i;
+	today_metric = Metric(metric, std::get<2>(*i), std::get<3>(*i));
+}
+
 void HealthComplication::recalculate_today_data()
 {
 	refresh_static_steps_today();
@@ -132,27 +165,35 @@ void HealthComplication::recalculate_today_data()
 				today_metric.reset();
 			}
 			else {
-				today_metric = Metric(st_today_steps.as<int32_t>(), "STEPS");
+				today_metric = Metric(st_today_steps.as<int32_t>(), "STEPS", plain_number_format);
 			}
 			break;
-		case DISTANCE_M:
-			today_metric = Metric(health_service_sum_today(HealthMetricWalkedDistanceMeters), "M");
-			break;
-		case DISTANCE_FT:
-			today_metric = Metric(health_service_sum_today(HealthMetricWalkedDistanceMeters) * 328 / 100, "FT");
+		case DISTANCE:
+			if(health_service_get_measurement_system_for_display(HealthMetricWalkedDistanceMeters) == MeasurementSystemMetric) {
+				store_scaled_metric(
+					health_service_sum_today(HealthMetricWalkedDistanceMeters),
+					metric_distance_divisors);
+			}
+			else {
+				store_scaled_metric(
+					health_service_sum_today(HealthMetricWalkedDistanceMeters) * 328 / 100,
+					imperial_distance_divisors);
+			}
 			break;
 		case CALORIES_ACTIVE:
-			today_metric = Metric(health_service_sum_today(HealthMetricActiveKCalories), "KCAL");
+			today_metric = Metric(health_service_sum_today(HealthMetricActiveKCalories), "KCAL", plain_number_format);
 			break;
 		case CALORIES_RESTING:
-			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories), "KCAL");
+			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories), "KCAL", plain_number_format);
 			break;
 		case CALORIES_TOTAL:
 			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories)
-			                      + health_service_sum_today(HealthMetricActiveKCalories), "KCAL");
+			                      + health_service_sum_today(HealthMetricActiveKCalories), "KCAL", plain_number_format);
 			break;
 		case ACTIVE_SECONDS:
-			today_metric = Metric(health_service_sum_today(HealthMetricActiveSeconds), "SEC");
+			store_scaled_metric(
+				health_service_sum_today(HealthMetricActiveSeconds),
+				time_divisors);
 			break;
 		}
 	}
@@ -176,7 +217,7 @@ void HealthComplication::update_angle_and_gadget()
 			break;
 		default:
 			auto& tm = today_metric.as<Metric>();
-			set_number_format(plain_number_format, tm.metric, tm.unit);
+			set_number_format(tm.format, tm.metric, tm.unit);
 			break;
 		}
 	}
