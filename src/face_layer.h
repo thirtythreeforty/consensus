@@ -9,7 +9,7 @@ extern "C" {
 #include "common.h"
 #include "scalable_path.h"
 
-class FaceLayer: public Boulder::Layer
+class FaceLayer final: public Boulder::Layer
 {
 	struct hms_t {
 		uint8_t hour;

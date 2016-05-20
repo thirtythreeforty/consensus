@@ -122,7 +122,7 @@ protected:
 	virtual GColor highlight_color2() const = 0;
 };
 
-class DateComplication: public IconTextComplication, private TimeCallback
+class DateComplication final: public IconTextComplication, private TimeCallback
 {
 	typedef enum {
 		DayOfWk = 0,
@@ -145,7 +145,7 @@ private:
 	static const char* month(int m);
 };
 
-class TimeZoneComplication: public Complication, private TimeCallback
+class TimeZoneComplication final: public Complication, private TimeCallback
 {
 	FaceLayer face;
 	int32_t offset_sec;
@@ -162,7 +162,7 @@ private:
 	void update_time();
 };
 
-class WeatherComplication: public HighlightComplication2
+class WeatherComplication final: public HighlightComplication2
 {
 	struct WeatherAngles {
 		int32_t temp_angle;
@@ -201,7 +201,7 @@ private:
 	constexpr static const char* percent_unit = "%";
 };
 
-class BatteryComplication: public HighlightComplication, private BatteryCallback
+class BatteryComplication final: public HighlightComplication, private BatteryCallback
 {
 public:
 	explicit BatteryComplication(GRect frame);
@@ -215,7 +215,7 @@ private:
 	static uint32_t calc_angle(const BatteryChargeState& state);
 };
 
-class HealthComplication
+class HealthComplication final
 	: public TickComplication
 #ifdef PBL_HEALTH
 	, private HealthCallback
