@@ -151,7 +151,13 @@ public:
 	}
 
 	template<typename T>
-	inline bool is() {
+	const T& as() const {
+		check_type<T>();
+		return data_ref<T>();
+	}
+
+	template<typename T>
+	inline bool is() const {
 		check_type<T>();
 		return typenum_of<T>() == typenum;
 	}
@@ -164,8 +170,8 @@ public:
 		}
 	}
 
-	template<typename T, typename F> enable_when_void<T>
-	inline if_is(F f) {
+	template<typename T, typename F>
+	inline void if_is(F f) const {
 		check_type<T>();
 		if(is<T>()) {
 			f();
@@ -183,8 +189,8 @@ public:
 		}
 	}
 
-	template<typename T, typename IfTrue, typename Else> enable_when_void<T>
-	inline if_is_else(IfTrue t, Else f) {
+	template<typename T, typename IfTrue, typename Else>
+	inline void if_is_else(IfTrue t, Else f) const {
 		check_type<T>();
 		if(is<T>()) {
 			t();
@@ -265,7 +271,7 @@ protected:
 	}
 
 	template<typename T>
-	void check_type() {
+	void check_type() const {
 		static_assert(AnyConvertibleTo<T, Ts...>::value,
 		              "Type not valid for this variant");
 	}
