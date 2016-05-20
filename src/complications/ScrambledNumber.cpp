@@ -71,7 +71,26 @@ void ScrambledNumber::scramble_animation_update(Animation* anim, AnimationProgre
 	auto scrambled_number = static_cast<ScrambledNumber*>(animation_get_context(anim));
 
 	if(scrambled_number->anim_frames_skipped == 1) {
-		uint8_t random_number = rand() % 100;
+		// Redneck log_10 follows:
+		unsigned int mod_random_number, min_number;
+		if(scrambled_number->requested_number > 1000) {
+			min_number = 1000;
+			mod_random_number = 10000 - 1000;
+		}
+		else if(scrambled_number->requested_number > 100) {
+			min_number = 100;
+			mod_random_number = 1000 - 100;
+		}
+		else if(scrambled_number->requested_number > 10) {
+			min_number = 10;
+			mod_random_number = 100 - 10;
+		}
+		else {
+			min_number = 0;
+			mod_random_number = 10 - 0;
+		}
+
+		uint8_t random_number = rand() % mod_random_number + min_number;
 		scrambled_number->format(random_number);
 		scrambled_number->anim_frames_skipped = 0;
 	}
