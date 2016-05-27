@@ -32,7 +32,7 @@ def configure(ctx):
         e.CXX = cxx
         e.CXXFLAGS = list(e.CFLAGS)
         e.CXXFLAGS.remove('-std=c99')
-        e.CXXFLAGS.extend(['-c', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
-        e.LINKFLAGS.extend(['-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g', '-zmuldefs'])
+        e.CXXFLAGS.extend(['-finstrument-functions', '-Wl,-Map=map.map', '-finstrument-functions-exclude-file-list=include/c++,variant.h,profiling.cpp,memory.cpp', '-c', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-g'])
+        e.LINKFLAGS.extend(['-finstrument-functions', '-Wl,-Map=map.map', '-finstrument-functions-exclude-file-list=include/c++,variant.h,profiling.cpp,memory.cpp', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-g', '-zmuldefs'])
         e.CXX_TGT_F = ['-o']
         e.LINK_CC = cxx

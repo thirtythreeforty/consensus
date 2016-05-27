@@ -110,7 +110,7 @@ void on_tap(AccelAxisType axis, int32_t direction)
 	}
 }
 
-static void init(void)
+void init(void)
 {
 	init_preferences();
 	set_theme();
@@ -160,7 +160,13 @@ static void deinit(void)
 
 int main(void)
 {
+	void setup_profiling();
+	setup_profiling();
+
 	init();
 	app_event_loop();
 	deinit();
+
+	void show_instrumentation();
+	show_instrumentation();
 }
