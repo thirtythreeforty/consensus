@@ -392,6 +392,7 @@ namespace {
 template<typename S, typename T, PropertyAnimationSetter<S, T> Setter, PropertyAnimationGetter<S, T> Getter>
 class PropertyAnimation {
 	::PropertyAnimation *anim;
+	bool released = false;
 
 public:
 	PropertyAnimation(S& subject, const T* from, const T* to) {
@@ -420,13 +421,24 @@ public:
 		property_animation_to(anim, const_cast<T*>(to), sizeof(T), true);
 	}
 	~PropertyAnimation() {
-		if(!animation_is_scheduled(*this)) {
+		if(!released) {
 			property_animation_destroy(anim);
 		}
 	}
 
 	void schedule() {
+		released = true;
 		animation_schedule(*this);
+	}
+
+	PropertyAnimation* release_pa() {
+		released = true;
+		return *this;
+	}
+
+	Animation* release() {
+		released = true;
+		return *this;
 	}
 
 	operator ::Animation*() {

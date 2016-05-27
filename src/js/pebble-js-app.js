@@ -213,6 +213,7 @@ function handleSettingsString(configStr) {
 	var dict = {
 		KEY_PREF_THEME: themeToInt(configData['theme']),
 		KEY_PREF_SHOW_SECOND_HAND: toInt(configData['show_second_hand']),
+		KEY_PREF_SHOW_ANIMATIONS: toInt(configData['show_animations']),
 		KEY_PREF_SHOW_NO_CONNECTION: toInt(configData['show_no_connection']),
 		KEY_PREF_VIBRATE_ON_HOUR: toInt(configData['vibrate_on_hour']),
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
@@ -264,7 +265,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://thirtythreeforty.github.io/consensus/config/v7/';
+	var url = 'https://thirtythreeforty.github.io/consensus/config/v8/';
 	console.log('Showing configuration page: ' + url);
 
 	Pebble.openURL(url);

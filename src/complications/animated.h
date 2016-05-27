@@ -1,7 +1,9 @@
 #ifndef ANIMATED_H
 #define ANIMATED_H
 
+#include "AnimationBuffer.h"
 #include "boulder.h"
+#include "preferences.h"
 #include "variant.h"
 
 #include <utility>
@@ -29,7 +31,7 @@ private:
 static DefaultAnimatedCallback default_callback;
 
 template<typename T>
-bool default_are_close(const T&, const T&) { return false; }
+bool default_are_close(const T& a, const T& b) { return a == b; }
 
 template<typename T>
 T default_clamp(const T& t) { return t; }
@@ -53,7 +55,14 @@ public:
 		: requested()
 		, current()
 		, animating(false)
-		, callback{&default_callback}
+		, callback(&default_callback)
+	{}
+
+	Animated(const T& t)
+		: requested(t)
+		, current(t)
+		, animating(false)
+		, callback(&default_callback)
 	{}
 
 	void set_callback(AnimatedCallback* new_callback) {
@@ -83,7 +92,7 @@ public:
 
 private:
 	void animate_to_requested() {
-		if(TsClose(current, requested)) {
+		if(TsClose(current, requested) || !should_animate()) {
 			current = requested;
 			callback->on_animated_update();
 			return;
@@ -109,7 +118,7 @@ private:
 		animation_set_curve(anim, AnimationCurveEaseInOut);
 		animation_set_handlers(anim, handlers, this);
 
-		anim.schedule();
+		AnimationBuffer::enqueue(anim.release());
 	}
 
 	static void set_st(Self& animated, const T& new_t) {

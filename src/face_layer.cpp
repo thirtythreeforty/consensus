@@ -1,5 +1,6 @@
 #include "face_layer.h"
 
+#include "AnimationBuffer.h"
 #include "common.h"
 #include "themes.h"
 
@@ -8,6 +9,91 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 	graphics_context_set_stroke_width(ctx, stroke_width);
 	graphics_context_set_stroke_color(ctx, stroke_color);
 	gpath_draw_outline(ctx, path);
+}
+
+FaceLayer::Hand::Hand(const GPathInfo *path_info, GPoint center, bool do_zoom)
+	: scale(do_zoom ? 0 : ANIMATION_NORMALIZED_MAX)
+	, path(path_info)
+{
+	angle.set_callback(this);
+	scale.set_callback(this);
+
+	gpath_move_to(path, center);
+
+	if(do_zoom) {
+		// initial state of scale does not trigger a callback
+		path.scale(0);
+		zoom(true);
+	}
+}
+
+void FaceLayer::Hand::set_angle(angle_t a)
+{
+	angle = a;
+}
+
+void FaceLayer::Hand::zoom(bool in)
+{
+	if(in) {
+		scale = ANIMATION_NORMALIZED_MAX;
+	}
+	else {
+		scale = 0;
+	}
+}
+
+const ScalablePath& FaceLayer::Hand::get_path() const
+{
+	return path;
+}
+
+void FaceLayer::Hand::on_animated_update()
+{
+	// TODO this does double the work
+	gpath_rotate_to(path, angle);
+	path.scale(scale);
+}
+
+FaceLayer::FaceLayer(GRect frame, bool large)
+	: Layer(frame)
+	, hour_hand(large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame), large)
+	, min_hand(large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame), large)
+	, sec_hand(large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame), large)
+	, show_second(false)
+	, large(large)
+{}
+
+void FaceLayer::set_show_second(bool show)
+{
+	show_second = show;
+	sec_hand.zoom(show);
+
+	mark_dirty();
+}
+
+namespace {
+
+static unsigned int hour_angle(unsigned int hour, unsigned int minute)
+{
+	return TRIG_MAX_ANGLE * (hour % 12) / 12 +
+	       TRIG_MAX_ANGLE * minute / (12 * 60);
+}
+
+static unsigned int minute_angle(unsigned int minute, unsigned int second)
+{
+	return TRIG_MAX_ANGLE * minute / 60 +
+	       TRIG_MAX_ANGLE * second / (60 * 60);
+}
+
+}
+
+void FaceLayer::set_time(uint8_t hour, uint8_t min, uint8_t sec)
+{
+	mark_dirty();
+
+	hour_hand.set_angle(hour_angle(hour, min));
+	min_hand.set_angle(minute_angle(min, sec));
+	sec_hand.set_angle(minute_angle(sec, 0));
 }
 
 void FaceLayer::update(GContext *ctx)
@@ -26,25 +112,25 @@ void FaceLayer::update(GContext *ctx)
 
 	const uint8_t outline_extra = 2;
 	if(large) {
-		draw_path_with(ctx, hour_path, fatter_width + outline_extra, theme().background_color());
+		draw_path_with(ctx, hour_hand.get_path(), fatter_width + outline_extra, theme().background_color());
 	}
 #endif
-	draw_path_with(ctx, hour_path, fatter_width, hour_hand_color);
+	draw_path_with(ctx, hour_hand.get_path(), fatter_width, hour_hand_color);
 
 #ifndef PBL_COLOR
 	if(large) {
-		draw_path_with(ctx, minute_path, base_width + outline_extra, theme().background_color());
+		draw_path_with(ctx, min_hand.get_path(), base_width + outline_extra, theme().background_color());
 	}
 #endif
-	draw_path_with(ctx, minute_path, base_width, minute_hand_color);
+	draw_path_with(ctx, min_hand.get_path(), base_width, minute_hand_color);
 
 	if(show_second) {
 #ifndef PBL_COLOR
 		if(large) {
-			draw_path_with(ctx, second_path, base_width - 4 + outline_extra, theme().background_color());
+			draw_path_with(ctx, sec_hand.get_path(), base_width - 4 + outline_extra, theme().background_color());
 		}
 #endif
-		draw_path_with(ctx, second_path, base_width - 4, second_hand_color);
+		draw_path_with(ctx, sec_hand.get_path(), base_width - 4, second_hand_color);
 	}
 
 	// Draw middle dot, only if large though
@@ -57,210 +143,6 @@ void FaceLayer::update(GContext *ctx)
 		// Yes this is a little hacky, but it works fine
 		graphics_fill_circle(ctx, center, base_width > 5 ? 2 : 1);
 	}
-}
-
-FaceLayer::FaceLayer(GRect frame, bool large)
-	: Layer(frame)
-	, animating(false)
-	, hour_path(large ? &hour_hand_path : &small_hour_hand_path)
-	, minute_path(large ? &minute_hand_path : &small_minute_hand_path)
-	, second_path(large ? &second_hand_path : &small_second_hand_path)
-	, show_second(false)
-	, large(large)
-{
-	GPoint center = grect_center_point(&frame);
-
-	gpath_move_to(hour_path, center);
-	gpath_move_to(minute_path, center);
-	gpath_move_to(second_path, center);
-}
-
-void FaceLayer::set_show_second(bool show)
-{
-	show_second = show;
-
-	mark_dirty();
-}
-
-static unsigned int face_layer_hour_angle(unsigned int hour, unsigned int minute)
-{
-	return TRIG_MAX_ANGLE * (hour % 12) / 12 +
-	       TRIG_MAX_ANGLE * minute / (12 * 60);
-}
-
-static unsigned int face_layer_minute_angle(unsigned int minute, unsigned int second)
-{
-	return TRIG_MAX_ANGLE * minute / 60 +
-	       TRIG_MAX_ANGLE * second / (60 * 60);
-}
-
-void FaceLayer::set_time(uint8_t hour, uint8_t min, uint8_t sec)
-{
-	requested_time.hour = hour;
-	requested_time.minute = min;
-	requested_time.second = sec;
-
-	if(!animating) {
-		gpath_rotate_to(hour_path, face_layer_hour_angle(hour, min));
-		gpath_rotate_to(minute_path, face_layer_minute_angle(min, sec));
-		gpath_rotate_to(second_path, face_layer_minute_angle(sec, 0));
-
-		mark_dirty();
-	}
-}
-
-/** Helper function to automate tedious setup in face_layer_animate_in */
-Animation* FaceLayer::make_anim(int duration,
-                                int delay,
-                                AnimationCurve curve,
-                                const AnimationImplementation *implementation,
-                                const AnimationHandlers *handlers)
-{
-	static const AnimationHandlers dummy_handlers = {
-		.started = NULL,
-		.stopped = NULL,
-	};
-	Animation *anim = animation_create();
-	animation_set_duration(anim, duration);
-	animation_set_delay(anim, delay);
-	animation_set_curve(anim, curve);
-	animation_set_implementation(anim, implementation);
-	animation_set_handlers(anim, handlers ? *handlers : dummy_handlers, this);
-
-	return anim;
-}
-
-static int face_layer_scale(AnimationProgress dist_normalized, unsigned int max)
-{
-	return dist_normalized * max / ANIMATION_NORMALIZED_MAX;
-}
-
-void FaceLayer::radius_anim_update(Animation *anim, AnimationProgress dist_normalized)
-{
-	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-
-	face_layer->hour_path.scale(dist_normalized);
-	face_layer->minute_path.scale(dist_normalized);
-	face_layer->second_path.scale(dist_normalized);
-
-	face_layer->mark_dirty();
-}
-
-void FaceLayer::radius_anim_setup(Animation *anim)
-{
-	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-	face_layer->animating = true;
-
-	radius_anim_update(anim, 0);
-}
-
-void FaceLayer::roll_anim_setup(Animation *anim)
-{
-	// Set the initial roll so there's no flicker of large hands.
-	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-	// We rely on the AnimationHandlers to set this to false when all the
-	// animations are done.  But this needs to be true here to make sure the
-	// hands are never displayed as the requested_time.
-	face_layer->animating = true;
-	roll_anim_update(anim, 0);
-}
-
-void FaceLayer::roll_anim_update(Animation *anim, AnimationProgress dist_normalized)
-{
-	auto face_layer = static_cast<FaceLayer*>(animation_get_context(anim));
-	gpath_rotate_to(face_layer->hour_path,
-	                face_layer_scale(dist_normalized,
-	                                 face_layer_hour_angle(face_layer->animation_time.hour,
-	                                                       face_layer->animation_time.minute)));
-
-	gpath_rotate_to(face_layer->minute_path,
-	                face_layer_scale(dist_normalized,
-	                                 face_layer_minute_angle(face_layer->animation_time.minute,
-	                                                         face_layer->animation_time.second)));
-
-	gpath_rotate_to(face_layer->second_path,
-	                face_layer_scale(dist_normalized,
-	                                 face_layer_minute_angle(face_layer->animation_time.second, 0)));
-
-	face_layer->mark_dirty();
-}
-
-// A couple more helper functions to create zoom and roll animations
-Animation* FaceLayer::make_zoom_anim()
-{
-	static const AnimationImplementation zoom_anim_impl = {
-		.setup = FaceLayer::radius_anim_setup,
-		.update = FaceLayer::radius_anim_update,
-		.teardown = NULL,
-	};
-
-	return make_anim(1000, 200,
-	                 AnimationCurveEaseOut,
-	                 &zoom_anim_impl,
-	                 NULL);
-}
-
-Animation* FaceLayer::make_roll_anim()
-{
-	static const AnimationImplementation roll_anim_impl = {
-		.setup = FaceLayer::roll_anim_setup,
-		.update = FaceLayer::roll_anim_update,
-		.teardown = NULL,
-	};
-
-	return make_anim(1000, 200,
-	                 AnimationCurveEaseInOut,
-	                 &roll_anim_impl,
-	                 NULL);
-}
-
-void FaceLayer::animation_start_handler(Animation *animation, void *context)
-{
-	auto face_layer = static_cast<FaceLayer*>(context);
-	face_layer->animating = true;
-
-	// Grab a copy of the requested time to use during animation
-	face_layer->animation_time = face_layer->requested_time;
-}
-
-void FaceLayer::animation_stop_handler(Animation *animation, bool finished, void *context)
-{
-	auto face_layer = static_cast<FaceLayer*>(context);
-	face_layer->animating = false;
-
-	// Set scale and roll to final values
-	face_layer->hour_path.scale(ANIMATION_NORMALIZED_MAX);
-	face_layer->minute_path.scale(ANIMATION_NORMALIZED_MAX);
-	face_layer->second_path.scale(ANIMATION_NORMALIZED_MAX);
-
-	// This will move the hands to requested_time and update the display
-	face_layer->set_time(face_layer->requested_time.hour,
-	                     face_layer->requested_time.minute,
-	                     face_layer->requested_time.second);
-}
-
-Animation* FaceLayer::animate_in(bool zoom, bool roll)
-{
-	// Collect all animations into this array to create a spawn animation later
-	Animation *animations[2];
-	unsigned int i = 0;
-
-	if(zoom) {
-		animations[i++] = make_zoom_anim();
-	}
-	if(roll) {
-		animations[i++] = make_roll_anim();
-	}
-
-	static const AnimationHandlers handlers = {
-		.started = FaceLayer::animation_start_handler,
-		.stopped = FaceLayer::animation_stop_handler
-	};
-
-	Animation *spawn_anim = animation_spawn_create_from_array(animations, i);
-	animation_set_handlers(spawn_anim, handlers, this);
-
-	return spawn_anim;
 }
 
 const GPoint FaceLayer::hour_hand_path_points[] = {{0, 0}, {0, -35}};

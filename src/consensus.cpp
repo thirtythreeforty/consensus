@@ -5,6 +5,7 @@ extern "C" {
 #include <pebble.h>
 }
 
+#include "AnimationBuffer.h"
 #include "constants.h"
 #include "main_window.h"
 #include "preferences.h"
@@ -114,6 +115,21 @@ static void init(void)
 	init_preferences();
 	set_theme();
 
+	AnimationBuffer::hold_all();
+	static const AppFocusHandlers focus_handlers = {
+		.will_focus = [](bool in_focus) {
+			if(!in_focus) {
+				AnimationBuffer::hold_all();
+			}
+		},
+		.did_focus = [](bool in_focus) {
+			if(in_focus) {
+				AnimationBuffer::release_all();
+			}
+		}
+	};
+	app_focus_service_subscribe_handlers(focus_handlers);
+
 	main_window = std::make_unique<MainWindow>();
 	Boulder::WindowStack::push(*main_window, true);
 
@@ -137,6 +153,7 @@ static void deinit(void)
 	app_message_deregister_callbacks();
 	accel_tap_service_unsubscribe();
 	connection_service_unsubscribe();
+	app_focus_service_unsubscribe();
 
 	main_window.reset();
 }

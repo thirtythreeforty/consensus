@@ -1,5 +1,7 @@
 #include "ScrambledNumber.h"
 
+#include "AnimationBuffer.h"
+#include "preferences.h"
 #include "themes.h"
 
 ScrambledNumber::ScrambledNumber(GRect frame, const char* format_string)
@@ -39,7 +41,7 @@ void ScrambledNumber::set(int32_t number)
 	const bool is_close = abs(number - requested_number) <= 5;
 	requested_number = number;
 	if(state != ANIMATING) {
-		if(state == INIT || !is_close) {
+		if((state == INIT || !is_close) && should_animate()) {
 			animate_to_requested();
 		}
 		else { // STATE == STOPPED && is_close
@@ -132,5 +134,5 @@ void ScrambledNumber::animate_to_requested()
 	animation_set_curve(anim, AnimationCurveEaseInOut);
 	animation_set_handlers(anim, scramble_anim_handlers, this);
 
-	animation_schedule(anim);
+	AnimationBuffer::enqueue(anim);
 }

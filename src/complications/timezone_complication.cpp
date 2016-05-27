@@ -1,5 +1,7 @@
 #include "complication.h"
 
+#include "AnimationBuffer.h"
+
 TimeZoneComplication::TimeZoneComplication(GRect frame)
 	: Complication(frame)
 	, TimeCallback(MINUTE_UNIT)
@@ -7,7 +9,6 @@ TimeZoneComplication::TimeZoneComplication(GRect frame)
 {
 	add_child(face);
 	update_time();
-	animation_schedule(face.animate_in(false, true));
 }
 
 void TimeZoneComplication::configure(const config_bundle_t& config)

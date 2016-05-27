@@ -36,6 +36,8 @@ struct Preferences {
 	uint32_t right_complication_opt2 = 0;
 	uint32_t right_complication_opt3 = 0;
 	uint32_t right_complication_opt4 = 0;
+
+	bool should_animate = true;
 };
 
 static Preferences prefs;
@@ -68,6 +70,11 @@ bool should_show_second()
 bool should_quiet_during_sleep()
 {
 	return prefs.should_quiet_during_sleep;
+}
+
+bool should_animate()
+{
+	return prefs.should_animate;
 }
 
 complication_config left_complication_type()
@@ -164,6 +171,8 @@ void parse_preferences(DictionaryIterator *iterator)
 	update_preference(iterator, KEY_PREF_RIGHT_COMPLICATION_OPT4, prefs.right_complication_opt4);
 
 	update_preference(iterator, KEY_PREF_THEME, prefs.theme);
+
+	update_preference(iterator, KEY_PREF_SHOW_ANIMATIONS, prefs.should_animate);
 
 	save_preferences();
 }

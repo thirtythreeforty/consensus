@@ -5,26 +5,34 @@ extern "C" {
 #include <pebble.h>
 }
 
+#include "complications/animated.h"
 #include "boulder.h"
 #include "common.h"
 #include "scalable_path.h"
 
 class FaceLayer final: public Boulder::Layer
 {
-	struct hms_t {
-		uint8_t hour;
-		uint8_t minute;
-		uint8_t second;
+	class Hand final: private AnimatedCallback
+	{
+		using angle_t = int32_t;
+
+		Animated<int32_t> angle;
+		Animated<int32_t> scale;
+		ScalablePath path;
+
+	public:
+		Hand(const GPathInfo *path_info, GPoint center, bool do_zoom);
+
+		void set_angle(angle_t);
+		void zoom(bool in);
+
+		const ScalablePath& get_path() const;
+
+	private:
+		virtual void on_animated_update() override;
 	};
 
-	hms_t requested_time;
-	hms_t animation_time;
-
-	bool animating;
-
-	ScalablePath hour_path;
-	ScalablePath minute_path;
-	ScalablePath second_path;
+	Hand hour_hand, min_hand, sec_hand;
 
 	bool show_second;
 	bool large;
@@ -35,7 +43,6 @@ public:
 
 	void set_show_second(bool show);
 	void set_time(uint8_t hour, uint8_t min, uint8_t sec);
-	Animation* animate_in(bool zoom, bool roll);
 
 protected:
 	void update(GContext* ctx) override;

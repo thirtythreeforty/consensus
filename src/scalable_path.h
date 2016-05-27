@@ -15,7 +15,7 @@ public:
 	~ScalablePath();
 	void scale(AnimationProgress dist_normalized);
 
-	operator GPath*() {
+	operator GPath*() const {
 		return path;
 	}
 };

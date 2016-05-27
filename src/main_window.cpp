@@ -1,5 +1,6 @@
 #include "main_window.h"
 
+#include "AnimationBuffer.h"
 #include "preferences.h"
 #include "vibration.h"
 
@@ -55,7 +56,6 @@ void MainWindow::init_layers()
 
 	face_layer.set_show_second(should_show_second());
 	add_child(face_layer);
-	animation_schedule(face_layer.animate_in(true, true));
 }
 
 void MainWindow::deinit_layers()

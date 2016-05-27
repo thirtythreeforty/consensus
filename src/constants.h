@@ -41,6 +41,8 @@ enum {
 
 	KEY_PREFS_REQUEST,
 	KEY_PREFS_DONT_EXIST,
+
+	KEY_PREF_SHOW_ANIMATIONS,
 };
 
 // Persistent storage keys:
