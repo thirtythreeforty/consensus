@@ -18,15 +18,16 @@ using Clamp = T(const T&);
 
 class AnimatedCallback
 {
-	template<typename T, CloseChecker<T>, Clamp<T> TsClamp>
+	template<typename T, CloseChecker<T> TsCheck, Clamp<T> TsClamp>
 	friend class Animated;
+
 private:
-	virtual void on_animated_update() = 0;
+	virtual void on_animated_update(void *animated) = 0;
 };
 
 class DefaultAnimatedCallback: public AnimatedCallback {
 private:
-	virtual void on_animated_update() override {}
+	virtual void on_animated_update(void*) override {}
 };
 static DefaultAnimatedCallback default_callback;
 
@@ -50,6 +51,8 @@ class Animated
 
 	AnimatedCallback* callback;
 
+	unsigned int duration = 700;
+
 public:
 	Animated()
 		: requested()
@@ -58,11 +61,16 @@ public:
 		, callback(&default_callback)
 	{}
 
-	Animated(const T& t)
+	Animated(const T& t, unsigned int duration)
 		: requested(t)
 		, current(t)
 		, animating(false)
 		, callback(&default_callback)
+		, duration(duration)
+	{}
+
+	Animated(const T& t)
+		: Animated(t, 700)
 	{}
 
 	void set_callback(AnimatedCallback* new_callback) {
@@ -94,7 +102,7 @@ private:
 	void animate_to_requested() {
 		if(TsClose(current, requested) || !should_animate()) {
 			current = requested;
-			callback->on_animated_update();
+			callback->on_animated_update(this);
 			return;
 		}
 
@@ -110,11 +118,7 @@ private:
 			.stopped = anim_stopped_handler,
 		};
 
-		static const unsigned int duration = 700;
-		static const unsigned int delay = 200;
-
 		animation_set_duration(anim, duration);
-		animation_set_delay(anim, delay);
 		animation_set_curve(anim, AnimationCurveEaseInOut);
 		animation_set_handlers(anim, handlers, this);
 
@@ -123,7 +127,7 @@ private:
 
 	static void set_st(Self& animated, const T& new_t) {
 		animated.current = new_t;
-		animated.callback->on_animated_update();
+		animated.callback->on_animated_update(&animated);
 	}
 
 	static const T& get_st(const Self& animated) {

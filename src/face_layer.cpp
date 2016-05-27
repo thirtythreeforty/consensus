@@ -12,7 +12,8 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 }
 
 FaceLayer::Hand::Hand(const GPathInfo *path_info, GPoint center, bool do_zoom)
-	: scale(do_zoom ? 0 : ANIMATION_NORMALIZED_MAX)
+	: angle(0, 1000)
+	, scale(do_zoom ? 0 : ANIMATION_NORMALIZED_MAX, 1000)
 	, path(path_info)
 {
 	angle.set_callback(this);
@@ -47,11 +48,13 @@ const ScalablePath& FaceLayer::Hand::get_path() const
 	return path;
 }
 
-void FaceLayer::Hand::on_animated_update()
+void FaceLayer::Hand::on_animated_update(void *animated)
 {
-	// TODO this does double the work
-	gpath_rotate_to(path, angle);
-	path.scale(scale);
+	if(animated == &angle) {
+		gpath_rotate_to(path, angle);
+	} else {
+		path.scale(scale);
+	}
 }
 
 FaceLayer::FaceLayer(GRect frame, bool large)

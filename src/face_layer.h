@@ -29,7 +29,7 @@ class FaceLayer final: public Boulder::Layer
 		const ScalablePath& get_path() const;
 
 	private:
-		virtual void on_animated_update() override;
+		virtual void on_animated_update(void *animated) override;
 	};
 
 	Hand hour_hand, min_hand, sec_hand;

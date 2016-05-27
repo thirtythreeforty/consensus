@@ -196,7 +196,7 @@ void HighlightComplication2::update(GContext *ctx)
 	icontext_update(ctx);
 }
 
-void HighlightComplication::on_animated_update()
+void HighlightComplication::on_animated_update(void*)
 {
 	mark_dirty();
 }

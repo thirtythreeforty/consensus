@@ -95,7 +95,7 @@ protected:
 	virtual GColor highlight_color() const = 0;
 
 private:
-	virtual void on_animated_update() override;
+	virtual void on_animated_update(void *animated) override;
 };
 
 class TickComplication: public HighlightComplication
