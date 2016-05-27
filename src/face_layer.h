@@ -12,16 +12,25 @@ extern "C" {
 
 class FaceLayer final: public Boulder::Layer
 {
-	class Hand final: private AnimatedCallback
+	template<int32_t Interval> class Hand final: private AnimatedCallback
 	{
 		using angle_t = int32_t;
 
-		Animated<int32_t> angle;
+		static inline bool is_close(const int32_t& a, const int32_t& b) {
+			constexpr auto Increment = (int32_t)(1.1 * ANIMATION_NORMALIZED_MAX / Interval);
+
+			return abs(a - b) <= Increment
+				|| abs(a - b) >= (ANIMATION_NORMALIZED_MAX - Increment);
+		}
+
+		Animated<int32_t, is_close> angle;
 		Animated<int32_t> scale;
 		ScalablePath path;
 
+		Boulder::Layer& layer;
+
 	public:
-		Hand(const GPathInfo *path_info, GPoint center, bool do_zoom);
+		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool do_zoom);
 
 		void set_angle(angle_t);
 		void zoom(bool in);
@@ -32,9 +41,9 @@ class FaceLayer final: public Boulder::Layer
 		virtual void on_animated_update(void *animated) override;
 	};
 
-	Hand hour_hand, min_hand, sec_hand;
+	Hand<12> hour_hand;
+	Hand<60> min_hand, sec_hand;
 
-	bool show_second;
 	bool large;
 
 public:

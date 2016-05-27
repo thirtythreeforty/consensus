@@ -11,10 +11,12 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 	gpath_draw_outline(ctx, path);
 }
 
-FaceLayer::Hand::Hand(const GPathInfo *path_info, GPoint center, bool do_zoom)
+template<int32_t Interval>
+FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool do_zoom)
 	: angle(0, 1000)
 	, scale(do_zoom ? 0 : ANIMATION_NORMALIZED_MAX, 1000)
 	, path(path_info)
+	, layer(layer)
 {
 	angle.set_callback(this);
 	scale.set_callback(this);
@@ -28,12 +30,14 @@ FaceLayer::Hand::Hand(const GPathInfo *path_info, GPoint center, bool do_zoom)
 	}
 }
 
-void FaceLayer::Hand::set_angle(angle_t a)
+template<int32_t Interval>
+void FaceLayer::Hand<Interval>::set_angle(angle_t a)
 {
 	angle = a;
 }
 
-void FaceLayer::Hand::zoom(bool in)
+template<int32_t Interval>
+void FaceLayer::Hand<Interval>::zoom(bool in)
 {
 	if(in) {
 		scale = ANIMATION_NORMALIZED_MAX;
@@ -43,35 +47,34 @@ void FaceLayer::Hand::zoom(bool in)
 	}
 }
 
-const ScalablePath& FaceLayer::Hand::get_path() const
+template<int32_t Interval>
+const ScalablePath& FaceLayer::Hand<Interval>::get_path() const
 {
 	return path;
 }
 
-void FaceLayer::Hand::on_animated_update(void *animated)
+template<int32_t Interval>
+void FaceLayer::Hand<Interval>::on_animated_update(void *animated)
 {
 	if(animated == &angle) {
 		gpath_rotate_to(path, angle);
 	} else {
 		path.scale(scale);
 	}
+	layer.mark_dirty();
 }
 
 FaceLayer::FaceLayer(GRect frame, bool large)
 	: Layer(frame)
-	, hour_hand(large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame), large)
-	, min_hand(large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame), large)
-	, sec_hand(large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame), large)
-	, show_second(false)
+	, hour_hand(*this, large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame), large)
+	, min_hand(*this, large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame), large)
+	, sec_hand(*this, large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame), large)
 	, large(large)
 {}
 
 void FaceLayer::set_show_second(bool show)
 {
-	show_second = show;
 	sec_hand.zoom(show);
-
-	mark_dirty();
 }
 
 namespace {
@@ -127,11 +130,10 @@ void FaceLayer::update(GContext *ctx)
 #endif
 	draw_path_with(ctx, min_hand.get_path(), base_width, minute_hand_color);
 
-	if(show_second) {
+	if(large) {
+		// Second hand
 #ifndef PBL_COLOR
-		if(large) {
-			draw_path_with(ctx, sec_hand.get_path(), base_width - 4 + outline_extra, theme().background_color());
-		}
+		draw_path_with(ctx, sec_hand.get_path(), base_width - 4 + outline_extra, theme().background_color());
 #endif
 		draw_path_with(ctx, sec_hand.get_path(), base_width - 4, second_hand_color);
 	}
