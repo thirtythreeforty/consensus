@@ -12,9 +12,9 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 }
 
 template<int32_t Interval>
-FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool do_zoom)
+FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center)
 	: angle(0, 1000)
-	, scale(do_zoom ? 0 : ANIMATION_NORMALIZED_MAX, 1000)
+	, scale(0, 1000)
 	, path(path_info)
 	, layer(layer)
 {
@@ -23,11 +23,8 @@ FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_inf
 
 	gpath_move_to(path, center);
 
-	if(do_zoom) {
-		// initial state of scale does not trigger a callback
-		path.scale(0);
-		zoom(true);
-	}
+	// initial state of scale does not trigger a callback
+	path.scale(0);
 }
 
 template<int32_t Interval>
@@ -48,12 +45,6 @@ void FaceLayer::Hand<Interval>::zoom(bool in)
 }
 
 template<int32_t Interval>
-const ScalablePath& FaceLayer::Hand<Interval>::get_path() const
-{
-	return path;
-}
-
-template<int32_t Interval>
 void FaceLayer::Hand<Interval>::on_animated_update(void *animated)
 {
 	if(animated == &angle) {
@@ -66,11 +57,14 @@ void FaceLayer::Hand<Interval>::on_animated_update(void *animated)
 
 FaceLayer::FaceLayer(GRect frame, bool large)
 	: Layer(frame)
-	, hour_hand(*this, large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame), large)
-	, min_hand(*this, large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame), large)
-	, sec_hand(*this, large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame), large)
+	, hour_hand(*this, large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame))
+	, min_hand(*this, large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame))
+	, sec_hand(*this, large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame))
 	, large(large)
-{}
+{
+	hour_hand.zoom(true);
+	min_hand.zoom(true);
+}
 
 void FaceLayer::set_show_second(bool show)
 {

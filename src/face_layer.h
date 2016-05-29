@@ -20,7 +20,7 @@ class FaceLayer final: public Boulder::Layer
 			constexpr auto Increment = (int32_t)(1.1 * ANIMATION_NORMALIZED_MAX / Interval);
 
 			return abs(a - b) <= Increment
-				|| abs(a - b) >= (ANIMATION_NORMALIZED_MAX - Increment);
+			       || abs(a - b) >= (ANIMATION_NORMALIZED_MAX - Increment);
 		}
 
 		Animated<int32_t, is_close> angle;
@@ -30,12 +30,12 @@ class FaceLayer final: public Boulder::Layer
 		Boulder::Layer& layer;
 
 	public:
-		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool do_zoom);
+		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center);
 
 		void set_angle(angle_t);
 		void zoom(bool in);
 
-		const ScalablePath& get_path() const;
+		const ScalablePath& get_path() const { return path; }
 
 	private:
 		virtual void on_animated_update(void *animated) override;
