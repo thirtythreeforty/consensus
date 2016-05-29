@@ -8,7 +8,6 @@ TimeZoneComplication::TimeZoneComplication(GRect frame)
 	, face(get_bounds(), false)
 {
 	add_child(face);
-	update_time();
 }
 
 void TimeZoneComplication::configure(const config_bundle_t& config)
