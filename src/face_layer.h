@@ -17,9 +17,10 @@ class FaceLayer final: public Boulder::Layer
 		using angle_t = int32_t;
 
 		static inline bool is_close(const int32_t& a, const int32_t& b) {
-			constexpr auto Increment = (int32_t)(1.1 * ANIMATION_NORMALIZED_MAX / Interval);
+			constexpr int32_t Increment = 1.1 * ANIMATION_NORMALIZED_MAX / Interval;
 
 			return abs(a - b) <= Increment
+			       // Handle wraparound from 59 to 0:
 			       || abs(a - b) >= (ANIMATION_NORMALIZED_MAX - Increment);
 		}
 
@@ -32,7 +33,7 @@ class FaceLayer final: public Boulder::Layer
 	public:
 		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center);
 
-		void set_angle(angle_t);
+		inline void set_angle(angle_t a) { angle = a; }
 		void zoom(bool in);
 
 		const ScalablePath& get_path() const { return path; }

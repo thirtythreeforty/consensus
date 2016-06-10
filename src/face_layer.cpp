@@ -28,12 +28,6 @@ FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_inf
 }
 
 template<int32_t Interval>
-void FaceLayer::Hand<Interval>::set_angle(angle_t a)
-{
-	angle = a;
-}
-
-template<int32_t Interval>
 void FaceLayer::Hand<Interval>::zoom(bool in)
 {
 	if(in) {
