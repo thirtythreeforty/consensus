@@ -75,15 +75,15 @@ void ScrambledNumber::scramble_animation_update(Animation* anim, AnimationProgre
 	if(scrambled_number->anim_frames_skipped == 1) {
 		// Redneck log_10 follows:
 		unsigned int mod_random_number, min_number;
-		if(scrambled_number->requested_number > 1000) {
+		if(scrambled_number->requested_number >= 1000) {
 			min_number = 1000;
 			mod_random_number = 10000 - 1000;
 		}
-		else if(scrambled_number->requested_number > 100) {
+		else if(scrambled_number->requested_number >= 100) {
 			min_number = 100;
 			mod_random_number = 1000 - 100;
 		}
-		else if(scrambled_number->requested_number > 10) {
+		else if(scrambled_number->requested_number >= 10) {
 			min_number = 10;
 			mod_random_number = 100 - 10;
 		}
