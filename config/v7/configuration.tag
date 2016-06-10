@@ -83,14 +83,6 @@
 			Display the second hand.  Note that this may increase battery consumption.
 		</configuration-footer>
 		<configuration-content>
-			<configuration-toggle attrib={ parent.parent.show_animations }>
-				Animations
-			</configuration-toggle>
-		</configuration-content>
-		<configuration-footer>
-			Animate various complication updates and spin the hands when the watchface starts.
-		</configuration-footer>
-		<configuration-content>
 			<configuration-toggle attrib={ parent.parent.show_no_connection }>
 				"No connection" icon
 			</configuration-toggle>
@@ -106,13 +98,11 @@
 	this.theme = new this.Attribute('bold-dark');
 	this.show_second_hand = new this.Attribute(false);
 	this.show_no_connection = new this.Attribute(true);
-	this.show_animations = new this.Attribute(true);
 
 	from_json(pack) {
 		this.theme.set(pack["theme"]);
 		this.show_second_hand.set(pack['show_second_hand']);
 		this.show_no_connection.set(pack['show_no_connection']);
-		this.show_animations.set(pack['show_animations']);
 		this.update();
 	}
 
@@ -120,7 +110,6 @@
 		pack['theme'] = this.theme.get();
 		pack['show_second_hand'] = this.show_second_hand.get();
 		pack['show_no_connection'] = this.show_no_connection.get();
-		pack['show_animations'] = this.show_animations.get();
 	}
 	</script>
 </configure-appearance>
