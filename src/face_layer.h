@@ -12,12 +12,12 @@ extern "C" {
 
 class FaceLayer final: public Boulder::Layer
 {
-	template<int32_t Interval> class Hand final: private AnimatedCallback
+	class Hand final: private AnimatedCallback
 	{
 		using angle_t = int32_t;
 
 		static inline bool is_close(const int32_t& a, const int32_t& b) {
-			constexpr int32_t Increment = 1.1 * ANIMATION_NORMALIZED_MAX / Interval;
+			constexpr int32_t Increment = 1.1 * ANIMATION_NORMALIZED_MAX / 60;
 
 			return abs(a - b) <= Increment
 			       // Handle wraparound from 59 to 0:
@@ -42,8 +42,7 @@ class FaceLayer final: public Boulder::Layer
 		virtual void on_animated_update(void *animated) override;
 	};
 
-	Hand<12> hour_hand;
-	Hand<60> min_hand, sec_hand;
+	Hand hour_hand, min_hand, sec_hand;
 
 	bool large;
 

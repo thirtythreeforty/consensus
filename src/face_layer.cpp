@@ -11,8 +11,7 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 	gpath_draw_outline(ctx, path);
 }
 
-template<int32_t Interval>
-FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center)
+FaceLayer::Hand::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center)
 	: angle(0, 1000)
 	, scale(0, 1000)
 	, path(path_info)
@@ -27,8 +26,7 @@ FaceLayer::Hand<Interval>::Hand(Boulder::Layer& layer, const GPathInfo *path_inf
 	path.scale(0);
 }
 
-template<int32_t Interval>
-void FaceLayer::Hand<Interval>::zoom(bool in)
+void FaceLayer::Hand::zoom(bool in)
 {
 	if(in) {
 		scale = ANIMATION_NORMALIZED_MAX;
@@ -38,8 +36,7 @@ void FaceLayer::Hand<Interval>::zoom(bool in)
 	}
 }
 
-template<int32_t Interval>
-void FaceLayer::Hand<Interval>::on_animated_update(void *animated)
+void FaceLayer::Hand::on_animated_update(void *animated)
 {
 	if(animated == &angle) {
 		gpath_rotate_to(path, angle);
