@@ -2,28 +2,26 @@
 
 #include <algorithm>
 
-std::array<TimeCallback::cb_t, 4> TimeCallback::callbacks;
-unsigned int TimeCallback::n = 0;
+std::vector<TimeCallback::cb_t> TimeCallback::callbacks;
 
 TimeCallback::TimeCallback(TimeUnits units)
 {
-	callbacks[n++] = {this, units};
+	callbacks.emplace_back(this, units);
 	resubscribe();
 }
 
 TimeCallback::~TimeCallback()
 {
-	n = std::remove_if(&callbacks[0], &callbacks[n],
-	                    [this](auto c){ return c.first == this; })
-	    - &callbacks[0];
+	std::remove_if(callbacks.begin(), callbacks.end(),
+	               [this](auto c){ return c.first == this; });
 	resubscribe();
 }
 
 void TimeCallback::update_time_subscription(TimeUnits units)
 {
-	for(unsigned int i = 0; i < n; ++i) {
-		if(callbacks[i].first == this) {
-			callbacks[i].second = units;
+	for(auto& callback: callbacks) {
+		if(callback.first == this) {
+			callback.second = units;
 		}
 	}
 	resubscribe();
@@ -31,22 +29,22 @@ void TimeCallback::update_time_subscription(TimeUnits units)
 
 void TimeCallback::tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
-	for(unsigned int i = 0; i < n; ++i) {
-		if(callbacks[i].second & units_changed) {
-			callbacks[i].first->on_tick(tick_time, units_changed);
+	for(const auto& callback: callbacks) {
+		if(callback.second & units_changed) {
+			callback.first->on_tick(tick_time, units_changed);
 		}
 	}
 }
 
 void TimeCallback::resubscribe()
 {
-	if(n == 0) {
+	if(callbacks.empty()) {
 		tick_timer_service_unsubscribe();
 		return;
 	}
 
-	for(unsigned int i = 0; i < n; ++i) {
-		if(callbacks[i].second & SECOND_UNIT) {
+	for(const auto& callback: callbacks) {
+		if(callback.second & SECOND_UNIT) {
 			tick_timer_service_subscribe(SECOND_UNIT, TimeCallback::tick_handler);
 			return;
 		}

@@ -5,11 +5,10 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include <array>
+#include <vector>
 
 class BatteryCallback {
-	static std::array<BatteryCallback*, 4> callbacks;
-	static unsigned int n;
+	static std::vector<BatteryCallback*> callbacks;
 
 protected:
 	BatteryCallback();

@@ -3,19 +3,18 @@
 #include <algorithm>
 
 decltype(BatteryCallback::callbacks) BatteryCallback::callbacks;
-unsigned int BatteryCallback::n = 0;
 
 BatteryCallback::BatteryCallback()
 {
-	callbacks[n++] = this;
-	if(n == 1) {
+	if(callbacks.empty()) {
 		battery_state_service_subscribe(BatteryCallback::update_handler);
 	}
+	callbacks.emplace_back(this);
 }
 
 BatteryCallback::~BatteryCallback()
 {
-	n = std::remove(&callbacks[0], &callbacks[n], this) - &callbacks[0];
+	std::remove(callbacks.begin(), callbacks.end(), this);
 }
 
 void BatteryCallback::update_battery_now()
@@ -26,7 +25,7 @@ void BatteryCallback::update_battery_now()
 
 void BatteryCallback::update_handler(BatteryChargeState state)
 {
-	for(unsigned int i = 0; i < n; ++i) {
-		callbacks[i]->on_battery_change(state);
+	for(const auto& callback: callbacks) {
+		callback->on_battery_change(state);
 	}
 }

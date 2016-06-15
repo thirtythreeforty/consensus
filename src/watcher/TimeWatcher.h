@@ -5,14 +5,12 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include <array>
 #include <utility>
 #include <vector>
 
 class TimeCallback {
 	using cb_t = std::pair<TimeCallback*, TimeUnits>;
-	static std::array<cb_t, 4> callbacks;
-	static unsigned int n;
+	static std::vector<cb_t> callbacks;
 
 protected:
 	TimeCallback(TimeUnits units);

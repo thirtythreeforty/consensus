@@ -5,13 +5,10 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include <algorithm>
-#include <array>
 #include <vector>
 
 class HealthCallback {
-	static std::array<HealthCallback*, 4> callbacks;
-	static unsigned int n;
+	static std::vector<HealthCallback*> callbacks;
 
 protected:
 	HealthCallback();

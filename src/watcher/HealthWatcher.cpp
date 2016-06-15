@@ -2,24 +2,23 @@
 
 #include <algorithm>
 
-std::array<HealthCallback*, 4> HealthCallback::callbacks;
-unsigned int HealthCallback::n;
+std::vector<HealthCallback*> HealthCallback::callbacks;
 
 HealthCallback::HealthCallback()
 {
 #ifdef PBL_HEALTH
-	callbacks[n++] = this;
-	if(n == 1) {
+	if(callbacks.empty()) {
 		health_service_events_subscribe(HealthCallback::update_handler, this);
 	}
+	callbacks.emplace_back(this);
 #endif
 }
 
 HealthCallback::~HealthCallback()
 {
 #ifdef PBL_HEALTH
-	n = std::remove(&callbacks[0], &callbacks[n], this) - &callbacks[0];
-	if(n == 0) {
+	std::remove(callbacks.begin(), callbacks.end(), this);
+	if(callbacks.empty()) {
 		health_service_events_unsubscribe();
 	}
 #endif
@@ -28,12 +27,12 @@ HealthCallback::~HealthCallback()
 #ifdef PBL_HEALTH
 void HealthCallback::update_handler(HealthEventType ev, void* ptr)
 {
-	for(unsigned int i = 0; i < n; ++i) {
+	for(const auto& callback: callbacks) {
 		if(ev == HealthEventSignificantUpdate) {
-			callbacks[i]->on_significant_update();
+			callback->on_significant_update();
 		}
 		else if(ev == HealthEventMovementUpdate) {
-			callbacks[i]->on_movement_update();
+			callback->on_movement_update();
 		}
 	}
 }
