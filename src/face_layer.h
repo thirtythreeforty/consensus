@@ -31,7 +31,7 @@ class FaceLayer final: public Boulder::Layer
 		Boulder::Layer& layer;
 
 	public:
-		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center);
+		Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool large);
 
 		inline void set_angle(angle_t a) { angle = a; }
 		void zoom(bool in);

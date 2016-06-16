@@ -11,9 +11,9 @@ static void draw_path_with(GContext *ctx, GPath* path, uint8_t stroke_width, GCo
 	gpath_draw_outline(ctx, path);
 }
 
-FaceLayer::Hand::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center)
+FaceLayer::Hand::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint center, bool large)
 	: angle(0, 1000)
-	, scale(0, 1000)
+	, scale(large ? 0 : ANIMATION_NORMALIZED_MAX, 1000)
 	, path(path_info)
 	, layer(layer)
 {
@@ -23,7 +23,9 @@ FaceLayer::Hand::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint 
 	gpath_move_to(path, center);
 
 	// initial state of scale does not trigger a callback
-	path.scale(0);
+	if(large) {
+		path.scale(0);
+	}
 }
 
 void FaceLayer::Hand::zoom(bool in)
@@ -48,9 +50,9 @@ void FaceLayer::Hand::on_animated_update(void *animated)
 
 FaceLayer::FaceLayer(GRect frame, bool large)
 	: Layer(frame)
-	, hour_hand(*this, large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame))
-	, min_hand(*this, large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame))
-	, sec_hand(*this, large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame))
+	, hour_hand(*this, large ? &hour_hand_path : &small_hour_hand_path, grect_center_point(&frame), large)
+	, min_hand(*this, large ? &minute_hand_path : &small_minute_hand_path, grect_center_point(&frame), large)
+	, sec_hand(*this, large ? &second_hand_path : &small_second_hand_path, grect_center_point(&frame), large)
 	, large(large)
 {
 	hour_hand.zoom(true);
