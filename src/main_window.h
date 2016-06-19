@@ -20,22 +20,15 @@ class MainWindow : public Boulder::Window, private TimeCallback {
 	BackgroundLayer background_layer;
 	FaceLayer face_layer;
 	Boulder::Layer complications_layer;
-	std::array<AbstractComplication, 3> complications;
-
-	BitmapLayer *no_bluetooth_layer;
-	GBitmap *no_bluetooth_image;
+	std::array<AbstractComplication, 4> complications;
 
 public:
 	explicit MainWindow();
-	~MainWindow();
+	~MainWindow() = default;
 
 	void configure();
 
 	void on_connection_change(bool connected);
-
-	bool should_power_compass();
-	void on_compass_power(bool on);
-	void on_compass_update(CompassHeadingData& heading);
 
 	virtual void on_tick(struct tm *tick_time, TimeUnits units_changed) override;
 

@@ -20,6 +20,7 @@ uint8_t current_theme();
 
 using complication_config = std::pair<unsigned int, std::array<unsigned int, 4>>;
 
+complication_config top_complication_type();
 complication_config left_complication_type();
 complication_config bottom_complication_type();
 complication_config right_complication_type();

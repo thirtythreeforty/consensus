@@ -10,14 +10,8 @@ MainWindow::MainWindow()
 	, background_layer(get_bounds())
 	, face_layer(get_bounds(), true)
 	, complications_layer(get_bounds())
-	, no_bluetooth_image(create_themed_bluetooth_bitmap())
 {
 	update_time_now();
-}
-
-MainWindow::~MainWindow()
-{
-	gbitmap_destroy(no_bluetooth_image);
 }
 
 void MainWindow::on_load()
@@ -32,24 +26,7 @@ void MainWindow::on_unload()
 
 void MainWindow::init_layers()
 {
-	GRect size = get_bounds();
-	GPoint center = grect_center_point(&size);
-
 	add_child(background_layer);
-
-	const GRect bluetooth_image_size = gbitmap_get_bounds(no_bluetooth_image);
-	const GRect bluetooth_layer_location =
-		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
-		      (int16_t)(center.y - complication_offset_y - complication_size / 2 - bluetooth_image_size.size.h / 2),
-		      (int16_t)bluetooth_image_size.size.w,
-		      (int16_t)bluetooth_image_size.size.h);
-	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
-	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
-	bitmap_layer_set_compositing_mode(no_bluetooth_layer, GCompOpSet);
-	// Immediately hide or show the icon
-	update_connection_now();
-	add_child(bitmap_layer_get_layer(no_bluetooth_layer));
-
 	add_child(complications_layer);
 
 	reinit_complications();
@@ -60,12 +37,6 @@ void MainWindow::init_layers()
 
 void MainWindow::deinit_layers()
 {
-	bitmap_layer_destroy(no_bluetooth_layer);
-}
-
-void MainWindow::update_connection_now()
-{
-	on_connection_change(connection_service_peek_pebble_app_connection());
 }
 
 void MainWindow::configure()
@@ -73,23 +44,10 @@ void MainWindow::configure()
 	face_layer.set_show_second(should_show_second());
 	background_layer.recolor();
 
-	gbitmap_destroy(no_bluetooth_image);
-	no_bluetooth_image = create_themed_bluetooth_bitmap();
-	bitmap_layer_set_bitmap(no_bluetooth_layer, no_bluetooth_image);
-
-	// The show-no-connection pref could have changed
-	update_connection_now();
-
 	update_time_subscription(should_show_second() ? SECOND_UNIT : MINUTE_UNIT);
 	update_time_now();
 
 	reinit_complications();
-}
-
-void MainWindow::on_connection_change(bool connected)
-{
-	layer_set_hidden(bitmap_layer_get_layer(no_bluetooth_layer),
-	                 connected || should_hide_no_bluetooth());
 }
 
 void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
@@ -110,23 +68,16 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	}
 }
 
-bool MainWindow::should_power_compass()
-{
-	return false;
-}
-
-void MainWindow::on_compass_power(bool on)
-{
-}
-
-void MainWindow::on_compass_update(CompassHeadingData& heading)
-{
-}
-
 void MainWindow::reinit_complications()
 {
 	GRect size = complications_layer.get_frame();
 	GPoint center = grect_center_point(&size);
+
+	const GRect top_complication_position =
+		GRect((int16_t)(center.x - complication_size / 2),
+		      (int16_t)(center.y - complication_size - complication_offset_y),
+		      (int16_t)complication_size,
+		      (int16_t)complication_size);
 
 	const GRect left_complication_position =
 		GRect((int16_t)(center.x - complication_size - complication_offset_x),
@@ -146,7 +97,8 @@ void MainWindow::reinit_complications()
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
 
-	const std::array<std::pair<const GRect&, complication_config>, 3> complication_params = {{
+	const std::array<std::pair<const GRect&, complication_config>, 4> complication_params = {{
+		{ top_complication_position, top_complication_type() },
 		{ left_complication_position, left_complication_type() },
 		{ bottom_complication_position, bottom_complication_type() },
 		{ right_complication_position, right_complication_type() },
@@ -184,9 +136,4 @@ void MainWindow::reinit_complications()
 	complication_do<WeatherComplication>([&](auto& c) {
 		c.weather_changed(wdata);
 	});
-}
-
-GBitmap* MainWindow::create_themed_bluetooth_bitmap()
-{
-	return gbitmap_create_with_resource(theme().no_bluetooth_resource());
 }

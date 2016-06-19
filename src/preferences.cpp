@@ -38,6 +38,12 @@ struct Preferences {
 	uint32_t right_complication_opt4 = 0;
 
 	bool should_animate = true;
+
+	uint8_t top_complication_type = AbstractComplication::typenum_of<StatusComplication>();
+	uint32_t top_complication_opt1 = 0;
+	uint32_t top_complication_opt2 = 0;
+	uint32_t top_complication_opt3 = 0;
+	uint32_t top_complication_opt4 = 0;
 };
 
 static Preferences prefs;
@@ -116,6 +122,19 @@ complication_config right_complication_type()
 	};
 }
 
+complication_config top_complication_type()
+{
+	return {
+		prefs.top_complication_type,
+		{
+			prefs.top_complication_opt1,
+			prefs.top_complication_opt2,
+			prefs.top_complication_opt3,
+			prefs.top_complication_opt4,
+		}
+	};
+}
+
 uint8_t current_theme()
 {
 	return prefs.theme;
@@ -173,6 +192,12 @@ void parse_preferences(DictionaryIterator *iterator)
 	update_preference(iterator, KEY_PREF_THEME, prefs.theme);
 
 	update_preference(iterator, KEY_PREF_SHOW_ANIMATIONS, prefs.should_animate);
+
+	update_preference(iterator, KEY_PREF_TOP_COMPLICATION, prefs.top_complication_type);
+	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT1, prefs.top_complication_opt1);
+	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT2, prefs.top_complication_opt2);
+	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT3, prefs.top_complication_opt3);
+	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT4, prefs.top_complication_opt4);
 
 	save_preferences();
 }

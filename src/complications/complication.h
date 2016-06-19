@@ -27,6 +27,7 @@ struct WeatherData {
 #include "variant.h"
 
 #include "watcher/BatteryWatcher.h"
+#include "watcher/ConnectionWatcher.h"
 #include "watcher/HealthWatcher.h"
 #include "watcher/TimeWatcher.h"
 
@@ -305,6 +306,29 @@ private:
 	constexpr static const char *steps_unit = "STEPS";
 };
 
+class StatusComplication
+	: public Complication
+	, private ConnectionCallback
+{
+	BitmapLayer *no_bluetooth_layer;
+	GBitmap *no_bluetooth_image;
+
+public:
+	explicit StatusComplication(GRect frame);
+	~StatusComplication();
+
+	virtual void configure(const config_bundle_t& config) override;
+
+protected:
+	virtual void update(GContext* ctx) override;
+
+private:
+	virtual void on_connection_change(bool connected) override;
+
+	GBitmap* create_themed_bluetooth_bitmap();
+	void update_connection_now();
+};
+
 using AbstractComplication = Variant<
 	// These must be kept in this order to preserve the mapping in the config
 	void,
@@ -312,7 +336,8 @@ using AbstractComplication = Variant<
 	DateComplication,
 	WeatherComplication,
 	HealthComplication,
-	TimeZoneComplication
+	TimeZoneComplication,
+	StatusComplication
 >;
 
 #endif
