@@ -109,6 +109,11 @@ protected:
 		layer_add_child(window_get_root_layer(_window), layer);
 	}
 
+	#define B_WINDOW_METHOD(M) B_PROXY_METHOD(M, window_, _window)
+
+	B_WINDOW_METHOD(get_root_layer);
+	B_WINDOW_METHOD(set_background_color);
+
 private:
 #define B_WINDOW_CALLBACK(CallbackName, MemberName) \
 	static void CallbackName(::Window *w) { \

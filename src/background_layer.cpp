@@ -16,8 +16,5 @@ void BackgroundLayer::recolor()
 
 void BackgroundLayer::update(GContext *ctx)
 {
-	graphics_context_set_fill_color(ctx, theme().background_color());
-	graphics_fill_rect(ctx, get_bounds(), 0, GCornerNone);
-
 	ticks_image.draw(ctx, GPointZero);
 }

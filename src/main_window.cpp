@@ -11,6 +11,7 @@ MainWindow::MainWindow()
 	, face_layer(get_bounds(), true)
 	, complications_layer(get_bounds())
 {
+	set_background_color(theme().background_color());
 	update_time_now();
 }
 
@@ -42,6 +43,7 @@ void MainWindow::deinit_layers()
 void MainWindow::configure()
 {
 	face_layer.set_show_second(should_show_second());
+	set_background_color(theme().background_color());
 	background_layer.recolor();
 
 	update_time_subscription(should_show_second() ? SECOND_UNIT : MINUTE_UNIT);
