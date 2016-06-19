@@ -21,6 +21,8 @@ struct Theme
 {
 	THEME_ACCESSOR(GColor, background_color);
 	THEME_ACCESSOR(uint8_t, no_bluetooth_resource);
+	THEME_ACCESSOR(uint8_t, low_batt_resource);
+	THEME_ACCESSOR(uint8_t, chg_batt_resource);
 	THEME_ACCESSOR(GColor, tick_color);
 	THEME_ACCESSOR(uint8_t, tick_resource);
 	THEME_ACCESSOR(bool, complication_fill);

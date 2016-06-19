@@ -158,6 +158,26 @@
         "type": "raw",
         "name": "SLEEP",
         "file": "sleep.pdc"
+      },
+      {
+        "type": "bitmap",
+        "name": "LOW_BATTERY",
+        "file": "low-battery.png"
+      },
+      {
+        "type": "bitmap",
+        "name": "LOW_BATTERY_BLACK",
+        "file": "low-battery-black.png"
+      },
+      {
+        "type": "bitmap",
+        "name": "CHG_BATTERY",
+        "file": "chg-battery.png"
+      },
+      {
+        "type": "bitmap",
+        "name": "CHG_BATTERY_BLACK",
+        "file": "chg-battery-black.png"
       }
     ]
   }

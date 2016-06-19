@@ -110,6 +110,7 @@ void MainWindow::reinit_complications()
 	              std::tuple_size<decltype(complications)>::value,
 	              "Complication parameter array size mismatch");
 
+	bool show_low_batt = true;
 	for(size_t i = 0; i < complication_params.size(); ++i) {
 		using std::get;
 		const GRect& position = get<0>(complication_params[i]);
@@ -117,6 +118,10 @@ void MainWindow::reinit_complications()
 		const auto& type = get<0>(config);
 		bool type_different = complications[i].type() != type;
 		bool new_type_valid = AbstractComplication::typenum_of<void>() != type;
+
+		if(AbstractComplication::typenum_of<BatteryComplication>() == type) {
+			show_low_batt = false;
+		}
 
 		if(type_different) {
 			complications[i].emplace(type, position);
@@ -137,5 +142,9 @@ void MainWindow::reinit_complications()
 	WeatherData wdata = WeatherData::from_persist();
 	complication_do<WeatherComplication>([&](auto& c) {
 		c.weather_changed(wdata);
+	});
+
+	complication_do<StatusComplication>([&](auto& c) {
+		c.enable_battery_alert(show_low_batt);
 	});
 }

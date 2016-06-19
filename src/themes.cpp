@@ -7,6 +7,8 @@ namespace {
 		{ // "Bold"
 			._background_color = GColorBlack,
 			._no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
+			._low_batt_resource = RESOURCE_ID_LOW_BATTERY,
+			._chg_batt_resource = RESOURCE_ID_CHG_BATTERY,
 			._tick_color = GColorWhite,
 			._tick_resource = RESOURCE_ID_TICKS,
 			._complication_fill = false,
@@ -29,6 +31,8 @@ namespace {
 		{ // "Thin"
 			._background_color = GColorBlack,
 			._no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
+			._low_batt_resource = RESOURCE_ID_LOW_BATTERY,
+			._chg_batt_resource = RESOURCE_ID_CHG_BATTERY,
 			._tick_color = COLOR_FALLBACK(GColorDarkGray, GColorWhite),
 			._tick_resource = RESOURCE_ID_TICKS,
 			._complication_fill = false,
@@ -51,6 +55,8 @@ namespace {
 		{ // "Bold White"
 			._background_color = GColorWhite,
 			._no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH_BLACK,
+			._low_batt_resource = RESOURCE_ID_LOW_BATTERY_BLACK,
+			._chg_batt_resource = RESOURCE_ID_CHG_BATTERY_BLACK,
 			._tick_color = GColorBlack,
 			._tick_resource = RESOURCE_ID_TICKS,
 			._complication_fill = false,
@@ -73,6 +79,8 @@ namespace {
 		{ // "Minimal Dark"
 			._background_color = GColorBlack,
 			._no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH,
+			._low_batt_resource = RESOURCE_ID_LOW_BATTERY,
+			._chg_batt_resource = RESOURCE_ID_CHG_BATTERY,
 			._tick_color = GColorWhite,
 			._tick_resource = RESOURCE_ID_TICKS_MINIMAL,
 			._complication_fill = false,
@@ -95,6 +103,8 @@ namespace {
 		{ // "Minimal White"
 			._background_color = GColorWhite,
 			._no_bluetooth_resource = RESOURCE_ID_NO_BLUETOOTH_BLACK,
+			._low_batt_resource = RESOURCE_ID_LOW_BATTERY_BLACK,
+			._chg_batt_resource = RESOURCE_ID_CHG_BATTERY_BLACK,
 			._tick_color = GColorBlack,
 			._tick_resource = RESOURCE_ID_TICKS_MINIMAL,
 			._complication_fill = false,

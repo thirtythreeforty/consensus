@@ -308,10 +308,16 @@ private:
 
 class StatusComplication
 	: public Complication
+	, private BatteryCallback
 	, private ConnectionCallback
 {
 	BitmapLayer *no_bluetooth_layer;
 	GBitmap *no_bluetooth_image;
+
+	BitmapLayer *battery_layer;
+	GBitmap *low_battery_image;
+	GBitmap *chg_battery_image;
+	bool show_battery_alert;
 
 public:
 	explicit StatusComplication(GRect frame);
@@ -319,14 +325,18 @@ public:
 
 	virtual void configure(const config_bundle_t& config) override;
 
+	void enable_battery_alert(bool enable);
+
 protected:
 	virtual void update(GContext* ctx) override;
 
 private:
 	virtual void on_connection_change(bool connected) override;
+	virtual void on_battery_change(const BatteryChargeState&) override;
 
-	GBitmap* create_themed_bluetooth_bitmap();
-	void update_connection_now();
+	static GBitmap* create_themed_bluetooth_bitmap();
+	static GBitmap* create_themed_low_batt_bitmap();
+	static GBitmap* create_themed_chg_batt_bitmap();
 };
 
 using AbstractComplication = Variant<
