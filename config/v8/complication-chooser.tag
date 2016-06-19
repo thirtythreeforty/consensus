@@ -153,7 +153,7 @@
 			<option class="item-select-option" value='14'>UTC+14:00</configuration-option>
 	</configuration-content>
 	<configuration-footer>
-		Choose a UTC offset for the clock.  Note that due to ever-changing daylight savings time preferences, this will not be adjusted for daylight savings time!
+		Choose a UTC offset for the clock.  Note that due to ever-changing daylight savings time policies, this will not be adjusted for daylight savings time!
 	</configuration-footer>
 
 	<script>
