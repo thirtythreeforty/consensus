@@ -15,9 +15,13 @@ StatusComplication::StatusComplication(GRect frame)
 	// size, which should be always true.
 	const GRect batt_image_size = gbitmap_get_bounds(low_battery_image);
 
+	const int16_t image_separation = 5;
+	const int16_t total_image_height = bluetooth_image_size.size.h +
+	                                   batt_image_size.size.h + image_separation;
+
 	const GRect bluetooth_layer_location =
 		GRect((int16_t)(center.x - bluetooth_image_size.size.w / 2),
-		      (int16_t)((center.y - bluetooth_image_size.size.h) / 2),
+			  (int16_t)(center.y - total_image_height / 2),
 		      (int16_t)bluetooth_image_size.size.w,
 		      (int16_t)bluetooth_image_size.size.h);
 	no_bluetooth_layer = bitmap_layer_create(bluetooth_layer_location);
@@ -27,7 +31,7 @@ StatusComplication::StatusComplication(GRect frame)
 
 	const GRect batt_layer_location =
 		GRect((int16_t)(center.x - batt_image_size.size.w / 2),
-		      (int16_t)(center.y / 2 + center.y - batt_image_size.size.h / 2),
+		      (int16_t)(center.y - total_image_height / 2 + bluetooth_image_size.size.h + image_separation),
 		      (int16_t)batt_image_size.size.w,
 		      (int16_t)batt_image_size.size.h);
 	battery_layer = bitmap_layer_create(batt_layer_location);
