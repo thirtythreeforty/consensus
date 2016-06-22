@@ -17,8 +17,8 @@ FaceLayer::Hand::Hand(Boulder::Layer& layer, const GPathInfo *path_info, GPoint 
 	, path(path_info)
 	, layer(layer)
 {
-	angle.set_callback(this);
-	scale.set_callback(this);
+	angle.set_callback(*this);
+	scale.set_callback(*this);
 
 	gpath_move_to(path, center);
 

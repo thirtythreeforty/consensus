@@ -136,13 +136,13 @@ void IconTextComplication::reset_number()
 HighlightComplication::HighlightComplication(GRect frame)
 	: IconTextComplication(frame)
 {
-	angle.set_callback(this);
+	angle.set_callback(*this);
 }
 
 HighlightComplication2::HighlightComplication2(GRect frame)
 	: HighlightComplication(frame)
 {
-	angle2.set_callback(this);
+	angle2.set_callback(*this);
 }
 
 bool HighlightComplication::angles_are_close(const angle_t& a, const angle_t& b)
@@ -169,7 +169,7 @@ void HighlightComplication::update(GContext* ctx)
 TickComplication::TickComplication(GRect frame)
 	: HighlightComplication(frame)
 {
-	tick_angle.set_callback(this);
+	tick_angle.set_callback(*this);
 }
 
 void TickComplication::update(GContext* ctx)

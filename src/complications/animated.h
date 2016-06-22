@@ -6,12 +6,13 @@
 #include "preferences.h"
 #include "variant.h"
 
+#include <functional>
 #include <utility>
 
 namespace animated_detail {
 
 template<typename T>
-using CloseChecker = bool (*)(const T&, const T&);
+using CloseChecker = bool(const T&, const T&);
 
 template<typename T>
 using Clamp = T(const T&);
@@ -49,7 +50,7 @@ class Animated
 	T current;
 	bool animating;
 
-	AnimatedCallback* callback;
+	std::reference_wrapper<AnimatedCallback> callback;
 
 	unsigned int duration = 700;
 
@@ -58,14 +59,14 @@ public:
 		: requested()
 		, current()
 		, animating(false)
-		, callback(&default_callback)
+		, callback(default_callback)
 	{}
 
 	Animated(const T& t, unsigned int duration)
 		: requested(t)
 		, current(t)
 		, animating(false)
-		, callback(&default_callback)
+		, callback(default_callback)
 		, duration(duration)
 	{}
 
@@ -73,7 +74,7 @@ public:
 		: Animated(t, 700)
 	{}
 
-	void set_callback(AnimatedCallback* new_callback) {
+	void set_callback(AnimatedCallback& new_callback) {
 		callback = new_callback;
 	}
 
@@ -102,7 +103,7 @@ private:
 	void animate_to_requested() {
 		if(TsClose(current, requested) || !should_animate()) {
 			current = requested;
-			callback->on_animated_update(this);
+			callback.get().on_animated_update(this);
 			return;
 		}
 
@@ -127,7 +128,7 @@ private:
 
 	static void set_st(Self& animated, const T& new_t) {
 		animated.current = new_t;
-		animated.callback->on_animated_update(&animated);
+		animated.callback.get().on_animated_update(&animated);
 	}
 
 	static const T& get_st(const Self& animated) {
