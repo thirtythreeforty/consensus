@@ -19,9 +19,9 @@ class FaceLayer final: public Boulder::Layer
 		static inline bool is_close(const int32_t& a, const int32_t& b) {
 			constexpr int32_t Increment = 1.1 * ANIMATION_NORMALIZED_MAX / 60;
 
-			return abs(a - b) <= Increment
+			return b - a <= Increment
 			       // Handle wraparound from 59 to 0:
-			       || abs(a - b) >= (ANIMATION_NORMALIZED_MAX - Increment);
+			       || a - b >= (ANIMATION_NORMALIZED_MAX - Increment);
 		}
 
 		Animated<int32_t, is_close> angle;
