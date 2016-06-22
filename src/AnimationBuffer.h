@@ -5,10 +5,6 @@ extern "C" {
 #include <pebble.h>
 }
 
-#include "boulder.h"
-
-#include <vector>
-
 namespace AnimationBuffer
 {
 	void enqueue(Animation*);

@@ -1,5 +1,7 @@
 #include "AnimationBuffer.h"
 
+#include <vector>
+
 namespace AnimationBuffer {
 
 std::vector<Animation*> animations;
@@ -12,7 +14,6 @@ void enqueue(Animation *anim)
 
 		auto setup = animation_get_implementation(anim)->setup;
 		if(setup) {
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Calling setup function");
 			setup(anim);
 		}
 	}
