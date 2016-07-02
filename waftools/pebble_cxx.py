@@ -12,9 +12,12 @@ def fix_pebble_h_dependencies(task_gen):
     from waflib.Tools import cxx, c_preproc
 
     def wrap_c_preproc_scan(task):
+        def get_node_from_abspath(ctx, path):
+            return ctx.root.make_node(path)
+
         (nodes, names) = c_preproc.scan(task)
         if 'pebble.h' in names:
-            nodes.append(task.env.RESOURCE_ID_HEADER)
+            nodes.append(get_node_from_abspath(task.generator.bld, task.env.RESOURCE_ID_HEADER))
         return (nodes, names)
 
     for task in task_gen.tasks:
