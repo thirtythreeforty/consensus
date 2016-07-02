@@ -1,0 +1,199 @@
+{
+  "name": "Consensus",
+  "version": "8.1.0",
+  "author": "George Hilliard",
+  "private": true,
+  "dependencies": {},
+  "keywords": [
+    "pebble-app"
+  ],
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": [
+        {
+          "menuIcon": true,
+          "type": "bitmap",
+          "name": "MENU_ICON",
+          "file": "icon.png"
+        },
+        {
+          "type": "raw",
+          "name": "TICKS",
+          "file": "ticks.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "TICKS_MINIMAL",
+          "file": "ticks-minimal.pdc"
+        },
+        {
+          "type": "bitmap",
+          "name": "NO_BLUETOOTH",
+          "file": "no-bluetooth.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "NO_BLUETOOTH_BLACK",
+          "file": "no-bluetooth-black.png"
+        },
+        {
+          "type": "raw",
+          "name": "BATTERY",
+          "file": "battery.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "BATTERY_CHARGING",
+          "file": "battery-charging.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_GENERIC",
+          "file": "weather/Generic_weather.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_SUNNY",
+          "file": "weather/Sunny_day.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_CLOUDY",
+          "file": "weather/Cloudy_day.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_PARTLY_CLOUDY",
+          "file": "weather/Partly_cloudy.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_RAIN_LIGHT",
+          "file": "weather/Light_rain.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_RAIN_HEAVY",
+          "file": "weather/Heavy_rain.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_RAIN_AND_SNOW",
+          "file": "weather/Raining_and_snowing.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_SNOW_LIGHT",
+          "file": "weather/Light_snow.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "WEATHER_SNOW_HEAVY",
+          "file": "weather/Heavy_snow.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "HEALTH",
+          "file": "health.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "HEALTH_CHECK",
+          "file": "health-check.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "HEALTH_ERROR",
+          "file": "health-error.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "SLEEP",
+          "file": "sleep.pdc"
+        },
+        {
+          "type": "bitmap",
+          "name": "LOW_BATTERY",
+          "file": "low-battery.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "LOW_BATTERY_BLACK",
+          "file": "low-battery-black.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "CHG_BATTERY",
+          "file": "chg-battery.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "CHG_BATTERY_BLACK",
+          "file": "chg-battery-black.png"
+        }
+      ]
+    },
+    "projectType": "native",
+    "uuid": "7cd698f3-f62b-4dd5-81d0-b4888c52e2c5",
+    "messageKeys": {
+      "KEY_WEATHER_REQUEST": 0,
+      "KEY_WEATHER_TEMP_C": 1,
+      "KEY_WEATHER_RAINCHANCE_PCT": 2,
+      "KEY_WEATHER_CONDITIONS": 3,
+      "KEY_WEATHER_HUMIDITY": 4,
+      "KEY_WEATHER_ICON": 5,
+
+      "KEY_PREF_SHOW_SECOND_HAND": 6,
+      "KEY_PREF_SHOW_NO_CONNECTION": 7,
+
+      "KEY_PREF_VIBRATE_ON_HOUR": 8,
+      "KEY_PREF_VIBRATE_ON_DISCONNECT": 9,
+
+      "KEY_PREF_LEFT_COMPLICATION": 10,
+      "KEY_PREF_BOTTOM_COMPLICATION": 11,
+      "KEY_PREF_RIGHT_COMPLICATION": 12,
+
+      "KEY_PREF_LEFT_COMPLICATION_OPT1": 13,
+      "KEY_PREF_LEFT_COMPLICATION_OPT2": 14,
+      "KEY_PREF_LEFT_COMPLICATION_OPT3": 15,
+      "KEY_PREF_LEFT_COMPLICATION_OPT4": 16,
+      "KEY_PREF_BOTTOM_COMPLICATION_OPT1": 17,
+      "KEY_PREF_BOTTOM_COMPLICATION_OPT2": 18,
+      "KEY_PREF_BOTTOM_COMPLICATION_OPT3": 19,
+      "KEY_PREF_BOTTOM_COMPLICATION_OPT4": 20,
+      "KEY_PREF_RIGHT_COMPLICATION_OPT1": 21,
+      "KEY_PREF_RIGHT_COMPLICATION_OPT2": 22,
+      "KEY_PREF_RIGHT_COMPLICATION_OPT3": 23,
+      "KEY_PREF_RIGHT_COMPLICATION_OPT4": 24,
+
+      "KEY_PREF_VIBRATE_ON_CONNECT": 25,
+
+      "KEY_PREF_THEME": 26,
+
+      "KEY_PREF_QUIET_DURING_SLEEP": 27,
+
+      "KEY_PREFS_REQUEST": 28,
+      "KEY_PREFS_DONT_EXIST": 29,
+
+      "KEY_PREF_SHOW_ANIMATIONS": 30
+    },
+    "enableMultiJS": false,
+    "displayName": "Consensus",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk"
+    ],
+    "capabilities": [
+      "location",
+      "health",
+      "configurable"
+    ]
+  }
+}

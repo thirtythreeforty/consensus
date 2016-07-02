@@ -7,3 +7,5 @@ build
 
 # Ignore compiled Python
 *.pyc
+
+node_modules/
