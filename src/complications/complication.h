@@ -306,7 +306,7 @@ private:
 	constexpr static const char *steps_unit = "STEPS";
 };
 
-class StatusComplication
+class StatusComplication final
 	: public Complication
 	, private BatteryCallback
 	, private ConnectionCallback

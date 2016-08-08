@@ -16,7 +16,7 @@ extern "C" {
 #include <array>
 #include <memory>
 
-class MainWindow : public Boulder::Window, private TimeCallback {
+class MainWindow final: public Boulder::Window, private TimeCallback {
 	BackgroundLayer background_layer;
 	FaceLayer face_layer;
 	Boulder::Layer complications_layer;
