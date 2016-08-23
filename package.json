@@ -178,7 +178,7 @@
 
       "KEY_PREF_SHOW_ANIMATIONS": 30
     },
-    "enableMultiJS": false,
+    "enableMultiJS": true,
     "displayName": "Consensus",
     "watchapp": {
       "onlyShownOnCommunication": false,
