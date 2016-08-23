@@ -36,54 +36,43 @@ const char* DateComplication::unit(struct tm *time)
 
 const char* DateComplication::weekday(int wday)
 {
-	switch(wday) {
-	case 0:
-		return "SUN";
-	case 1:
-		return "MON";
-	case 2:
-		return "TUE";
-	case 3:
-		return "WED";
-	case 4:
-		return "THU";
-	case 5:
-		return "FRI";
-	case 6:
-		return "SAT";
-	default:
+	static const char* weekdays[] = {
+		"SUN",
+		"MON",
+		"TUE",
+		"WED",
+		"THU",
+		"FRI",
+		"SAT",
+	};
+	if(wday >= 0 && wday < 7) {
+		return weekdays[wday];
+	}
+	else {
 		return empty;
 	}
 }
 
 const char* DateComplication::month(int m)
 {
-	switch(m) {
-	case 0:
-		return "JAN";
-	case 1:
-		return "FEB";
-	case 2:
-		return "MAR";
-	case 3:
-		return "APR";
-	case 4:
-		return "MAY";
-	case 5:
-		return "JUN";
-	case 6:
-		return "JUL";
-	case 7:
-		return "AUG";
-	case 8:
-		return "SEP";
-	case 9:
-		return "OCT";
-	case 10:
-		return "NOV";
-	case 11:
-		return "DEC";
-	default:
+	static const char* months[] = {
+		"JAN",
+		"FEB",
+		"MAR",
+		"APR",
+		"MAY",
+		"JUN",
+		"JUL",
+		"AUG",
+		"SEP",
+		"OCT",
+		"NOV",
+		"DEC",
+	};
+	if(m >= 0 && m < 12) {
+		return months[m];
+	}
+	else {
 		return empty;
 	}
 }
