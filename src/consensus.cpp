@@ -85,48 +85,54 @@ void on_appmessage_in_dropped(AppMessageResult reason, void *context)
 	APP_LOG(APP_LOG_LEVEL_ERROR, "AppMessage dropped (reason %i)!", reason);
 }
 
-static void init(void)
+class App
 {
-	init_preferences();
-	set_theme();
+	Vibrator vib;
 
-	AnimationBuffer::hold_all();
-	static const AppFocusHandlers focus_handlers = {
-		.will_focus = [](bool in_focus) {
-			if(!in_focus) {
-				AnimationBuffer::hold_all();
+public:
+	App() {
+		init_preferences();
+		set_theme();
+
+		AnimationBuffer::hold_all();
+		static const AppFocusHandlers focus_handlers = {
+			.will_focus = [](bool in_focus) {
+				if(!in_focus) {
+					AnimationBuffer::hold_all();
+				}
+			},
+			.did_focus = [](bool in_focus) {
+				if(in_focus) {
+					AnimationBuffer::release_all();
+				}
 			}
-		},
-		.did_focus = [](bool in_focus) {
-			if(in_focus) {
-				AnimationBuffer::release_all();
-			}
-		}
-	};
-	app_focus_service_subscribe_handlers(focus_handlers);
+		};
+		app_focus_service_subscribe_handlers(focus_handlers);
 
-	main_window = std::make_unique<MainWindow>();
-	Boulder::WindowStack::push(*main_window, true);
+		main_window = std::make_unique<MainWindow>();
+		Boulder::WindowStack::push(*main_window, true);
 
-	app_message_register_inbox_received(on_appmessage_in);
-	app_message_register_inbox_dropped(on_appmessage_in_dropped);
-	app_message_open(256, 64);
-}
+		app_message_register_inbox_received(on_appmessage_in);
+		app_message_register_inbox_dropped(on_appmessage_in_dropped);
+		app_message_open(256, 64);
+	}
 
-static void deinit(void)
-{
-	animation_unschedule_all();
-	app_message_deregister_callbacks();
-	accel_tap_service_unsubscribe();
-	app_focus_service_unsubscribe();
+	~App() {
+		animation_unschedule_all();
+		app_message_deregister_callbacks();
+		accel_tap_service_unsubscribe();
+		app_focus_service_unsubscribe();
 
-	main_window.reset();
-}
+		main_window.reset();
+	}
+
+	void event_loop() {
+		app_event_loop();
+	}
+};
 
 int main(void)
 {
-	Vibrator vib;
-	init();
-	app_event_loop();
-	deinit();
+	App app;
+	app.event_loop();
 }
