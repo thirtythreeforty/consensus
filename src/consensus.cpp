@@ -11,50 +11,8 @@ extern "C" {
 #include "preferences.h"
 #include "themes.h"
 #include "vibration.h"
-#include "watcher/ConnectionWatcher.h"
 
 std::unique_ptr<MainWindow> main_window;
-
-class Vibrator: private ConnectionCallback {
-	bool was_connected;
-
-public:
-	Vibrator()
-		: was_connected(connection_service_peek_pebble_app_connection())
-	{}
-
-	void on_connection_change(bool connected) override
-	{
-		const bool became_disconnected = was_connected && !connected;
-		const bool became_connected = !was_connected && connected;
-
-		if(became_disconnected &&
-		   vibration_ok() &&
-		   should_vibrate_on_disconnect()) {
-			static const uint32_t vibe_pattern[] = {200, 250, 200, 250, 800};
-			static const VibePattern vibe = {
-				.durations = vibe_pattern,
-				.num_segments = NELEM(vibe_pattern)
-			};
-
-			vibes_enqueue_custom_pattern(vibe);
-		}
-
-		if(became_connected &&
-		   vibration_ok() &&
-		   should_vibrate_on_connect()) {
-			static const uint32_t vibe_pattern[] = {150, 100, 150};
-			static const VibePattern vibe = {
-				.durations = vibe_pattern,
-				.num_segments = NELEM(vibe_pattern)
-			};
-
-			vibes_enqueue_custom_pattern(vibe);
-		}
-
-		was_connected = connected;
-	}
-};
 
 static void on_preferences_in(DictionaryIterator *iterator)
 {

@@ -55,19 +55,6 @@ void MainWindow::configure()
 void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 {
 	face_layer.set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
-
-	// Vibrate once on the hour and twice at noon.
-	if(tick_time->tm_min == 0 && tick_time->tm_sec == 0 &&
-	   should_vibrate_on_hour() &&
-	   vibration_ok()) {
-		static const uint32_t vibe_pattern[] = {100, 250, 100};
-		VibePattern vibe = {
-			.durations = vibe_pattern,
-			.num_segments = static_cast<unsigned int>(tick_time->tm_hour % 12 == 0 ? 3 : 1)
-		};
-
-		vibes_enqueue_custom_pattern(vibe);
-	}
 }
 
 void MainWindow::reinit_complications()
