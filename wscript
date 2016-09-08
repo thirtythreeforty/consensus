@@ -16,12 +16,15 @@ def options(ctx):
 def configure(ctx):
     ctx.load('pebble_sdk')
     ctx.load('pebble_cxx', tooldir='waftools')
+    ctx.load('js', tooldir='waftools')
 
 def build(ctx):
     ctx.load('pebble_sdk')
 
     build_worker = os.path.exists('worker_src')
     binaries = []
+
+    js, js_entry_point = ctx.compile_js()
 
     for p in ctx.env.TARGET_PLATFORMS:
         ctx.set_env(ctx.all_envs[p])
@@ -37,4 +40,4 @@ def build(ctx):
             binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'))
+    ctx.pbl_bundle(binaries=binaries, js=js, js_entry_file=js_entry_point.relpath())
