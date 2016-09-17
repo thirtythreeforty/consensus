@@ -181,6 +181,10 @@ void TickComplication::update(GContext* ctx)
 	base_complication_appropriate_bounds(bounds);
 
 	constexpr unsigned int tick_thickness = TRIG_MAX_ANGLE / 1800;
+#ifndef PBL_COLOR
+	draw_foreground_arc(ctx, bounds, theme().complication_ring_thickness() + 4,
+	                    theme().background_color(), tick_angle - tick_thickness, tick_angle + tick_thickness);
+#endif
 	draw_foreground_arc(ctx, bounds, theme().complication_ring_thickness() + 2,
 	                    tick_color(), tick_angle - tick_thickness / 2, tick_angle + tick_thickness / 2);
 }
