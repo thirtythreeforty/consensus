@@ -126,13 +126,13 @@ private:
 		AnimationBuffer::enqueue(anim.release());
 	}
 
-	static void set_st(Self& animated, const T& new_t) {
-		animated.current = new_t;
-		animated.callback.get().on_animated_update(&animated);
+	static void set_st(Self* animated, T new_t) {
+		animated->current = new_t;
+		animated->callback.get().on_animated_update(animated);
 	}
 
-	static const T& get_st(const Self& animated) {
-		return animated.current;
+	static T get_st(const Self* animated) {
+		return animated->current;
 	}
 
 	static void anim_stopped_handler(Animation *anim, bool finished, void* context) {

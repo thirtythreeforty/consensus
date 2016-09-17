@@ -317,10 +317,10 @@ namespace {
 	// The code in this namespace{} is helper code for the PropertyAnimation class.
 
 	template<typename S, typename T>
-	using PropertyAnimationSetter = void (*)(S&, const T&);
+	using PropertyAnimationSetter = void (*)(S*, T);
 
 	template<typename S, typename T>
-	using PropertyAnimationGetter = const T& (*)(const S&);
+	using PropertyAnimationGetter = T (*)(const S*);
 
 	using updater_t = void (*)(::PropertyAnimation*, const uint32_t);
 
@@ -375,7 +375,7 @@ namespace {
 
 			// subject cannot be null, because it was a reference in the PropertyAnimation ctor
 			// setter cannot be null, because it was statically checked in the ctor
-			setter(*subject, interpolated);
+			setter(subject, interpolated);
 		}
 	};
 
@@ -417,13 +417,20 @@ public:
 		};
 		anim = property_animation_create(&impl, &subject, NULL, NULL);
 		if(from == nullptr) {
-			from = &Getter(subject);
+			T from_obj = Getter(&subject);
+			property_animation_from(anim, &from_obj, sizeof(T), true);
 		}
+		else {
+			property_animation_from(anim, const_cast<T*>(from), sizeof(T), true);
+		}
+
 		if(to == nullptr) {
-			to = &Getter(subject);
+			T to_obj = Getter(&subject);
+			property_animation_to(anim, &to_obj, sizeof(T), true);
 		}
-		property_animation_from(anim, const_cast<T*>(from), sizeof(T), true);
-		property_animation_to(anim, const_cast<T*>(to), sizeof(T), true);
+		else {
+			property_animation_to(anim, const_cast<T*>(to), sizeof(T), true);
+		}
 	}
 	~PropertyAnimation() {
 		if(!released) {
