@@ -18,6 +18,16 @@ MainWindow::MainWindow()
 void MainWindow::on_load()
 {
 	init_layers();
+
+#ifdef UNOBSTRUCTED_AREA
+	Layer *root_layer = get_root_layer();
+
+	GRect win_bounds, win_frame;
+	std::tie(win_frame, win_bounds) = get_correct_frame_and_bounds(layer_get_unobstructed_bounds(root_layer));
+
+	layer_set_frame(root_layer, win_frame);
+	layer_set_bounds(root_layer, win_bounds);
+#endif
 }
 
 void MainWindow::on_unload()
@@ -57,16 +67,59 @@ void MainWindow::on_tick(struct tm *tick_time, TimeUnits units_changed)
 	face_layer.set_time(tick_time->tm_hour, tick_time->tm_min, tick_time->tm_sec);
 }
 
+#ifdef UNOBSTRUCTED_AREA
+void MainWindow::on_area_will_change(const GRect& final_unobstructed_screen_area)
+{
+	// Scoot the face to remain centered.
+	GRect win_bounds, win_frame;
+	std::tie(win_frame, win_bounds) = get_correct_frame_and_bounds(final_unobstructed_screen_area);
+
+	Layer *root_layer = get_root_layer();
+
+	area_animations.emplace_as<UnobstructedAnimations>(
+		ManualAnimation(BoundsPAnim(*root_layer, nullptr, &win_bounds).release())
+	);
+
+	layer_set_frame(root_layer, win_frame);
+}
+
+void MainWindow::on_area_change(AnimationProgress progress)
+{
+	// Forward the event to the animations in progress.
+	area_animations.as<UnobstructedAnimations>().win_scoot.update(progress);
+}
+
+void MainWindow::on_area_did_change()
+{
+	area_animations.reset();
+}
+
+std::pair<GRect, GRect> MainWindow::get_correct_frame_and_bounds(const GRect& unobstructed_area)
+{
+	std::pair<GRect, GRect> frame_and_bounds;
+	GRect &win_frame = std::get<0>(frame_and_bounds);
+	GRect &win_bounds = std::get<1>(frame_and_bounds);
+
+	Layer *root_layer = get_root_layer();
+	win_frame = layer_get_frame(root_layer);
+	win_bounds = layer_get_bounds(root_layer);
+
+	const int16_t size_difference = (unobstructed_area.size.h - win_frame.size.h);
+	const int16_t scoot_distance = size_difference / 2;
+	win_bounds.origin.y += scoot_distance;
+	win_bounds.size.h -= size_difference;
+	win_frame.size.h += size_difference;
+
+	return frame_and_bounds;
+}
+#endif
+
 void MainWindow::reinit_complications()
 {
 	GRect size = complications_layer.get_frame();
 	GPoint center = grect_center_point(&size);
 
-	const GRect top_complication_position =
-		GRect((int16_t)(center.x - complication_size / 2),
-		      (int16_t)(center.y - complication_size - complication_offset_y),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
+	const GRect top_complication_position = top_complication_pos(size);
 
 	const GRect left_complication_position =
 		GRect((int16_t)(center.x - complication_size - complication_offset_x),
@@ -80,11 +133,7 @@ void MainWindow::reinit_complications()
 		      (int16_t)complication_size,
 		      (int16_t)complication_size);
 
-	const GRect bottom_complication_position =
-		GRect((int16_t)(center.x - complication_size / 2),
-		      (int16_t)(center.y + complication_offset_y),
-		      (int16_t)complication_size,
-		      (int16_t)complication_size);
+	const GRect bottom_complication_position = bottom_complication_pos(size);
 
 	const std::array<std::pair<const GRect&, complication_config>, 4> complication_params = {{
 		{ top_complication_position, top_complication_type() },
@@ -134,4 +183,22 @@ void MainWindow::reinit_complications()
 	complication_do<StatusComplication>([&](auto& c) {
 		c.enable_battery_alert(show_low_batt);
 	});
+}
+
+GRect MainWindow::top_complication_pos(GRect& size)
+{
+	const GPoint center = grect_center_point(&size);
+	return GRect((int16_t)(center.x - complication_size / 2),
+	             (int16_t)(center.y - complication_size - complication_offset_y),
+	             (int16_t)complication_size,
+	             (int16_t)complication_size);
+}
+
+GRect MainWindow::bottom_complication_pos(GRect& size)
+{
+	const GPoint center = grect_center_point(&size);
+	return GRect((int16_t)(center.x - complication_size / 2),
+				 (int16_t)(center.y + complication_offset_y),
+				 (int16_t)complication_size,
+				 (int16_t)complication_size);
 }
