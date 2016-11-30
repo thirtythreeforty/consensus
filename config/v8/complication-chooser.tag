@@ -32,9 +32,9 @@
 		<configuration-dropdown caption='Gadget' attrib={ parent.gadget }>
 			<option class="item-select-option" value='icon'>Status icon</configuration-option>
 			<option class="item-select-option" value='distance'>Distance walked</configuration-option>
-			<option class="item-select-option" value='kcal_act'>KCal active</configuration-option>
-			<option class="item-select-option" value='kcal_rest'>KCal resting</configuration-option>
-			<option class="item-select-option" value='kcal_tot'>KCal total</configuration-option>
+			<option class="item-select-option" value='kcal_act'>Cal active</configuration-option>
+			<option class="item-select-option" value='kcal_rest'>Cal resting</configuration-option>
+			<option class="item-select-option" value='kcal_tot'>Cal total</configuration-option>
 			<option class="item-select-option" value='act_sec'>Time active</configuration-option>
 		</configuration-dropdown>
 	</configuration-content>

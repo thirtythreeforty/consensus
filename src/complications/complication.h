@@ -301,6 +301,7 @@ private:
 	static const divisor_list_t<3> time_divisors;
 	static const divisor_list_t<3> imperial_distance_divisors;
 	static const divisor_list_t<3> metric_distance_divisors;
+	static const divisor_list_t<3> calorie_divisors;
 
 	constexpr static const char *point_number_format = "0.%i";
 	constexpr static const char *steps_unit = "STEPS";

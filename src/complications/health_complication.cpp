@@ -59,6 +59,12 @@ const HealthComplication::divisor_list_t<3> HealthComplication::metric_distance_
 	std::make_tuple(10, -1, "KM", plain_number_format)
 };
 
+const HealthComplication::divisor_list_t<3> HealthComplication::calorie_divisors = {
+	std::make_tuple(1, 100, "CAL", plain_number_format),
+	std::make_tuple(100, 10, "KCAL", point_number_format),
+	std::make_tuple(100, -1, "KCAL", plain_number_format),
+};
+
 Variant<void, int32_t> HealthComplication::st_today_steps;
 Variant<void, int32_t> HealthComplication::st_today_average_steps;
 
@@ -181,14 +187,19 @@ void HealthComplication::recalculate_today_data()
 			}
 			break;
 		case CALORIES_ACTIVE:
-			today_metric = Metric(health_service_sum_today(HealthMetricActiveKCalories), "KCAL", plain_number_format);
+			store_scaled_metric(
+				health_service_sum_today(HealthMetricActiveKCalories),
+				calorie_divisors);
 			break;
 		case CALORIES_RESTING:
-			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories), "KCAL", plain_number_format);
+			store_scaled_metric(
+				health_service_sum_today(HealthMetricRestingKCalories),
+				calorie_divisors);
 			break;
 		case CALORIES_TOTAL:
-			today_metric = Metric(health_service_sum_today(HealthMetricRestingKCalories)
-			                      + health_service_sum_today(HealthMetricActiveKCalories), "KCAL", plain_number_format);
+			store_scaled_metric(
+				health_service_sum_today(HealthMetricActiveKCalories) + health_service_sum_today(HealthMetricRestingKCalories),
+				calorie_divisors);
 			break;
 		case ACTIVE_SECONDS:
 			store_scaled_metric(
