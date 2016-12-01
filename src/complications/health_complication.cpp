@@ -62,7 +62,7 @@ const HealthComplication::divisor_list_t<3> HealthComplication::metric_distance_
 const HealthComplication::divisor_list_t<3> HealthComplication::calorie_divisors = {
 	std::make_tuple(1, 100, "CAL", plain_number_format),
 	std::make_tuple(100, 10, "KCAL", point_number_format),
-	std::make_tuple(100, -1, "KCAL", plain_number_format),
+	std::make_tuple(10, -1, "KCAL", plain_number_format),
 };
 
 Variant<void, int32_t> HealthComplication::st_today_steps;
