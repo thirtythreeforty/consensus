@@ -265,7 +265,7 @@ Pebble.addEventListener('appmessage', function(e) {
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://thirtythreeforty.github.io/consensus/config/v8/';
+	var url = 'https://thirtythreeforty.github.io/consensus/config/v10/';
 	console.log('Showing configuration page: ' + url);
 
 	Pebble.openURL(url);
