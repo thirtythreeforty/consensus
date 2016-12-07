@@ -7,6 +7,8 @@
 
 namespace persist = Boulder::persist;
 
+// This struct is persisted directly into flash.  New things should ONLY be added to the end,
+// so that when the old version is read from flash, the new defaults will be applied.
 struct Preferences {
 	uint8_t prefs_version = 2;
 
@@ -44,6 +46,8 @@ struct Preferences {
 	uint32_t top_complication_opt2 = 0;
 	uint32_t top_complication_opt3 = 0;
 	uint32_t top_complication_opt4 = 0;
+
+	bool should_quiet_during_dnd = false;
 };
 
 static Preferences prefs;
@@ -76,6 +80,11 @@ bool should_show_second()
 bool should_quiet_during_sleep()
 {
 	return prefs.should_quiet_during_sleep;
+}
+
+bool should_quiet_during_dnd()
+{
+	return prefs.should_quiet_during_dnd;
 }
 
 bool should_animate()
@@ -198,6 +207,8 @@ void parse_preferences(DictionaryIterator *iterator)
 	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT2, prefs.top_complication_opt2);
 	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT3, prefs.top_complication_opt3);
 	update_preference(iterator, KEY_PREF_TOP_COMPLICATION_OPT4, prefs.top_complication_opt4);
+
+	update_preference(iterator, KEY_PREF_QUIET_DURING_DND, prefs.should_quiet_during_dnd);
 
 	save_preferences();
 }

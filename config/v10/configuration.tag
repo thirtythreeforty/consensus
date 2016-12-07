@@ -154,7 +154,15 @@
 			</configuration-toggle>
 		</configuration-content>
 		<configuration-footer>
-			When you are sleeping, disable all these vibrations (but don't worry: alarms and timers will still buzz). Has no effect if Pebble Health is disabled.
+			When you are sleeping, disable all Consensus vibrations (but don't worry: alarms and timers will still buzz). Has no effect if Pebble Health is disabled.
+		</configuration-footer>
+		<configuration-content>
+			<configuration-toggle attrib={ parent.parent.quiet_during_dnd }>
+				Quiet during Quiet Time
+			</configuration-toggle>
+		</configuration-content>
+		<configuration-footer>
+			When Quiet Time is enabled (for example, by holding the watch's Back button), disable all Consensus vibrations.
 		</configuration-footer>
 	</configuration-container>
 	<configuration-content>
@@ -179,6 +187,7 @@
 	this.vibrate_on_disconnect = new this.Attribute(true);
 	this.vibrate_on_connect = new this.Attribute(false);
 	this.quiet_during_sleep = new this.Attribute(false);
+	this.quiet_during_dnd = new this.Attribute(false);
 	this.location_type = new this.Attribute("auto", function(val) {
 		self.tags['location'].root.style.display =
 			(val === 'manual') ? "initial" : "none";
@@ -190,6 +199,7 @@
 		this.vibrate_on_disconnect.set(pack["vibrate_on_disconnect"]);
 		this.vibrate_on_connect.set(pack["vibrate_on_connect"]);
 		this.quiet_during_sleep.set(pack["quiet_during_sleep"]);
+		this.quiet_during_dnd.set(pack["quiet_during_dnd"]);
 		this.location.set(pack["location"]);
 		this.location_type.set(pack["location_type"]);
 		this.update();
@@ -200,6 +210,7 @@
 		pack['vibrate_on_disconnect'] = this.vibrate_on_disconnect.get();
 		pack['vibrate_on_connect'] = this.vibrate_on_connect.get();
 		pack['quiet_during_sleep'] = this.quiet_during_sleep.get();
+		pack['quiet_during_dnd'] = this.quiet_during_dnd.get();
 		pack["location"] = this.location.get();
 		pack["location_type"] = this.location_type.get();
 	}

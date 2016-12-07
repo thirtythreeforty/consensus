@@ -20,11 +20,16 @@ static bool user_is_asleep()
 
 static bool vibration_ok()
 {
-	// Vibration is allowed if the user is not asleep or the user doesn't care
-	// if we vibrate while they are asleep
-	if(user_is_asleep()) {
-		return !should_quiet_during_sleep();
+	// Vibration is not allowed if the user is asleep and has told us not to
+	// vibrate while they are asleep
+	if(user_is_asleep() && should_quiet_during_sleep()) {
+		return false;
 	}
+	// Vibration is not allowed if Quiet Time is on
+	else if(quiet_time_is_active() && should_quiet_during_dnd()) {
+		return false;
+	}
+	// No reason not to vibrate, so it's OK
 	else {
 		return true;
 	}

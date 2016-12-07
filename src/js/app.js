@@ -219,6 +219,7 @@ function handleSettingsString(configStr) {
 		KEY_PREF_VIBRATE_ON_DISCONNECT: toInt(configData['vibrate_on_disconnect']),
 		KEY_PREF_VIBRATE_ON_CONNECT: toInt(configData['vibrate_on_connect']),
 		KEY_PREF_QUIET_DURING_SLEEP: toInt(configData['quiet_during_sleep']),
+		KEY_PREF_QUIET_DURING_DND: toInt(configData['quiet_during_dnd']),
 	};
 
 	complicationConfigToInts(dict, 'Left');

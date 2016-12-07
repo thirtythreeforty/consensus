@@ -14,6 +14,7 @@ bool should_vibrate_on_connect();
 bool should_hide_no_bluetooth();
 bool should_show_second();
 bool should_quiet_during_sleep();
+bool should_quiet_during_dnd();
 bool should_animate();
 
 uint8_t current_theme();
