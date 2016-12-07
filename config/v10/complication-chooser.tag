@@ -88,6 +88,12 @@
 			<option class="item-select-option" value='relhum'>Humidity (%)</configuration-option>
 		</configuration-dropdown>
 	</configuration-content>
+	<configuration-content>
+		<configuration-input input_type="number" caption='Min temp in &deg;C' attrib={ parent.minTempC }/>
+	</configuration-content>
+	<configuration-content>
+		<configuration-input input_type="number" caption='Max temp in &deg;C' attrib={ parent.maxTempC }/>
+	</configuration-content>
 	<configuration-footer>
 		Select the gadget displayed in the center of the complication's ring.
 
@@ -97,13 +103,19 @@
 	<script>
 	this.mixin(Attribute);
 	this.gadget = new this.Attribute("icon");
+	this.minTempC = new this.Attribute(-5);
+	this.maxTempC = new this.Attribute(43);
 
 	from_json(pack) {
 		this.gadget.set(pack["gadget"]);
+		this.minTempC.set(pack["minTempC"]);
+		this.maxTempC.set(pack["maxTempC"]);
 		this.update();
 	}
 	to_json(pack) {
 		pack["gadget"] = this.gadget.get();
+		pack["minTempC"] = this.minTempC.get();
+		pack["maxTempC"] = this.maxTempC.get();
 	}
 	</script>
 </complication-customize-weather>
