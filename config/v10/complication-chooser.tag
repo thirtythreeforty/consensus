@@ -88,15 +88,14 @@
 			<option class="item-select-option" value='relhum'>Humidity (%)</configuration-option>
 		</configuration-dropdown>
 	</configuration-content>
-	<configuration-content>
-		<configuration-input input_type="number" caption='Min temp in &deg;C' attrib={ parent.minTempC }/>
-	</configuration-content>
-	<configuration-content>
-		<configuration-input input_type="number" caption='Max temp in &deg;C' attrib={ parent.maxTempC }/>
-	</configuration-content>
 	<configuration-footer>
 		Select the gadget displayed in the center of the complication's ring.
-
+	</configuration-footer>
+	<configuration-content>
+		<configuration-input input_type="number" attrib={ parent.minTempC }/>
+		<configuration-input input_type="number" attrib={ parent.maxTempC }/>
+	</configuration-content>
+	<configuration-footer>
 		<img src="weather-explanation.svg" style="width:100%;">
 	</configuration-footer>
 
