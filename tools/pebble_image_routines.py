@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2015 Pebble Technology
 #
@@ -11,7 +11,7 @@ import math
 # Create pebble 64 colors-table (r, g, b - 2 bits per channel)
 def pebble_get_64color_palette():
     pebble_palette = []
-    for i in xrange(0, 64):
+    for i in range(0, 64):
         pebble_palette.append((
             ((i >> 4) & 0x3) * 85,   # R
             ((i >> 2) & 0x3) * 85,   # G
@@ -22,15 +22,15 @@ def pebble_get_64color_palette():
 # match each rgba32 pixel to the nearest color in pebble_palette
 # returns closest rgba32 color triplet (r, g, b, a)
 def pebble_nearest_color_to_pebble_palette(r, g, b, a):
-    a = ((a + 42) / 85) * 85  # fast nearest alpha for 2bit color range
+    a = ((a + 42) // 85) * 85  # fast nearest alpha for 2bit color range
     # clear transparent pixels (makes image more compress-able)
     # and required for greyscale tests
     if a == 0:
         r, g, b = (0, 0, 0)
     else:
-        r = ((r + 42) / 85) * 85  # nearest for 2bit color range
-        g = ((g + 42) / 85) * 85  # nearest for 2bit color range
-        b = ((b + 42) / 85) * 85  # nearest for 2bit color range
+        r = ((r + 42) // 85) * 85  # nearest for 2bit color range
+        g = ((g + 42) // 85) * 85  # nearest for 2bit color range
+        b = ((b + 42) // 85) * 85  # nearest for 2bit color range
 
     return r, g, b, a
 
@@ -39,15 +39,15 @@ def pebble_nearest_color_to_pebble_palette(r, g, b, a):
 # in the pebble palette
 # returns the truncated color as a rgba32 color triplet (r, g, b, a)
 def pebble_truncate_color_to_pebble_palette(r, g, b, a):
-    a = (a / 85) * 85  # truncate alpha for 2bit color range
+    a = (a // 85) * 85  # truncate alpha for 2bit color range
     # clear transparent pixels (makes image more compress-able)
     # and required for greyscale tests
     if a == 0:
         r, g, b = (0, 0, 0)
     else:
-        r = (r / 85) * 85  # truncate for 2bit color range
-        g = (g / 85) * 85  # truncate for 2bit color range
-        b = (b / 85) * 85  # truncate for 2bit color range
+        r = (r // 85) * 85  # truncate for 2bit color range
+        g = (g // 85) * 85  # truncate for 2bit color range
+        b = (b // 85) * 85  # truncate for 2bit color range
 
     return r, g, b, a
 
