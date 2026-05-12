@@ -35,7 +35,7 @@ def configure(ctx):
         e.CXX = cxx
         e.CXXFLAGS = list(e.CFLAGS)
         e.CXXFLAGS.remove('-std=c99')
-        e.CXXFLAGS.extend(['-c', '-std=c++20', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
-        e.LINKFLAGS.extend(['-std=c++20', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g', '-zmuldefs'])
+        e.CXXFLAGS.extend(['-c', '-std=c++20', '-fPIE', '-fno-rtti', '-fno-use-cxa-atexit', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto'])
+        e.LINKFLAGS.extend(['-std=c++20', '-fPIE', '-fno-rtti', '-fno-use-cxa-atexit', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '--specs=nano.specs', '--specs=nosys.specs', '-flto'])
         e.CXX_TGT_F = ['-o']
         e.LINK_CC = cxx
