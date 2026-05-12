@@ -12,8 +12,8 @@ TimeCallback::TimeCallback(TimeUnits units)
 
 TimeCallback::~TimeCallback()
 {
-	std::remove_if(callbacks.begin(), callbacks.end(),
-	               [this](auto c){ return c.first == this; });
+	(void)std::remove_if(callbacks.begin(), callbacks.end(),
+	                     [this](auto c){ return c.first == this; });
 	resubscribe();
 }
 

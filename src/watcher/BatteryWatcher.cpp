@@ -14,7 +14,7 @@ BatteryCallback::BatteryCallback()
 
 BatteryCallback::~BatteryCallback()
 {
-	std::remove(callbacks.begin(), callbacks.end(), this);
+	(void)std::remove(callbacks.begin(), callbacks.end(), this);
 	if(callbacks.empty()) {
 		battery_state_service_unsubscribe();
 	}

@@ -19,7 +19,7 @@ ConnectionCallback::ConnectionCallback()
 
 ConnectionCallback::~ConnectionCallback()
 {
-	std::remove(callbacks.begin(), callbacks.end(), this);
+	(void)std::remove(callbacks.begin(), callbacks.end(), this);
 	if(callbacks.empty()) {
 		connection_service_unsubscribe();
 	}

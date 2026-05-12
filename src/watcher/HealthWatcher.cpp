@@ -17,7 +17,7 @@ HealthCallback::HealthCallback()
 HealthCallback::~HealthCallback()
 {
 #ifdef PBL_HEALTH
-	std::remove(callbacks.begin(), callbacks.end(), this);
+	(void)std::remove(callbacks.begin(), callbacks.end(), this);
 	if(callbacks.empty()) {
 		health_service_events_unsubscribe();
 	}
