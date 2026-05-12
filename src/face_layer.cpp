@@ -1,5 +1,9 @@
 #include "face_layer.h"
 
+extern "C" {
+#include <pebble.h>
+}
+
 #include "AnimationBuffer.h"
 #include "common.h"
 #include "themes.h"
@@ -137,12 +141,27 @@ void FaceLayer::update(GContext *ctx)
 	}
 }
 
-const GPoint FaceLayer::hour_hand_path_points[] = {{0, 0}, {0, -35}};
+// Older rectangular platforms have 168h displays; newer ones have 228h.
+// Likewise with newer round ones.  The original code was written for 168; scale them
+// since they're all arbitrary anyway
+#define SCALE_PT(X) \
+PBL_PLATFORM_SWITCH( \
+	PBL_PLATFORM_TYPE_CURRENT, \
+	/* aplite */ (X), \
+	/* basalt */ (X), \
+	/* chalk */ (X), \
+	/* diorite */ (X), \
+	/* emery */ ((X) * 2280 / 1680), \
+	/* flint */ (X), \
+	/* gabbro */ ((X) * 2600 / 1800) \
+)
+
+const GPoint FaceLayer::hour_hand_path_points[] = {{0, 0}, {0, SCALE_PT(-35)}};
 const GPathInfo FaceLayer::hour_hand_path = {
 	.num_points = NELEM(hour_hand_path_points),
 	.points = (GPoint*)hour_hand_path_points
 };
-const GPoint FaceLayer::minute_hand_path_points[] = {{0, 0}, {0, -60}};
+const GPoint FaceLayer::minute_hand_path_points[] = {{0, 0}, {0, SCALE_PT(-60)}};
 const GPathInfo FaceLayer::minute_hand_path = {
 	.num_points = NELEM(minute_hand_path_points),
 	.points = (GPoint*)minute_hand_path_points
@@ -151,7 +170,7 @@ const GPathInfo FaceLayer::minute_hand_path = {
 // The extra {0, 0} point keeps the second hand always going through the
 // center, even if the rotation makes the hand imperceptibly bent due to
 // imperfect rotation.
-const GPoint FaceLayer::second_hand_path_points[] = {{0, 15}, {0, 0}, {0, -60}};
+const GPoint FaceLayer::second_hand_path_points[] = {{0, SCALE_PT(15)}, {0, 0}, {0, SCALE_PT(-60)}};
 const GPathInfo FaceLayer::second_hand_path = {
 	.num_points = NELEM(second_hand_path_points),
 	.points = (GPoint*)second_hand_path_points

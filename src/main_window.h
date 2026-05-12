@@ -86,9 +86,24 @@ private:
 	static GRect top_complication_pos(GRect& size);
 	static GRect bottom_complication_pos(GRect& size);
 
+// Older rectangular platforms have 168h displays; newer ones have 228h.
+// Likewise with newer round ones.  The original code was written for 168; scale them
+// since they're all arbitrary anyway
+#define SCALE_PT(X) \
+PBL_PLATFORM_SWITCH( \
+	PBL_PLATFORM_TYPE_CURRENT, \
+	/* aplite */ (X), \
+	/* basalt */ (X), \
+	/* chalk */ (X), \
+	/* diorite */ (X), \
+	/* emery */ ((X) * 2280 / 1680), \
+	/* flint */ (X), \
+	/* gabbro */ ((X) * 2600 / 1800) \
+)
+
 	static constexpr int16_t complication_size = 51;
-	static constexpr int16_t complication_offset_x = PBL_IF_ROUND_ELSE(15, 10);
-	static constexpr int16_t complication_offset_y = 15;
+	static constexpr int16_t complication_offset_x = SCALE_PT(PBL_IF_ROUND_ELSE(15, 10));
+	static constexpr int16_t complication_offset_y = SCALE_PT(15);
 };
 
 #endif

@@ -197,7 +197,10 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
     ],
     "capabilities": [
       "location",
