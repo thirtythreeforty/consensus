@@ -34,6 +34,8 @@ COORDINATE_SHIFT_WARNING_THRESHOLD = 0.1
 
 xmlns = '{http://www.w3.org/2000/svg}'
 
+output_scale = 1.0
+
 
 def sum_points(p1, p2):
     return p1[0] + p2[0], p1[1] + p2[1]
@@ -63,6 +65,7 @@ def find_nearest_valid_precise_point(p):
 def convert_to_pebble_coordinates(point, precise=False):
     # convert from graphic tool coordinate system to pebble coordinate system so that they render the same on
     # both
+    point = scale_point(point, output_scale)
 
     if not precise:
         nearest = find_nearest_valid_point(point)  # used to give feedback to user if the point shifts considerably
@@ -180,7 +183,7 @@ class CircleCommand(Command):
     def __init__(self, center, radius, translate, stroke_width=0, stroke_color=0, fill_color=0):
         points = [(center[0], center[1])]
         Command.__init__(self, points, translate, stroke_width, stroke_color, fill_color)
-        self.radius = radius
+        self.radius = max(0, int(round(radius * output_scale)))
 
     def serialize(self):
         s = pack('B', DRAW_COMMAND_TYPE_CIRCLE)  # command type
@@ -546,23 +549,39 @@ def serialize_image(commands, size):
 def get_info(xml):
     viewbox = get_viewbox(xml)
     translate = (-viewbox[0][0], -viewbox[0][1])  # subtract origin point in viewbox to get relative positions
-    return translate, viewbox[1]
+    size = scale_point(viewbox[1], output_scale)
+    return translate, size
 
 
-def parse_svg_image(filename, precise=False, raise_error=False, stroke_color=None, fill_color=None):
+def parse_svg_image(filename, precise=False, raise_error=False, stroke_color=None, fill_color=None, target_height=None):
     root = get_xml(filename)
+    global output_scale
+    if target_height:
+        _, (_, original_height) = get_viewbox(root)
+        output_scale = target_height / original_height if original_height > 0 else 1.0
+        print(f"Scaling: input height={original_height}, target height={target_height}, scale={output_scale}")
+    else:
+        output_scale = 1.0
     translate, size = get_info(root)
     cmd_list, error = get_commands(translate, root, precise, raise_error, False, stroke_color, fill_color)
     return size, cmd_list, error
 
 
-def parse_svg_sequence(dir_name, precise=False, raise_error=False, stroke_color=None, fill_color=None):
+def parse_svg_sequence(dir_name, precise=False, raise_error=False, stroke_color=None, fill_color=None, target_height=None):
     frames = []
     error_files = []
     file_list = sorted(glob.glob(dir_name + "/*.svg"))
     if not file_list:
         return
-    translate, size = get_info(get_xml(file_list[0]))  # get the viewbox from the first file
+    root = get_xml(file_list[0])
+    global output_scale
+    if target_height:
+        _, (_, original_height) = get_viewbox(root)
+        output_scale = target_height / original_height if original_height > 0 else 1.0
+        print(f"Scaling: input height={original_height}, target height={target_height}, scale={output_scale}")
+    else:
+        output_scale = 1.0
+    translate, size = get_info(root)  # get the viewbox from the first file
     for filename in file_list:
         cmd_list, error = get_commands(translate, get_xml(filename), precise, raise_error, False, stroke_color, fill_color)
         if cmd_list is not None:
@@ -572,7 +591,7 @@ def parse_svg_sequence(dir_name, precise=False, raise_error=False, stroke_color=
     return size, frames, error_files
 
 
-def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count, precise=False, raise_error=False, stroke_color=None, fill_color=None):
+def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count, precise=False, raise_error=False, stroke_color=None, fill_color=None, target_height=None):
     dir_name = path
     output = b''
     error_files = []
@@ -585,14 +604,14 @@ def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count
         commands = []
         if sequence:
             # get all .svg files in directory
-            result = parse_svg_sequence(dir_name, precise, raise_error, stroke_color, fill_color)
+            result = parse_svg_sequence(dir_name, precise, raise_error, stroke_color, fill_color, target_height)
             if result:
                 frames = result[1]
                 size = result[0]
                 error_files += result[2]
-                output = serialize_sequence(frames, size, duration, play_count, stroke_color, fill_color)
+                output = serialize_sequence(frames, size, duration, play_count)
         elif os.path.isfile(path):
-            size, commands, error = parse_svg_image(path, precise, raise_error, stroke_color, fill_color)
+            size, commands, error = parse_svg_image(path, precise, raise_error, stroke_color, fill_color, target_height)
             if commands:
                 output = serialize_image(commands, size)
             if error:
@@ -606,7 +625,7 @@ def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count
     else:
         print("Invalid path")
 
-    if output != '':
+    if output:
         if out_path is None:
             if sequence:
                 f = os.path.basename(dir_name.rstrip('/')) + '.pdc'
@@ -623,7 +642,7 @@ def create_pdc_from_path(path, sequence, out_path, verbose, duration, play_count
 def main(args):
     path = os.path.abspath(args.path)
     error_files = create_pdc_from_path(path, args.sequence, args.output, args.verbose, args.duration, args.play_count,
-                                       args.precise, False, args.stroke_color, args.fill_color)
+                                       args.precise, False, args.stroke_color, args.fill_color, args.height)
     if error_files:
         print("Errors in the following files:")
         for ef in error_files:
@@ -651,6 +670,8 @@ if __name__ == '__main__':
                         help="Use the specified stroke color for all elements")
     parser.add_argument('-F', '--fill-color', type=str, default=None,
                         help="Use the specified fill color for all elements")
+    parser.add_argument('-H', '--height', type=float, default=None,
+                        help="Scale output to the given height (pixels)")
     args = parser.parse_args()
     main(args)
 
