@@ -22,7 +22,7 @@ def fix_pebble_h_dependencies(task_gen):
 
     for task in task_gen.tasks:
         if type(task) == cxx.cxx:
-            task.scan = types.MethodType(wrap_c_preproc_scan, task, cxx.cxx)
+            task.scan = types.MethodType(wrap_c_preproc_scan, task)
 
 def configure(ctx):
     CROSS_COMPILE_PREFIX = 'arm-none-eabi-'
@@ -35,7 +35,7 @@ def configure(ctx):
         e.CXX = cxx
         e.CXXFLAGS = list(e.CFLAGS)
         e.CXXFLAGS.remove('-std=c99')
-        e.CXXFLAGS.extend(['-c', '-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
-        e.LINKFLAGS.extend(['-std=c++14', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g', '-zmuldefs'])
+        e.CXXFLAGS.extend(['-c', '-std=c++20', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g'])
+        e.LINKFLAGS.extend(['-std=c++20', '-fPIE', '-fno-rtti', '-fno-unwind-tables', '-fno-exceptions', '-fno-threadsafe-statics', '-flto', '-g', '-zmuldefs'])
         e.CXX_TGT_F = ['-o']
         e.LINK_CC = cxx
