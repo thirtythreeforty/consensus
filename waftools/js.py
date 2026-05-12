@@ -1,5 +1,4 @@
 import os
-import itertools
 
 from waflib.Configure import conf
 
@@ -16,7 +15,7 @@ def compile_js(ctx, js_path=os.path.join("src", "js")):
         uglifyjs = os.path.join('node_modules', 'uglify-js', 'bin', 'uglifyjs')
         options = '--bare-returns --reserve-domprops -m toplevel=true -c warnings=false,hoist_funs=true -r $,require,exports '
 
-        for node_in, node_out in itertools.izip(in_js_nodes, out_js_nodes):
+        for node_in, node_out in zip(in_js_nodes, out_js_nodes):
             ret = ctx.exec_command('%s %s %s > %s' % (uglifyjs, node_in.abspath(), options, node_out.abspath()))
             if ret != 0:
                 ctx.fatal('uglifyjs failed')
