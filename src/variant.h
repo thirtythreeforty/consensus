@@ -80,11 +80,35 @@ namespace {
 template<typename typenum_t, typename... Ts>
 class BaseVariant
 {
+	template<typename T, typename... Remain>
+	static consteval size_t maxsize() {
+		if constexpr(!std::is_same_v<T, void>) {
+			if constexpr(sizeof...(Remain) > 0) {
+				return std::max(maxsize<Remain...>(), sizeof(T));
+			}
+			else return sizeof(T);
+		} else {
+			return maxsize<Remain...>();
+		}
+	}
+
+	template<typename T, typename... Remain>
+	static consteval size_t maxalign() {
+		if constexpr(!std::is_same_v<T, void>) {
+			if constexpr(sizeof...(Remain) > 0) {
+				return std::max(maxalign<Remain...>(), alignof(T));
+			}
+			else return alignof(T);
+		}
+		else {
+			return maxalign<Remain...>();
+		}
+	}
+
 protected:
 	using public_typenum_t = uint8_t;
 
-	using data_t = typename std::aligned_union<0, Ts...>::type;
-	data_t data;
+	alignas(maxalign<Ts...>()) std::byte data[maxsize<Ts...>()];
 
 	typenum_t typenum;
 
