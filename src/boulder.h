@@ -368,7 +368,10 @@ namespace {
 
 			auto anim = reinterpret_cast<::Animation*>(panim);
 			auto impl = reinterpret_cast<const ::PropertyAnimationImplementation*>(animation_get_implementation(anim));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 			auto setter = reinterpret_cast<PropertyAnimationSetter<S, T>>(impl->accessors.setter.int16);
+#pragma GCC diagnostic pop
 
 			S *subject;
 			property_animation_subject(panim, reinterpret_cast<void**>(&subject), false);
@@ -404,6 +407,8 @@ public:
 		static_assert(Setter != nullptr, "Setter cannot be null");
 		static_assert(Getter != nullptr, "Getter cannot be null");
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 		static const PropertyAnimationImplementation impl = {
 			.base = {
 				NULL,
@@ -411,10 +416,12 @@ public:
 				NULL,
 			},
 			.accessors = {
-				{ (Int16Setter)Setter },
-				{ (Int16Getter)Getter }
+				{ reinterpret_cast<Int16Setter>(Setter) },
+				{ reinterpret_cast<Int16Getter>(Getter) }
 			}
 		};
+#pragma GCC diagnostic pop
+
 		anim = property_animation_create(&impl, &subject, NULL, NULL);
 		if(from == nullptr) {
 			T from_obj = Getter(&subject);
