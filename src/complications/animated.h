@@ -45,7 +45,8 @@ class Animated
 
 	// Currently there is no need to store requested in an Optional or something
 	// similar because I'm just animating POD types like ints.
-	static_assert(std::is_pod<T>::value, "Animated type is not POD");
+	static_assert(std::is_standard_layout_v<T>, "Animated type is not POD");
+	static_assert(std::is_trivial_v<T>, "Animated type is not POD");
 	T requested;
 	T current;
 	bool animating;
