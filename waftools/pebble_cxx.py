@@ -1,4 +1,4 @@
-from waflib.TaskGen import after_method, feature
+from waflib.TaskGen import after_method, before_method, feature
 
 @after_method('process_source')
 @feature('cxx')
@@ -23,6 +23,14 @@ def fix_pebble_h_dependencies(task_gen):
     for task in task_gen.tasks:
         if type(task) == cxx.cxx:
             task.scan = types.MethodType(wrap_c_preproc_scan, task)
+
+@feature('c', 'cxx')
+@before_method('apply_incpaths')
+def prepend_local_override_includes(task_gen):
+    """Put local waftools/include/ before SDK include/ so we can override SDK headers
+    like pebble_warn_unsupported_functions.h without modifying the SDK."""
+    includes = task_gen.to_list(getattr(task_gen, 'includes', []))
+    task_gen.includes = ['src/include'] + includes
 
 def configure(ctx):
     CROSS_COMPILE_PREFIX = 'arm-none-eabi-'
