@@ -295,6 +295,12 @@ protected:
 	}
 
 	template<typename T>
+	const T& data_ref() const {
+		check_type<T>();
+		return *reinterpret_cast<const T*>(&data);
+	}
+
+	template<typename T>
 	void check_type() const {
 		static_assert(AnyConvertibleTo<T, Ts...>::value,
 		              "Type not valid for this variant");

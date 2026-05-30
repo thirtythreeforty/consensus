@@ -189,8 +189,12 @@ function handleSettingsString(configStr) {
 				"kcal_act": 3,
 				"kcal_rest": 4,
 				"kcal_tot": 5,
-				"act_sec": 6
+				"act_sec": 6,
+				"heart_icon": 7,
+				"heart_bpm": 8
 			}[cOptions["gadget"]];
+			dict[opt3Key] = parseInt(cOptions["heart_zone2_min"] || "120", 10);
+			dict[opt4Key] = parseInt(cOptions["heart_zone3_min"] || "140", 10);
 			break;
 		case "Time Zone":
 			// Compute the number of seconds' offset

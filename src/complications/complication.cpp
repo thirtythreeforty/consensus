@@ -176,6 +176,11 @@ void TickComplication::update(GContext* ctx)
 {
 	HighlightComplication::update(ctx);
 
+	const GColor color = tick_color();
+	if(gcolor_equal(color, GColorClear)) {
+		return;
+	}
+
 	// Draw the yellow "average steps now" tick mark
 	GRect bounds = this->get_bounds();
 	base_complication_appropriate_bounds(bounds);
@@ -186,7 +191,7 @@ void TickComplication::update(GContext* ctx)
 	                    theme().background_color(), tick_angle - tick_thickness, tick_angle + tick_thickness);
 #endif
 	draw_foreground_arc(ctx, bounds, theme().complication_ring_thickness() + 2,
-	                    tick_color(), tick_angle - tick_thickness / 2, tick_angle + tick_thickness / 2);
+	                    color, tick_angle - tick_thickness / 2, tick_angle + tick_thickness / 2);
 }
 
 void HighlightComplication2::update(GContext *ctx)

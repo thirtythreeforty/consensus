@@ -250,14 +250,19 @@ class HealthComplication final
 		CALORIES_RESTING,
 		CALORIES_TOTAL,
 		ACTIVE_SECONDS,
+		HEART_RATE_ICON,
+		HEART_RATE_BPM,
 	};
 
 	// Only need these members on watches that will actually use it
 #ifdef PBL_HEALTH
 	GadgetType gadget_type;
+	uint16_t heart_rate_zone2_min;
+	uint16_t heart_rate_zone3_min;
 
 	Variant<void, AutoGoal, ManualGoal> step_goal;
 	Variant<void, Metric> today_metric;
+	Variant<void, HealthValue> current_heart_rate;
 
 	static Variant<void, int32_t> st_today_steps;
 	static Variant<void, int32_t> st_today_average_steps;
@@ -273,6 +278,7 @@ public:
 	virtual void on_tick(struct tm*, TimeUnits units_changed) override;
 
 	virtual void on_movement_update() override;
+	virtual void on_heart_update() override;
 	virtual void on_significant_update() override;
 #endif
 
@@ -284,6 +290,13 @@ private:
 	void recalculate_today_data();
 	void invalidate_today_data();
 
+	bool is_heart_rate_gadget() const;
+	void configure_heart_rate_zones(const config_bundle_t& config);
+	void update_gadget();
+	void update_heart_rate_gadget();
+	void update_step_gadget();
+	GColor heart_rate_zone_color() const;
+
 	void store_scaled_metric(uint32_t metric, const divisor_t* begin, const divisor_t* end);
 
 	template<typename T>
@@ -292,8 +305,6 @@ private:
 	}
 
 	void recalculate_auto_goal();
-
-	void update_angle_and_gadget();
 
 	static void refresh_static_steps_today();
 	static void invalidate_static_today_data();
@@ -305,6 +316,9 @@ private:
 
 	constexpr static const char *point_number_format = "0.%i";
 	constexpr static const char *steps_unit = "STEPS";
+	constexpr static uint16_t default_heart_rate_zone2_min = 120;
+	constexpr static uint16_t default_heart_rate_zone3_min = 140;
+	constexpr static uint16_t heart_rate_ring_max = 190;
 };
 
 class StatusComplication final

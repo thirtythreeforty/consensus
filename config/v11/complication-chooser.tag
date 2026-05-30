@@ -36,10 +36,19 @@
 			<option class="item-select-option" value='kcal_rest'>Cal resting</configuration-option>
 			<option class="item-select-option" value='kcal_tot'>Cal total</configuration-option>
 			<option class="item-select-option" value='act_sec'>Time active</configuration-option>
+			<option class="item-select-option" value='heart_icon'>Heart rate heart</configuration-option>
+			<option class="item-select-option" value='heart_bpm'>Heart rate BPM</configuration-option>
 		</configuration-dropdown>
 	</configuration-content>
 	<configuration-footer>
 		Select the gadget displayed in the center of the complication's ring.
+	</configuration-footer>
+	<configuration-content name='heartzones'>
+		<configuration-input input_type="number" input_placeholder="Zone 2 min BPM" attrib={ parent.heart_zone2_min }/>
+		<configuration-input input_type="number" input_placeholder="Zone 3 min BPM" attrib={ parent.heart_zone3_min }/>
+	</configuration-content>
+	<configuration-footer name='heartzonesfooter'>
+		Choose heart rate zone thresholds. Zone 1 is below the first number, Zone 2 is between them, and Zone 3 is above the second.
 	</configuration-footer>
 	<configuration-content>
 		<configuration-dropdown caption='Goal Type' attrib={ parent.goal_type }>
@@ -57,24 +66,39 @@
 	<script>
 	var self = this;
 
+	function isHeartRateGadget(val) {
+		return val === 'heart_icon' || val === 'heart_bpm';
+	}
+
 	this.mixin(Attribute);
-	this.gadget = new this.Attribute("icon");
+	this.gadget = new this.Attribute("icon", function(val) {
+		self.tags['heartzones'].root.style.display =
+			isHeartRateGadget(val) ? "initial" : "none";
+		self.tags['heartzonesfooter'].root.style.display =
+			isHeartRateGadget(val) ? "initial" : "none";
+	});
 	this.goal_type = new this.Attribute("auto", function(val) {
 		self.tags['goalinput'].root.style.display =
 			(val === 'manual') ? "initial" : "none";
 	});
 	this.goal = new this.Attribute("10000");
+	this.heart_zone2_min = new this.Attribute("120");
+	this.heart_zone3_min = new this.Attribute("140");
 
 	from_json(pack) {
 		this.gadget.set(pack["gadget"]);
 		this.goal_type.set(pack["goal_type"]);
 		this.goal.set(pack["goal"]);
+		this.heart_zone2_min.set(pack["heart_zone2_min"]);
+		this.heart_zone3_min.set(pack["heart_zone3_min"]);
 		this.update();
 	}
 	to_json(pack) {
 		pack["gadget"] = this.gadget.get();
 		pack["goal_type"] = this.goal_type.get();
 		pack["goal"] = this.goal.get();
+		pack["heart_zone2_min"] = this.heart_zone2_min.get();
+		pack["heart_zone3_min"] = this.heart_zone3_min.get();
 	}
 	</script>
 </complication-customize-health>

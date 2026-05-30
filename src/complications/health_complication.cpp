@@ -3,10 +3,26 @@
 #include "common.h"
 #include "constants.h"
 
+#include <algorithm>
+
+#ifdef PBL_HEALTH
+namespace {
+uint16_t configured_bpm_threshold(unsigned configured_value, uint16_t default_value)
+{
+	return configured_value
+		? static_cast<uint16_t>(configured_value)
+		: default_value;
+}
+}
+#endif
+
 HealthComplication::HealthComplication(GRect frame)
 	: TickComplication(frame)
 #ifdef PBL_HEALTH
 	, TimeCallback(MINUTE_UNIT)
+	, gadget_type(ICON)
+	, heart_rate_zone2_min(default_heart_rate_zone2_min)
+	, heart_rate_zone3_min(default_heart_rate_zone3_min)
 #endif
 {}
 
@@ -16,6 +32,8 @@ void HealthComplication::configure(const config_bundle_t& config)
 
 #ifdef PBL_HEALTH
 	gadget_type = static_cast<GadgetType>(std::get<1>(config));
+	configure_heart_rate_zones(config);
+
 	const auto user_goal = std::get<0>(config);
 	if(user_goal != 0) {
 		step_goal = ManualGoal(user_goal);
@@ -23,8 +41,8 @@ void HealthComplication::configure(const config_bundle_t& config)
 	else {
 		recalculate_auto_goal();
 	}
-	on_movement_update();
-	update_angle_and_gadget();
+
+	update_gadget();
 #else
 	set_icon(RESOURCE_ID_HEALTH_ERROR);
 #endif
@@ -32,11 +50,21 @@ void HealthComplication::configure(const config_bundle_t& config)
 
 GColor HealthComplication::highlight_color() const
 {
+#ifdef PBL_HEALTH
+	if(is_heart_rate_gadget()) {
+		return heart_rate_zone_color();
+	}
+#endif
 	return theme().health_complication_color();
 }
 
 GColor HealthComplication::tick_color() const
 {
+#ifdef PBL_HEALTH
+	if(is_heart_rate_gadget()) {
+		return GColorClear;
+	}
+#endif
 	return theme().health_complication_dot_color();
 }
 
@@ -70,7 +98,7 @@ Variant<void, int32_t> HealthComplication::st_today_average_steps;
 
 void HealthComplication::on_tick(struct tm*, TimeUnits units_changed)
 {
-	update_angle_and_gadget();
+	update_gadget();
 }
 
 void HealthComplication::on_significant_update()
@@ -79,18 +107,17 @@ void HealthComplication::on_significant_update()
 		recalculate_auto_goal();
 	}
 	on_movement_update();
-
-	// Don't wait for the minute to roll around in this case
-	update_angle_and_gadget();
 }
 
 void HealthComplication::on_movement_update()
 {
-	// This function will be called twice when the program is launched:
-	// once for the configure() call from the main window, and one from the
-	// significant update that the Pebble OS sends out.  I don't know of
-	// any way to avoid this though.
 	invalidate_today_data();
+	update_gadget();
+}
+
+void HealthComplication::on_heart_update()
+{
+	update_gadget();
 }
 
 void HealthComplication::recalculate_auto_goal()
@@ -158,6 +185,76 @@ void HealthComplication::store_scaled_metric(uint32_t metric, const divisor_t* b
 	today_metric = Metric(metric, std::get<2>(*i), std::get<3>(*i));
 }
 
+bool HealthComplication::is_heart_rate_gadget() const
+{
+	return gadget_type == HEART_RATE_ICON || gadget_type == HEART_RATE_BPM;
+}
+
+void HealthComplication::configure_heart_rate_zones(const config_bundle_t& config)
+{
+	heart_rate_zone2_min = configured_bpm_threshold(
+		std::get<2>(config),
+		default_heart_rate_zone2_min);
+	heart_rate_zone3_min = std::max<uint16_t>(
+		configured_bpm_threshold(std::get<3>(config), default_heart_rate_zone3_min),
+		heart_rate_zone2_min + 1);
+}
+
+void HealthComplication::update_gadget()
+{
+	if(is_heart_rate_gadget()) {
+		update_heart_rate_gadget();
+	}
+	else {
+		update_step_gadget();
+	}
+}
+
+void HealthComplication::update_heart_rate_gadget()
+{
+	const HealthValue heart_rate = health_service_peek_current_value(HealthMetricHeartRateBPM);
+
+	if(heart_rate > 0) {
+		current_heart_rate = heart_rate;
+		const HealthValue ring_heart_rate = std::min(heart_rate, (HealthValue)heart_rate_ring_max);
+		angle = TRIG_MAX_ANGLE * ring_heart_rate / heart_rate_ring_max;
+
+		if(gadget_type == HEART_RATE_BPM) {
+			set_number_format(plain_number_format, heart_rate, "BPM");
+		}
+		else {
+			set_icon(RESOURCE_ID_HEALTH);
+		}
+	}
+	else {
+		current_heart_rate.reset();
+		angle = 0;
+		set_icon(RESOURCE_ID_HEALTH_ERROR);
+	}
+}
+
+GColor HealthComplication::heart_rate_zone_color() const
+{
+#ifndef PBL_COLOR
+	return theme().health_complication_color();
+#else
+	if(current_heart_rate.is<void>()) {
+		return theme().health_complication_color();
+	}
+
+	const auto heart_rate = current_heart_rate.as<HealthValue>();
+	if(heart_rate < heart_rate_zone2_min) {
+		return GColorGreen;
+	}
+	else if(heart_rate < heart_rate_zone3_min) {
+		return GColorYellow;
+	}
+	else {
+		return GColorRed;
+	}
+#endif
+}
+
 void HealthComplication::recalculate_today_data()
 {
 	refresh_static_steps_today();
@@ -206,11 +303,14 @@ void HealthComplication::recalculate_today_data()
 				health_service_sum_today(HealthMetricActiveSeconds),
 				time_divisors);
 			break;
+		case HEART_RATE_ICON:
+		case HEART_RATE_BPM:
+			break;
 		}
 	}
 }
 
-void HealthComplication::update_angle_and_gadget()
+void HealthComplication::update_step_gadget()
 {
 	if(!step_goal.is<void>()) {
 		recalculate_today_data();

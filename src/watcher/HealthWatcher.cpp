@@ -34,6 +34,9 @@ void HealthCallback::update_handler(HealthEventType ev, void* ptr)
 		else if(ev == HealthEventMovementUpdate) {
 			callback->on_movement_update();
 		}
+		else if(ev == HealthEventHeartRateUpdate) {
+			callback->on_heart_update();
+		}
 	}
 }
 #endif

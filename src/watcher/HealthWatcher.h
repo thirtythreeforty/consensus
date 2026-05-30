@@ -16,6 +16,7 @@ protected:
 
 #ifdef PBL_HEALTH
 	virtual void on_movement_update() = 0;
+	virtual void on_heart_update() = 0;
 	virtual void on_significant_update() = 0;
 #endif
 
